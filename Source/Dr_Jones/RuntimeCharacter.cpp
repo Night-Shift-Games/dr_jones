@@ -22,7 +22,6 @@ void ARuntimeCharacter::BeginPlay()
 void ARuntimeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -33,6 +32,7 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("MoveRight", this, &ARuntimeCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ARuntimeCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ARuntimeCharacter::LookUp);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
