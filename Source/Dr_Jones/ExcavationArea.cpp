@@ -18,23 +18,23 @@ void AExcavationArea::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	RefreshMesh();
+	CreateMesh();
 
 }
 
 void AExcavationArea::PostActorCreated()
 {
 	Super::PostActorCreated();
-	RefreshMesh();
+	CreateMesh();
 }
 
 void AExcavationArea::PostLoad()
 {
 	Super::PostLoad();
-	RefreshMesh();
+	CreateMesh();
 }
 
-void AExcavationArea::RefreshMesh()
+void AExcavationArea::CreateMesh()
 {
 	TArray<FVector> vertices;
 	TArray<int32> Triangles;
@@ -44,11 +44,14 @@ void AExcavationArea::RefreshMesh()
 	TArray<FColor> vertexColors;
 
 	int it = 0;
+
+	float SizeRes = (float)Size / ((float)Resolution - 1);
 	for (size_t x = 0; x < Resolution; x++)
 	{
 		for (size_t y = 0; y < Resolution; y++)
 		{	
-			vertices.Add(FVector(y * (float)Size/((float)Resolution - 1), x * (float)Size/((float)Resolution - 1), 0) + FVector(-Size/2, -Size/2, 0));
+			vertices.Add(FVector(y * SizeRes, x * SizeRes, 0) + FVector(-Size/2, -Size/2, 0));
+			UV0.Add(FVector2D(y * SizeRes / 100, x * SizeRes / 100));
 			if (y != Resolution - 1 && x != Resolution - 1)
 			{
 				Triangles.Add(it);
@@ -77,6 +80,6 @@ void AExcavationArea::CreateFace()
 void AExcavationArea::PostEditChangeProperty (FPropertyChangedEvent& PropertyChangedEvent)
 {
 	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	RefreshMesh();
+	CreateMesh();
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

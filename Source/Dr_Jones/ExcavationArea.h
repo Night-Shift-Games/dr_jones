@@ -25,7 +25,7 @@ public:
 	UProceduralMeshComponent* PMC;
 	
 	UFUNCTION(CallInEditor)
-	void RefreshMesh();
+	void CreateMesh();
 
 	void CreateFace();
 
