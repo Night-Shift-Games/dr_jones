@@ -46,7 +46,7 @@ public:
 	UMaterialInterface* ExcavateMaterial;
 
 	UPROPERTY(EditAnywhere, meta=(MakeEditWidget))
-	FVector CollisionBox;
+	FTransform CollisionBox;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 

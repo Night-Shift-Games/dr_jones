@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ExcavationArea.h"
 #include "RuntimeCharacter.generated.h"
 
 UCLASS()
@@ -30,4 +31,5 @@ private:
 	void MoveRight(float AxisValue);
 	void Turn(float AxisValue);
 	void LookUp(float AxisValue);
+	void PrimaryAction();
 };

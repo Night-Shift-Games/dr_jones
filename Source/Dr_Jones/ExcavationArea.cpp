@@ -51,8 +51,8 @@ void AExcavationArea::CreateMesh()
 	for (size_t x = 0; x < Resolution; x++)
 	{
 		for (size_t y = 0; y < Resolution; y++)
-		{	
-			vertices.Add(FVector(y * SizeRes, x * SizeRes, FMath::RandRange(-2, 2)) + FVector(-Size/2, -Size/2, 0));
+		{
+			vertices.Add(FVector(y * SizeRes, x * SizeRes, FMath::RandRange(-2, 2)) + FVector(-Size / 2, -Size / 2, 0));
 			UV0.Add(FVector2D(y * SizeRes / 100, x * SizeRes / 100));
 			if (y != Resolution - 1 && x != Resolution - 1)
 			{
@@ -64,6 +64,7 @@ void AExcavationArea::CreateMesh()
 				Triangles.Add(it + Resolution + 1);
 				Triangles.Add(it + 1);
 			}
+			if (y == Resolution - 1 || x == Resolution - 1 || x == 0 || y == 0) vertices.Last().Z = 0;
 			it++;
 		}
 	}
@@ -79,14 +80,10 @@ void AExcavationArea::RefreshMesh()
 
 void AExcavationArea::Dig()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, (GetActorLocation() + CollisionBox).ToString());
-
 	for (size_t i = 0; i < vertices.Num(); i++)
 	{
-		if (UKismetMathLibrary::IsPointInBox(vertices[i], CollisionBox, FVector(30, 30, 30)))
-		vertices[i] += FVector(0, 0, -10);
+		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionBox, FVector(30, 30, 30))) vertices[i] += FVector(0, 0, -10);
 	}
-
 	RefreshMesh();
 }
 

@@ -32,6 +32,7 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn", this, &ARuntimeCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ARuntimeCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ARuntimeCharacter::PrimaryAction);
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
@@ -52,4 +53,28 @@ void ARuntimeCharacter::Turn(float AxisValue)
 void ARuntimeCharacter::LookUp(float AxisValue)
 {
 	AddControllerPitchInput(AxisValue);
+}
+
+void ARuntimeCharacter::PrimaryAction()
+{
+	FVector OUT ControllerViewportLocation;
+	FRotator OUT ControllerViewportRotation;
+	
+	GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
+
+	FHitResult OUT Hit;
+
+	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
+
+	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility)) return;
+	//DrawDebugLine(GWorld, ControllerViewportLocation, Hit.Location, FColor::Green, false, 5);
+	if (AExcavationArea* ExcavationSite = Cast<AExcavationArea>(Hit.GetActor()))
+	{
+		//DrawDebugBox(GWorld, Hit.Location, FVector(30, 30, 30), FColor::Green, false, 5);
+		ExcavationSite->CollisionBox = FTransform(GetActorRotation(), FVector(0,0,0) - (ExcavationSite->GetActorLocation() - Hit.Location), GetActorScale3D());
+		ExcavationSite->Dig();
+	}
+
+
+
 }
