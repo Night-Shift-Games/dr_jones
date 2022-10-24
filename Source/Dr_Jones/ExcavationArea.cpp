@@ -36,12 +36,14 @@ void AExcavationArea::PostLoad()
 
 void AExcavationArea::CreateMesh()
 {
-	TArray<FVector> vertices;
-	TArray<int32> Triangles;
-	TArray<FVector> normals;
-	TArray<FVector2D> UV0;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FColor> vertexColors;
+	PMC->ClearAllMeshSections();
+	
+	vertices.Empty();
+	Triangles.Empty();;
+	normals.Empty();;
+	UV0.Empty();;
+	tangents.Empty();;
+	vertexColors.Empty();;
 
 	int it = 0;
 
@@ -65,21 +67,32 @@ void AExcavationArea::CreateMesh()
 			it++;
 		}
 	}
-	PMC->ClearAllMeshSections();
 	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
-	PMC->SetMeshSectionVisible(0, true);
 	if (ExcavateMaterial) PMC->SetMaterial(0, ExcavateMaterial);
 }
 
-void AExcavationArea::CreateFace()
+void AExcavationArea::RefreshMesh()
 {
-
-
+	PMC->ClearAllMeshSections();
+	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
 }
 
-void AExcavationArea::PostEditChangeProperty (FPropertyChangedEvent& PropertyChangedEvent)
+void AExcavationArea::Dig()
+{
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5, FColor::Red, (GetActorLocation() + CollisionBox).ToString());
+
+	for (size_t i = 0; i < vertices.Num(); i++)
+	{
+		if (UKismetMathLibrary::IsPointInBox(vertices[i], CollisionBox, FVector(30, 30, 30)))
+		vertices[i] += FVector(0, 0, -10);
+	}
+
+	RefreshMesh();
+}
+
+void AExcavationArea::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	CreateMesh();
+	if (PropertyName == "Resolution" || PropertyName == "Size" || PropertyName == "Excavate Material") CreateMesh();
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

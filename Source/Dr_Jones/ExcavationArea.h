@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
 #include "ExcavationArea.generated.h"
 
 UCLASS()
@@ -20,14 +22,17 @@ protected:
 
 	virtual void PostActorCreated() override;
 
-
 public:
 	UProceduralMeshComponent* PMC;
 	
 	UFUNCTION(CallInEditor)
 	void CreateMesh();
+	
+	UFUNCTION(CallInEditor)
+	void RefreshMesh();
 
-	void CreateFace();
+	UFUNCTION(CallInEditor)
+	void Dig();
 
 	virtual void PostLoad() override;
 
@@ -40,6 +45,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* ExcavateMaterial;
 
-	 
+	UPROPERTY(EditAnywhere, meta=(MakeEditWidget))
+	FVector CollisionBox;
+
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+private: 
+	TArray<FVector> vertices;
+	TArray<int32> Triangles;
+	TArray<FVector> normals;
+	TArray<FVector2D> UV0;
+	TArray<FProcMeshTangent> tangents;
+	TArray<FColor> vertexColors;
 };
