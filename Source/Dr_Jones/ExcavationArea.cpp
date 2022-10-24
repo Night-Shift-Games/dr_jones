@@ -50,7 +50,7 @@ void AExcavationArea::CreateMesh()
 	{
 		for (size_t y = 0; y < Resolution; y++)
 		{	
-			vertices.Add(FVector(y * SizeRes, x * SizeRes, 0) + FVector(-Size/2, -Size/2, 0));
+			vertices.Add(FVector(y * SizeRes, x * SizeRes, FMath::RandRange(-2, 2)) + FVector(-Size/2, -Size/2, 0));
 			UV0.Add(FVector2D(y * SizeRes / 100, x * SizeRes / 100));
 			if (y != Resolution - 1 && x != Resolution - 1)
 			{
