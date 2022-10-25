@@ -23,9 +23,11 @@ protected:
 	virtual void PostActorCreated() override;
 
 public:
-	TArray<UExcavationSegment*> ExcavationSegments;
 	
-	UProceduralMeshComponent* PMC;
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* Root;
+
+	TArray<UExcavationSegment*> ExcavationSegments;
 	
 	UFUNCTION(CallInEditor)
 	void CreateMesh();
@@ -42,13 +44,16 @@ public:
 	virtual void PostLoad() override;
 
 	UPROPERTY(EditAnywhere)
-	int Size;
+	float Size;
+
+	UPROPERTY(EditAnywhere)
+	int AreaResolution;
 
 	UPROPERTY(EditAnywhere)
 	int Resolution;
 
-	UPROPERTY(EditAnywhere)
-	int AreaResolution;
+	UPROPERTY()
+	float SegmentSize;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* ExcavateMaterial;

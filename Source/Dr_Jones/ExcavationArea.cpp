@@ -5,10 +5,9 @@
 
 AExcavationArea::AExcavationArea() 
 { 
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent = Root;
 	PrimaryActorTick.bCanEverTick = false; 
-	if (!PMC) PMC = CreateDefaultSubobject<UProceduralMeshComponent>("DefaultPMC");
-	PMC->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	
 	Resolution = 10;
 	Size = 100;
 	AreaResolution = 1;
@@ -19,25 +18,25 @@ void AExcavationArea::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	CreateMesh();
+	///CreateMesh();
 
 }
 
 void AExcavationArea::PostActorCreated()
 {
 	Super::PostActorCreated();
-	CreateMesh();
+	//CreateMesh();
 }
 
 void AExcavationArea::PostLoad()
 {
 	Super::PostLoad();
-	CreateMesh();
+	//CreateMesh();
 }
 
 void AExcavationArea::CreateMesh()
 {
-	PMC->ClearAllMeshSections();
+//	PMC->ClearAllMeshSections();
 	
 	vertices.Empty();
 	Triangles.Empty();;
@@ -69,8 +68,8 @@ void AExcavationArea::CreateMesh()
 			it++;
 		}
 	}
-	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
-	if (ExcavateMaterial) PMC->SetMaterial(0, ExcavateMaterial);
+//	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
+//	if (ExcavateMaterial) PMC->SetMaterial(0, ExcavateMaterial);
 }
 
 void AExcavationArea::CreateArea()
@@ -82,15 +81,16 @@ void AExcavationArea::CreateArea()
 	
 	ExcavationSegments.Empty();
 
+	SegmentSize = Size / AreaResolution;
+	
 	for (size_t y = 0; y < AreaResolution; y++)
 	{
 		for (size_t x = 0; x < AreaResolution; x++)
 		{
-			FTransform SegmentLocation(FVector(Size*x, Size * y, 0));
-			UExcavationSegment* NewSegment = Cast<UExcavationSegment>(AddComponentByClass(UExcavationSegment::StaticClass(), true, SegmentLocation, false));
+			FTransform SegmentLocation(FVector(SegmentSize * x, SegmentSize * y, 0) + FVector(-Size / 2.f + SegmentSize/2, -Size / 2.f + SegmentSize / 2, 0));
+			UExcavationSegment* NewSegment = Cast<UExcavationSegment>(AddComponentByClass(UExcavationSegment::StaticClass(), false, SegmentLocation, false));
 			ExcavationSegments.Add(NewSegment);
-			DrawDebugPoint(GWorld, SegmentLocation.GetLocation(), 10, FColor::Green);
-			NewSegment->GenerateMesh(Resolution, Size);
+			NewSegment->GenerateMesh(Resolution, SegmentSize);
 		}
 	}
 
@@ -98,8 +98,8 @@ void AExcavationArea::CreateArea()
 
 void AExcavationArea::RefreshMesh()
 {
-	PMC->ClearAllMeshSections();
-	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
+	//PMC->ClearAllMeshSections();
+	//PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
 }
 
 void AExcavationArea::Dig()
@@ -113,7 +113,8 @@ void AExcavationArea::Dig()
 
 void AExcavationArea::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	FName PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	if (PropertyName == "Resolution" || PropertyName == "Size" || PropertyName == "Excavate Material") CreateMesh();
+	// PropertyName = (PropertyChangedEvent.Property != NULL) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+	//if (PropertyName == "Resolution" || PropertyName == "Size" || PropertyName == "Excavate Material") CreateMesh();
+	//else { ; }
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

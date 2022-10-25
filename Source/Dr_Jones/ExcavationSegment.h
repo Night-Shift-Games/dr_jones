@@ -18,7 +18,7 @@ class DR_JONES_API UExcavationSegment : public UProceduralMeshComponent
 public:
 	UExcavationSegment(const FObjectInitializer& ObjectInitializer);
 
-	void GenerateMesh(int Resolution, int Size);
+	void GenerateMesh(int Resolution, float Size);
 	TArray<FVector> vertices;
 	TArray<int32> Triangles;
 	TArray<FVector> normals;
