@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ProceduralMeshComponent.h"
+#include "ExcavationSegment.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "ExcavationArea.generated.h"
@@ -23,10 +23,15 @@ protected:
 	virtual void PostActorCreated() override;
 
 public:
+	TArray<UExcavationSegment*> ExcavationSegments;
+	
 	UProceduralMeshComponent* PMC;
 	
 	UFUNCTION(CallInEditor)
 	void CreateMesh();
+
+	UFUNCTION(CallInEditor)
+	void CreateArea();
 	
 	UFUNCTION(CallInEditor)
 	void RefreshMesh();
@@ -37,10 +42,13 @@ public:
 	virtual void PostLoad() override;
 
 	UPROPERTY(EditAnywhere)
+	int Size;
+
+	UPROPERTY(EditAnywhere)
 	int Resolution;
 
 	UPROPERTY(EditAnywhere)
-	int Size;
+	int AreaResolution;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* ExcavateMaterial;

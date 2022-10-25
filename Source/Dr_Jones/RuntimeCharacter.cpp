@@ -75,6 +75,4 @@ void ARuntimeCharacter::PrimaryAction()
 		ExcavationSite->Dig();
 	}
 
-
-
 }

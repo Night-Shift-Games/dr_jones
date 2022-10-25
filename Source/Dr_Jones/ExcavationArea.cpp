@@ -11,6 +11,7 @@ AExcavationArea::AExcavationArea()
 	
 	Resolution = 10;
 	Size = 100;
+	AreaResolution = 1;
 
 }
 
@@ -70,6 +71,29 @@ void AExcavationArea::CreateMesh()
 	}
 	PMC->CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
 	if (ExcavateMaterial) PMC->SetMaterial(0, ExcavateMaterial);
+}
+
+void AExcavationArea::CreateArea()
+{
+	for (auto x : ExcavationSegments)
+	{
+		x->DestroyComponent();
+	}
+	
+	ExcavationSegments.Empty();
+
+	for (size_t y = 0; y < AreaResolution; y++)
+	{
+		for (size_t x = 0; x < AreaResolution; x++)
+		{
+			FTransform SegmentLocation(FVector(Size*x, Size * y, 0));
+			UExcavationSegment* NewSegment = Cast<UExcavationSegment>(AddComponentByClass(UExcavationSegment::StaticClass(), true, SegmentLocation, false));
+			ExcavationSegments.Add(NewSegment);
+			DrawDebugPoint(GWorld, SegmentLocation.GetLocation(), 10, FColor::Green);
+			NewSegment->GenerateMesh(Resolution, Size);
+		}
+	}
+
 }
 
 void AExcavationArea::RefreshMesh()
