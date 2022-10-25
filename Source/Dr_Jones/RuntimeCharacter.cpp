@@ -68,11 +68,10 @@ void ARuntimeCharacter::PrimaryAction()
 
 	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility)) return;
 	//DrawDebugLine(GWorld, ControllerViewportLocation, Hit.Location, FColor::Green, false, 5);
-	if (AExcavationArea* ExcavationSite = Cast<AExcavationArea>(Hit.GetActor()))
+	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
 		//DrawDebugBox(GWorld, Hit.Location, FVector(30, 30, 30), FColor::Green, false, 5);
-		ExcavationSite->CollisionBox = FTransform(GetActorRotation(), FVector(0,0,0) - (ExcavationSite->GetActorLocation() - Hit.Location), GetActorScale3D());
-		ExcavationSite->Dig();
+		ExcavationSite->Dig(FTransform (GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetActorScale3D()));
 	}
 
 }

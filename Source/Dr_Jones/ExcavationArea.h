@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ExcavationSegment.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "ExcavationArea.generated.h"
 
@@ -28,19 +27,10 @@ public:
 	USceneComponent* Root;
 
 	TArray<UExcavationSegment*> ExcavationSegments;
-	
-	UFUNCTION(CallInEditor)
-	void CreateMesh();
 
 	UFUNCTION(CallInEditor)
 	void CreateArea();
 	
-	UFUNCTION(CallInEditor)
-	void RefreshMesh();
-
-	UFUNCTION(CallInEditor)
-	void Dig();
-
 	virtual void PostLoad() override;
 
 	UPROPERTY(EditAnywhere)

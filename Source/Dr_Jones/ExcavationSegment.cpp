@@ -45,3 +45,18 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 	CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
 	//if (ExcavateMaterial) SetMaterial(0, ExcavateMaterial);
 }
+
+void UExcavationSegment::Dig(FTransform CollisionPoint)
+{
+	for (size_t i = 0; i < vertices.Num(); i++)
+	{
+		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30))) vertices[i] += FVector(0, 0, -10);
+	}
+	RefreshMesh();
+}
+
+void UExcavationSegment::RefreshMesh()
+{
+	ClearAllMeshSections();
+	CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
+}

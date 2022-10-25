@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ProceduralMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "ExcavationSegment.generated.h"
 
 /**
@@ -19,6 +20,11 @@ public:
 	UExcavationSegment(const FObjectInitializer& ObjectInitializer);
 
 	void GenerateMesh(int Resolution, float Size);
+	void Dig(FTransform CollisionPoint);
+
+	void RefreshMesh();
+	
+	
 	TArray<FVector> vertices;
 	TArray<int32> Triangles;
 	TArray<FVector> normals;
