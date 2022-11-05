@@ -20,12 +20,16 @@ public:
 	UExcavationSegment(const FObjectInitializer& ObjectInitializer);
 
 	void GenerateMesh(int Resolution, float Size);
-	void Dig(FTransform CollisionPoint);
-
 	void RefreshMesh();
+	void Dig(FTransform CollisionPoint);
 	
-	
+	TArray<UExcavationSegment*> Neighbors;
+
 	TArray<FVector> vertices;
+
+	UMaterialInterface* Material;
+
+private:
 	TArray<int32> Triangles;
 	TArray<FVector> normals;
 	TArray<FVector2D> UV0;

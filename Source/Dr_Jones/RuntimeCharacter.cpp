@@ -72,6 +72,10 @@ void ARuntimeCharacter::PrimaryAction()
 	{
 		//DrawDebugBox(GWorld, Hit.Location, FVector(30, 30, 30), FColor::Green, false, 5);
 		ExcavationSite->Dig(FTransform (GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetActorScale3D()));
+		for (UExcavationSegment* x : ExcavationSite->Neighbors)
+		{
+			x->Dig(FTransform(GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetActorScale3D()));
+		}
 	}
 
 }

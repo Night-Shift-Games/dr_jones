@@ -43,7 +43,8 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 		}
 	}
 	CreateMeshSection(0, vertices, Triangles, normals, UV0, vertexColors, tangents, true);
-	//if (ExcavateMaterial) SetMaterial(0, ExcavateMaterial);
+
+	SetMaterial(0, Material);
 }
 
 void UExcavationSegment::Dig(FTransform CollisionPoint)

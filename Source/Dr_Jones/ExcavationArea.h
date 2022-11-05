@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ExcavationSegment.h"
 #include "DrawDebugHelpers.h"
+#include "ComponentVisualizer.h"
 #include "ExcavationArea.generated.h"
 
 UCLASS()
@@ -15,23 +16,16 @@ class DR_JONES_API AExcavationArea : public AActor
 	
 public:	
 	AExcavationArea();
-
-protected:
-	virtual void BeginPlay() override;
-
-	virtual void PostActorCreated() override;
-
-public:
 	
-	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
 
 	TArray<UExcavationSegment*> ExcavationSegments;
 
 	UFUNCTION(CallInEditor)
 	void CreateArea();
-	
-	virtual void PostLoad() override;
+
+	UFUNCTION(CallInEditor)
+	void RefreshArena();
 
 	UPROPERTY(EditAnywhere)
 	float Size;
@@ -42,22 +36,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	int Resolution;
 
-	UPROPERTY()
-	float SegmentSize;
-
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* ExcavateMaterial;
 
-	UPROPERTY(EditAnywhere, meta=(MakeEditWidget))
-	FTransform CollisionBox;
+protected:
 
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void BeginPlay() override;
 
-private: 
-	TArray<FVector> vertices;
-	TArray<int32> Triangles;
-	TArray<FVector> normals;
-	TArray<FVector2D> UV0;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FColor> vertexColors;
+private:
+
+	void DestroyArea();
+	bool bIsArenaGenerated;
+	float SegmentSize;
 };
