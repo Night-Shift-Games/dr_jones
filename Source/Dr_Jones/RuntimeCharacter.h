@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ExcavationArea.h"
 #include "RuntimeCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 UCLASS()
 class DR_JONES_API ARuntimeCharacter : public ACharacter
@@ -23,6 +24,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	FOnUseItem OnActionKeyPressed;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -32,4 +36,5 @@ private:
 	void Turn(float AxisValue);
 	void LookUp(float AxisValue);
 	void PrimaryAction();
+	
 };

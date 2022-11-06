@@ -57,25 +57,5 @@ void ARuntimeCharacter::LookUp(float AxisValue)
 
 void ARuntimeCharacter::PrimaryAction()
 {
-	FVector OUT ControllerViewportLocation;
-	FRotator OUT ControllerViewportRotation;
-	
-	GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
-
-	FHitResult OUT Hit;
-
-	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
-
-	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility)) return;
-	//DrawDebugLine(GWorld, ControllerViewportLocation, Hit.Location, FColor::Green, false, 5);
-	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
-	{
-		//DrawDebugBox(GWorld, Hit.Location, FVector(30, 30, 30), FColor::Green, false, 5);
-		ExcavationSite->Dig(FTransform (GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetActorScale3D()));
-		for (UExcavationSegment* x : ExcavationSite->Neighbors)
-		{
-			x->Dig(FTransform(GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetActorScale3D()));
-		}
-	}
-
+	OnActionKeyPressed.Broadcast();
 }
