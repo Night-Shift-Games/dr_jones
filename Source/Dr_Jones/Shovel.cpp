@@ -5,7 +5,9 @@
 
 void UShovel::BeginPlay()
 {
-	Cast<ARuntimeCharacter>(GetOwner())->OnActionKeyPressed.AddDynamic(this, &UShovel::Dig);
+	ARuntimeCharacter* Character = Cast<ARuntimeCharacter>(GetOwner());
+	Character->OnActionKeyPressed.AddDynamic(this, &UShovel::Dig);
+	bFilled = false;
 }
 
 void UShovel::Dig()
@@ -20,14 +22,16 @@ void UShovel::Dig()
 	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
 
 	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility)) return;
-	//DrawDebugLine(GWorld, ControllerViewportLocation, Hit.Location, FColor::Green, false, 5);
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
-		//DrawDebugBox(GWorld, Hit.Location, FVector(30, 30, 30), FColor::Green, false, 5);
-		ExcavationSite->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()));
+		FVector DigDir = FVector(0, 0, -10 + (20 * (int)bFilled));
+		
+		ExcavationSite->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
 		for (UExcavationSegment* x : ExcavationSite->Neighbors)
 		{
-			x->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()));
+			x->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
 		}
+		bFilled = !bFilled;
 	}
+
 }

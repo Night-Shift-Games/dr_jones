@@ -47,11 +47,11 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 	SetMaterial(0, Material);
 }
 
-void UExcavationSegment::Dig(FTransform CollisionPoint)
+void UExcavationSegment::Dig(FTransform CollisionPoint, FVector Dig)
 {
 	for (size_t i = 0; i < vertices.Num(); i++)
 	{
-		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30))) vertices[i] += FVector(0, 0, -10);
+		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30))) vertices[i] += Dig;
 	}
 	RefreshMesh();
 }

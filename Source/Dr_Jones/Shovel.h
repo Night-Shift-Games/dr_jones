@@ -19,4 +19,6 @@ public:
 	virtual void BeginPlay() override;
 	UFUNCTION()
 	void Dig();
+protected:
+	bool bFilled;
 };

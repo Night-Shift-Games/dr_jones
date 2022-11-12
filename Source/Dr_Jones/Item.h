@@ -13,14 +13,7 @@ class DR_JONES_API UItem : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UItem();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
 	
 	UPROPERTY(EditAnywhere)
 	FName Name;
@@ -30,5 +23,7 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* StaticMesh;
+protected:
+	virtual void BeginPlay() override;
 
 };

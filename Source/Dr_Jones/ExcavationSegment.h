@@ -21,7 +21,7 @@ public:
 
 	void GenerateMesh(int Resolution, float Size);
 	void RefreshMesh();
-	void Dig(FTransform CollisionPoint);
+	void Dig(FTransform CollisionPoint, FVector Dig);
 	
 	TArray<UExcavationSegment*> Neighbors;
 
