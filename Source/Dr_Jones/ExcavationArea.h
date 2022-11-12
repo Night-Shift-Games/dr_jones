@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "ExcavationSegment.h"
 #include "DrawDebugHelpers.h"
-#include "ComponentVisualizer.h"
 #include "ExcavationArea.generated.h"
 
 UCLASS()

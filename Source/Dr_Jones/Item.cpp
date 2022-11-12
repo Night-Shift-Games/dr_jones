@@ -16,9 +16,9 @@ void UItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (StaticMesh)
+	if (Mesh)
 	{
-		StaticMeshComponent->SetStaticMesh(StaticMesh);
+		StaticMeshComponent->SetStaticMesh(Mesh);
 	}
 	
 }
