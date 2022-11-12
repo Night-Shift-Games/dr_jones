@@ -1,12 +1,10 @@
 // Property of Night Shift Games, all rights reserved.
 
-
 #include "Shovel.h"
 
 void UShovel::BeginPlay()
 {
-	ARuntimeCharacter* Character = Cast<ARuntimeCharacter>(GetOwner());
-	Character->OnActionKeyPressed.AddDynamic(this, &UShovel::Dig);
+	Super::BeginPlay();
 	bFilled = false;
 }
 
@@ -34,4 +32,10 @@ void UShovel::Dig()
 		bFilled = !bFilled;
 	}
 
+}
+
+void UShovel::SetupTool()
+{
+	ARuntimeCharacter* Character = Cast<ARuntimeCharacter>(GetOwner());
+	Character->OnActionKeyPressed.AddDynamic(this, &UShovel::Dig);
 }

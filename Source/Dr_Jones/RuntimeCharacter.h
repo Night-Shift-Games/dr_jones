@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "ToolComponent.h"
+#include "InteractiveObject.h"
 #include "RuntimeCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
@@ -20,7 +21,8 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnActionKeyPressed;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Storage")
 	UToolComponent* ToolComponent;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -31,6 +33,7 @@ private:
 	void Turn(float AxisValue);
 	void LookUp(float AxisValue);
 	void PrimaryAction();
+	void Interact();
 
 protected:
 	virtual void BeginPlay() override;

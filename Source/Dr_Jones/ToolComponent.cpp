@@ -2,13 +2,25 @@
 
 
 #include "ToolComponent.h"
-
+#include "Tool.h"
+UToolComponent::UToolComponent()
+{
+	ItemHoldInHand = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SlotComponent"));
+}
 void UToolComponent::BeginPlay()
 {
+	Owner = Cast<ARuntimeCharacter>(GetOwner());
+	ItemHoldInHand->AttachToComponent(Owner->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-void UToolComponent::AddItem(UItem* ItemToAdd)
+void UToolComponent::AddItem(UClass* ItemToAdd)
 {
-	UTool* ToolToAdd = Cast<UTool>(ItemToAdd);
-	if (ToolToAdd) Storage.Items.Add(ToolToAdd);
+	UTool* ToolToAdd = NewObject<UTool>(this, ItemToAdd);
+	ToolToAdd->SetupTool();
+	ItemHoldInHand->SetStaticMesh(ToolToAdd->Mesh);
+}
+
+void UToolComponent::SwitchItemInHand(UTool* NewTool)
+{
+
 }

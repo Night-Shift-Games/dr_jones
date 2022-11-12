@@ -5,6 +5,6 @@
 
 // Add default functionality here for any IInteractiveObject functions that are not pure virtual.
 
-void IInteractiveObject::Interact()
+void IInteractiveObject::Interact(APawn* Indicator)
 {
 }

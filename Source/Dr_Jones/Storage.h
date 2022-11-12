@@ -16,18 +16,22 @@ USTRUCT(BlueprintType) struct FItemStorage
 };
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup="Storage", meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UStorage : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	UStorage();
-	FItemStorage Storage;
+	
+	FItemStorage GetStorage();
+
 protected:
 	virtual void BeginPlay() override;
 	
-	virtual void AddItem(UItem* ItemToAdd);
+	virtual void AddItem(UClass* ItemToAdd);
 	virtual void RemoveItem(UItem* ItemToRemove);
+	FItemStorage Storage;
 		
+
 };

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Tool.h"
 #include "ExcavationArea.h"
-#include "RuntimeCharacter.h"
 #include "Shovel.generated.h"
 
 /**
@@ -19,6 +18,7 @@ public:
 	virtual void BeginPlay() override;
 	UFUNCTION()
 	void Dig();
+	virtual void SetupTool() override;
 protected:
 	bool bFilled;
 };

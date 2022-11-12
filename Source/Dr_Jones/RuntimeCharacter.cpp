@@ -28,6 +28,7 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUp", this, &ARuntimeCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ARuntimeCharacter::PrimaryAction);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ARuntimeCharacter::Interact);
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
@@ -53,4 +54,25 @@ void ARuntimeCharacter::LookUp(float AxisValue)
 void ARuntimeCharacter::PrimaryAction()
 {
 	OnActionKeyPressed.Broadcast();
+}
+
+void ARuntimeCharacter::Interact()
+{
+	FVector OUT ControllerViewportLocation;
+	FRotator OUT ControllerViewportRotation;
+
+	GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
+
+	FHitResult OUT Hit;
+
+	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
+
+	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility))
+	{
+		return;
+	}
+	if (IInteractiveObject* IO = Cast<IInteractiveObject>(Hit.GetActor()))
+	{
+		IO->Interact(this);
+	}
 }

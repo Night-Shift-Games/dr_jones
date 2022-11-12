@@ -8,17 +8,21 @@ UStorage::UStorage()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+FItemStorage UStorage::GetStorage()
+{
+	return Storage;
+}
+
 
 void UStorage::BeginPlay()
 {
 	Super::BeginPlay();
-
 	
 }
 
-void UStorage::AddItem(UItem* ItemToAdd)
+void UStorage::AddItem(UClass* ItemToAdd)
 {
-	Storage.Items.Add(ItemToAdd);
+	//Storage.Items.Add(ItemToAdd);
 }
 
 void UStorage::RemoveItem(UItem* ItemToRemove)

@@ -22,7 +22,7 @@ public:
 	UStaticMeshComponent* StaticMeshComponent;
 	
 	UPROPERTY(EditAnywhere)
-	UStaticMesh* StaticMesh;
+	UStaticMesh* Mesh;
 protected:
 	virtual void BeginPlay() override;
 
