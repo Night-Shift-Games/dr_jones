@@ -3,27 +3,22 @@
 
 #include "RuntimeCharacter.h"
 
-// Sets default values
 ARuntimeCharacter::ARuntimeCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	ToolComponent = CreateDefaultSubobject<UToolComponent>(TEXT("ToolInventory"));
 }
 
-// Called when the game starts or when spawned
 void ARuntimeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
-// Called every frame
 void ARuntimeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
 void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
