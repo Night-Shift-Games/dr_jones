@@ -5,11 +5,19 @@
 
 UExcavationSegment::UExcavationSegment(const FObjectInitializer& ObjectInitializer) : UProceduralMeshComponent(ObjectInitializer)
 {
-	;
+	bFullResolution = false;
 }
 
 void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 {
+	
+	if (!bFullResolution)
+	{
+		FullResolution = Resolution;
+		FullSize = Size;
+		Resolution = 4;
+	}
+
 	ClearAllMeshSections();
 
 	vertices.Empty();
@@ -49,6 +57,11 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 
 void UExcavationSegment::Dig(FTransform CollisionPoint, FVector Dig)
 {
+	if (!bFullResolution)
+	{
+		bFullResolution = true;
+		GenerateMesh(FullResolution, FullSize);
+	}
 	for (size_t i = 0; i < vertices.Num(); i++)
 	{
 		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30))) vertices[i] += Dig;

@@ -23,6 +23,8 @@ public:
 	void RefreshMesh();
 	void Dig(FTransform CollisionPoint, FVector Dig);
 	
+	bool bFullResolution;
+
 	TArray<UExcavationSegment*> Neighbors;
 
 	TArray<FVector> vertices;
@@ -30,6 +32,9 @@ public:
 	UMaterialInterface* Material;
 
 private:
+
+	int FullResolution;
+	int FullSize;
 	TArray<int32> Triangles;
 	TArray<FVector> normals;
 	TArray<FVector2D> UV0;
