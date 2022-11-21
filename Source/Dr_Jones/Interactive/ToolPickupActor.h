@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "InteractiveActor.h"
-#include "Tool.h"
-#include "RuntimeCharacter.h"
+#include "../Items/Tools/Tool.h"
+#include ".././RuntimeCharacter.h"
 #include "ToolPickupActor.generated.h"
 
 UCLASS()

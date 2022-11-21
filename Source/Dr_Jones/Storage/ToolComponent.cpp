@@ -2,7 +2,8 @@
 
 
 #include "ToolComponent.h"
-#include "Tool.h"
+#include "../Items/Tools/Tool.h"
+#include "../RuntimeCharacter.h"
 UToolComponent::UToolComponent()
 {
 	ItemHoldInHand = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SlotComponent"));

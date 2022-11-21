@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Tool.h"
-#include "ExcavationArea.h"
+#include "../../Archeological Site/ExcavationArea.h"
+#include "../../RuntimeCharacter.h"
 #include "Shovel.generated.h"
 
 /**

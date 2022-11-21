@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Item.h"
-#include "RuntimeCharacter.h"
+#include "../Item.h"
 #include "Tool.generated.h"
 
 /**

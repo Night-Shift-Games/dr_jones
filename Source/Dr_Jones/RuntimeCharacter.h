@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ToolComponent.h"
-#include "InteractiveObject.h"
+#include "Storage/ToolComponent.h"
+#include "Interactive/InteractiveObject.h"
 #include "RuntimeCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
