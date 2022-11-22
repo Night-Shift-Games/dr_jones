@@ -20,7 +20,7 @@ void UStorage::BeginPlay()
 	
 }
 
-void UStorage::AddItem(UClass* ItemToAdd)
+void UStorage::AddItem(UItem* ItemToAdd)
 {
 	//Storage.Items.Add(ItemToAdd);
 }

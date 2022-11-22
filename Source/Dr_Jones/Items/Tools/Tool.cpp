@@ -3,11 +3,15 @@
 #include "Tool.h"
 #include "../../RuntimeCharacter.h"
 
-void UTool::UseItem()
+// Virtual function
+void UTool::UseItem() {}
+
+void UTool::BindTool(ARuntimeCharacter* Player)
 {
+	Player->OnActionKeyPressed.AddUniqueDynamic(this, &UTool::UseItem);
 }
 
-void UTool::SetupTool()
+void UTool::UnbindTool(ARuntimeCharacter* Player)
 {
-	if (Mesh) StaticMeshComponent->SetStaticMesh(Mesh);
+	Player->OnActionKeyPressed.RemoveDynamic(this, &UTool::UseItem);
 }

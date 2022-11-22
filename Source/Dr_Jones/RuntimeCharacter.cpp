@@ -7,11 +7,17 @@ ARuntimeCharacter::ARuntimeCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	ToolComponent = CreateDefaultSubobject<UToolComponent>(TEXT("ToolInventory"));
+
 }
 
 void ARuntimeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ARuntimeCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	OnActionKeyPressed.RemoveAll(this);
 }
 
 void ARuntimeCharacter::Tick(float DeltaTime)
@@ -29,6 +35,7 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ARuntimeCharacter::PrimaryAction);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ARuntimeCharacter::Interact);
+	PlayerInputComponent->BindAxis("Scroll", this, &ARuntimeCharacter::SwitchItem);
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
@@ -75,4 +82,13 @@ void ARuntimeCharacter::Interact()
 	{
 		IO->Interact(this);
 	}
+}
+
+void ARuntimeCharacter::SwitchItem(float AxisValue)
+{
+	if (AxisValue == 0)
+	{
+		return;
+	}
+	ToolComponent->ScrollItem(AxisValue);
 }

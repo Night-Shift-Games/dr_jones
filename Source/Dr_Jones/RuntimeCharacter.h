@@ -22,7 +22,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnActionKeyPressed;
 	
-	UPROPERTY(EditAnywhere, Category = "Storage")
+	UPROPERTY()
 	UToolComponent* ToolComponent;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -34,8 +34,8 @@ private:
 	void LookUp(float AxisValue);
 	void PrimaryAction();
 	void Interact();
-
+	void SwitchItem(float AxisValue);
 protected:
 	virtual void BeginPlay() override;
-	
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

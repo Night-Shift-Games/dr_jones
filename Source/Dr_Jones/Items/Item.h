@@ -15,15 +15,13 @@ class DR_JONES_API UItem : public UActorComponent
 public:	
 	UItem();
 	
-	UPROPERTY(EditAnywhere)
-	FName Name;
+	UPROPERTY(EditDefaultsOnly)
+	FName ItemName;
 	
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* StaticMeshComponent;
-	
-	UPROPERTY(EditAnywhere)
-	UStaticMesh* Mesh;
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* ItemMesh;
+
 protected:
-	virtual void BeginPlay() override;
+	UStaticMeshComponent* StaticMeshComponent;
 
 };

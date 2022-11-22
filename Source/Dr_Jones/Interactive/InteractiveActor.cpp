@@ -3,31 +3,10 @@
 
 #include "InteractiveActor.h"
 
+
 AInteractiveActor::AInteractiveActor()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
-	StaticMeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	if (Mesh)
-	{
-		StaticMeshComponent->SetStaticMesh(Mesh);
-	}
-}
-
-void AInteractiveActor::SetStaticMesh(UStaticMesh* NewMesh)
-{
-	StaticMeshComponent->SetStaticMesh(NewMesh);
-}
-
-void AInteractiveActor::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void AInteractiveActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Interactive Actor Static Mesh"));
 }
 
 void AInteractiveActor::Interact(APawn* Indicator)

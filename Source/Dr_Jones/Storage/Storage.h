@@ -29,7 +29,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	virtual void AddItem(UClass* ItemToAdd);
+	virtual void AddItem(UItem* ItemToAdd);
 	virtual void RemoveItem(UItem* ItemToRemove);
 	FItemStorage Storage;
 		

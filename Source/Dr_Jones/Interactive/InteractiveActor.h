@@ -14,17 +14,10 @@ class DR_JONES_API AInteractiveActor : public AActor, public IInteractiveObject
 	
 public:	
 	AInteractiveActor();
-	virtual void Tick(float DeltaTime) override;
+
 	virtual void Interact(APawn* Indicator) override;
 
-	UPROPERTY(EditAnywhere)
+protected:
 	UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY(EditAnywhere)
-	UStaticMesh* Mesh;
-
-	virtual void SetStaticMesh(UStaticMesh* Mesh);
-
-protected:
-	virtual void BeginPlay() override;
 };

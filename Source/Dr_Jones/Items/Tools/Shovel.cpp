@@ -2,10 +2,9 @@
 
 #include "Shovel.h"
 
-void UShovel::BeginPlay()
+void UShovel::UseItem()
 {
-	Super::BeginPlay();
-	bFilled = false;
+	Dig();
 }
 
 void UShovel::Dig()
@@ -19,7 +18,10 @@ void UShovel::Dig()
 
 	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
 
-	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility)) return;
+	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility))
+	{
+		return;
+	}
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
 		FVector DigDir = FVector(0, 0, -10 + (20 * (int)bFilled));
@@ -31,11 +33,5 @@ void UShovel::Dig()
 		}
 		bFilled = !bFilled;
 	}
-
 }
 
-void UShovel::SetupTool()
-{
-	ARuntimeCharacter* Character = Cast<ARuntimeCharacter>(GetOwner());
-	Character->OnActionKeyPressed.AddDynamic(this, &UShovel::Dig);
-}

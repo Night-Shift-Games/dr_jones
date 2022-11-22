@@ -10,20 +10,31 @@
 class ARuntimeCharacter;
 class UTool;
 
-UCLASS(ClassGroup = "Storage", meta = (BlueprintSpawnableComponent))
+UCLASS()
 class DR_JONES_API UToolComponent : public UStorage
 {
 	GENERATED_BODY()
 public:
 	UToolComponent();
+	
+	TArray<UTool*> Tools;
+	
 	virtual void BeginPlay() override;
-	virtual void AddItem(UClass* ItemToAdd);
+
+	virtual void AddItem(UItem* NewTool) override;
+	
 	void SwitchItemInHand(UTool* NewTool);
 	
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* ItemHoldInHand;
+	UTool* ActiveItem;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* Hand;
+	
+	void ScrollItem(int Direction);
+
 private:
-	ARuntimeCharacter* Owner;
+	ARuntimeCharacter* Player;
 
 
 };
