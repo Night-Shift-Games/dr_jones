@@ -11,8 +11,8 @@ UToolComponent::UToolComponent()
 void UToolComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	Player = Cast<ARuntimeCharacter>(GetOwner());
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, "TestBeginPlayTC");
 	Hand->AttachToComponent(Player->GetMesh(),FAttachmentTransformRules::KeepRelativeTransform, TEXT("RightHandSocket"));
 }
 
@@ -26,11 +26,11 @@ void UToolComponent::AddItem(UItem* NewItem)
 	NewTool->RegisterComponent();
 	Tools.Add(NewTool);
 	SwitchItemInHand(NewTool);
-
 }
 
 void UToolComponent::SwitchItemInHand(UTool* NewTool)
 {
+	// If previous item exist unbind it first before set new one
 	if (ActiveItem)
 	{
 		ActiveItem->UnbindTool(Player);
@@ -40,16 +40,41 @@ void UToolComponent::SwitchItemInHand(UTool* NewTool)
 	Hand->SetStaticMesh(ActiveItem->ItemMesh);
 }
 
+UTool* UToolComponent::GetActiveItem()
+{
+	return ActiveItem;
+}
+
+int32 UToolComponent::GetActiveItemID()
+{
+	return Tools.Find(ActiveItem);
+}
+
+TArray<UTool*> UToolComponent::GetItems()
+{
+	return Tools;
+}
+
 void UToolComponent::ScrollItem(int Direction)
 {
+	// If array is empty there is no point to continue.
 	if (Tools.IsEmpty())
 	{
 		return;
 	}
-	int NextItemID = (Tools.Find(ActiveItem) + Direction);
 	
-	if (NextItemID >= Tools.Num()) NextItemID = 0;
-	else if (NextItemID < 0) NextItemID = Tools.Num() - 1;
+	// Get next or previous tool
+	int NextItemID = GetActiveItemID() + Direction;
 	
+	// Looping array
+	if (NextItemID >= Tools.Num())
+	{
+		NextItemID = 0;
+	}
+	else if (NextItemID < 0)
+	{
+		NextItemID = Tools.Num() - 1;
+	}
+
 	SwitchItemInHand(Tools[NextItemID]);
 }

@@ -5,5 +5,5 @@
 
 void UBucket::UseItem()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Wiadro kurwa dziala, jebac habibiego"));
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Bucket in use"));
 }

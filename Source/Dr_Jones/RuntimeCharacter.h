@@ -10,7 +10,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
-UCLASS()
+UCLASS(Blueprintable)
 class DR_JONES_API ARuntimeCharacter : public ACharacter
 {
 	GENERATED_BODY()
