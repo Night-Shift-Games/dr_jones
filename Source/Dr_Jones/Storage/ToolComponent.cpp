@@ -40,6 +40,34 @@ void UToolComponent::SwitchItemInHand(UTool* NewTool)
 	Hand->SetStaticMesh(ActiveItem->ItemMesh);
 }
 
+UTool* UToolComponent::GetNextItem()
+{
+	if (Tools.IsEmpty())
+	{
+		return nullptr;
+	}
+	int NextItemID = GetActiveItemID() + 1;
+	if (NextItemID >= Tools.Num())
+	{
+		NextItemID = 0;
+	}
+	return Tools[NextItemID];
+}
+
+UTool* UToolComponent::GetPreviousItem()
+{
+	if (Tools.IsEmpty())
+	{
+		return nullptr;
+	}
+	int NextItemID = GetActiveItemID() - 1;
+	if (NextItemID < 0)
+	{
+		NextItemID = Tools.Num() - 1;
+	}
+	return Tools[NextItemID];
+}
+
 UTool* UToolComponent::GetActiveItem()
 {
 	return ActiveItem;

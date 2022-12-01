@@ -15,6 +15,7 @@ void AToolPickupActor::Interact(APawn* Indicator)
 {
 	UTool* NewTool = NewObject<UTool>(Indicator, ToolClass);
 	NewTool->ItemMesh = ToolMesh;
+	NewTool->ItemImage = ToolIcon;
 	if (ARuntimeCharacter* Player = Cast<ARuntimeCharacter>(Indicator))
 	{
 		if (Player->ToolComponent)

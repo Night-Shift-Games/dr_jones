@@ -22,7 +22,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnActionKeyPressed;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	UToolComponent* ToolComponent;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMesh* ToolMesh;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UTexture2D> ToolIcon;
+
 	virtual void Interact(APawn* Indicator) override;
 	
 };

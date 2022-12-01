@@ -23,6 +23,12 @@ public:
 	void SwitchItemInHand(UTool* NewTool);
 	
 	UFUNCTION(BlueprintPure)
+		UTool* GetNextItem();
+
+	UFUNCTION(BlueprintPure)
+		UTool* GetPreviousItem();
+
+	UFUNCTION(BlueprintPure)
 	UTool* GetActiveItem();
 	
 	UFUNCTION(BlueprintPure)
