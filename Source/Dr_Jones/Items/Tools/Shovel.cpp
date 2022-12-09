@@ -16,7 +16,7 @@ void UShovel::Dig()
 
 	FHitResult OUT Hit;
 
-	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
+	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 350;
 
 	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility))
 	{
@@ -24,7 +24,7 @@ void UShovel::Dig()
 	}
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
-		FVector DigDir = FVector(0, 0, -10 + (20 * (int)bFilled));
+		FVector DigDir = FVector(0, 0, -15 + (20 * (int)bFilled));
 		
 		ExcavationSite->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
 		for (UExcavationSegment* x : ExcavationSite->Neighbors)

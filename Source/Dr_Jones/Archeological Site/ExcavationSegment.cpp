@@ -34,7 +34,7 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 	{
 		for (size_t y = 0; y < Resolution; y++)
 		{
-			vertices.Add(FVector(y * SizeRes, x * SizeRes, FMath::RandRange(-1, 1)) + FVector(-Size / 2, -Size / 2, 0));
+			vertices.Add(FVector(y * SizeRes, x * SizeRes, 0) + FVector(-Size / 2, -Size / 2, 0));
 			UV0.Add(FVector2D(y * SizeRes / 100, x * SizeRes / 100));
 			if (y != Resolution - 1 && x != Resolution - 1)
 			{
@@ -46,7 +46,6 @@ void UExcavationSegment::GenerateMesh(int Resolution, float Size)
 				Triangles.Add(it + Resolution + 1);
 				Triangles.Add(it + 1);
 			}
-			if (y == Resolution - 1 || x == Resolution - 1 || x == 0 || y == 0) vertices.Last().Z = 0;
 			it++;
 		}
 	}
@@ -64,7 +63,28 @@ void UExcavationSegment::Dig(FTransform CollisionPoint, FVector Dig)
 	}
 	for (size_t i = 0; i < vertices.Num(); i++)
 	{
-		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30))) vertices[i] += Dig;
+		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30)))
+		{
+
+			bool bIsBottomEdge = i > vertices.Num() - FullResolution - 2;
+			bool bIsTopEdge = i < FullResolution;
+			bool bIsRightEdge = (i % FullResolution == 0);
+			bool bIsLeftEdge = (i == 0 || (i+1) % FullResolution == 0);
+			bool bIsEdge = bIsBottomEdge || bIsTopEdge || bIsLeftEdge || bIsRightEdge;
+
+			if (bSmoothDig && !bIsEdge)
+			{
+				vertices[i] += Dig + FVector(Dig.X, Dig.Y, Dig.Z * 5);
+				vertices[i] =	((
+								vertices[i]						+ vertices[i + 1]				+ vertices[i - 1] + 
+								vertices[i + FullResolution + 1]+ vertices[i + FullResolution]	+ vertices[i + FullResolution - 1 ] + 
+								vertices[i - FullResolution + 1]+ vertices[i - FullResolution]	+ vertices[i - FullResolution - 1]) / 9);
+			}
+			else
+			{
+				vertices[i] += Dig;
+			}
+		}
 	}
 	RefreshMesh();
 }

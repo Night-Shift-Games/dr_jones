@@ -36,11 +36,16 @@ public:
 	int Resolution;
 
 	UPROPERTY(EditAnywhere)
+	bool bSmoothDigging;
+
+	UPROPERTY(EditAnywhere)
 	UMaterialInterface* ExcavateMaterial;
 
 protected:
 
 	virtual void BeginPlay() override;
+
+	//virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
 

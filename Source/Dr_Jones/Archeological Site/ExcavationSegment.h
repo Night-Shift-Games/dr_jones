@@ -22,7 +22,7 @@ public:
 	void GenerateMesh(int Resolution, float Size);
 	void RefreshMesh();
 	void Dig(FTransform CollisionPoint, FVector Dig);
-	
+	bool bSmoothDig;
 	bool bFullResolution;
 
 	TArray<UExcavationSegment*> Neighbors;

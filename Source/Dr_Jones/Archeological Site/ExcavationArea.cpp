@@ -12,6 +12,7 @@ AExcavationArea::AExcavationArea()
 	Size = 1000;
 	AreaResolution = 10;
 	bIsArenaGenerated = false;
+	bSmoothDigging = false;
 }
 
 void AExcavationArea::BeginPlay()
@@ -19,6 +20,14 @@ void AExcavationArea::BeginPlay()
 	Super::BeginPlay();
 	CreateArea();
 }
+
+//void AExcavationArea::OnConstruction(const FTransform& Transform)
+//{
+//	if (bIsArenaGenerated)
+//	{
+//		RefreshArena();
+//	}
+//}
 
 void AExcavationArea::CreateArea()
 {
@@ -30,12 +39,12 @@ void AExcavationArea::CreateArea()
 	{
 		for (int x = 0; x < AreaResolution; x++)
 		{
-			FTransform SegmentLocation(FVector(SegmentSize * x, SegmentSize * y, 0) + FVector(-Size / 2.f + SegmentSize/2, -Size / 2.f + SegmentSize / 2, 0));
+			FTransform SegmentLocation(FVector(SegmentSize * x, SegmentSize * y, 0) + FVector(-Size / 2.f + SegmentSize / 2, -Size / 2.f + SegmentSize / 2, 0));
 			UExcavationSegment* NewSegment = Cast<UExcavationSegment>(AddComponentByClass(UExcavationSegment::StaticClass(), false, SegmentLocation, false));
 			ExcavationSegments.Add(NewSegment);
 			NewSegment->Material = ExcavateMaterial;
+			NewSegment->bSmoothDig = bSmoothDigging;
 			NewSegment->GenerateMesh(Resolution, SegmentSize);
-
 	
 			if (x != 0)
 			{
