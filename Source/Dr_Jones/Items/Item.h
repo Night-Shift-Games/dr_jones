@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Item), meta=(BlueprintSpawnableComponent) )
-class DR_JONES_API UItem : public UActorComponent
+class DR_JONES_API UItem : public USceneComponent
 {
 	GENERATED_BODY()
 

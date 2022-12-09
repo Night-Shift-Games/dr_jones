@@ -3,7 +3,7 @@
 
 #include "Bucket.h"
 
-void UBucket::UseItem()
+void UBucket::UseTool()
 {
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Bucket in use"));
 }

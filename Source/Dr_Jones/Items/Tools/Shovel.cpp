@@ -2,7 +2,7 @@
 
 #include "Shovel.h"
 
-void UShovel::UseItem()
+void UShovel::UseTool()
 {
 	Dig();
 }
@@ -24,7 +24,7 @@ void UShovel::Dig()
 	}
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
-		FVector DigDir = FVector(0, 0, -15 + (20 * (int)bFilled));
+		FVector DigDir = FVector(0, 0, -ShovelStrengh + (2 * ShovelStrengh * (int)bFilled));
 		
 		ExcavationSite->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
 		for (UExcavationSegment* x : ExcavationSite->Neighbors)

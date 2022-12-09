@@ -13,5 +13,5 @@ class DR_JONES_API UBucket : public UTool
 	
 public:
 
-	virtual void UseItem() override;
+	virtual void UseTool() override;
 };

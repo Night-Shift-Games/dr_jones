@@ -5,8 +5,12 @@
 UItem::UItem()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
-	if (ItemMesh) StaticMeshComponent->SetStaticMesh(ItemMesh);
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+	if (ItemMesh)
+	{
+		StaticMeshComponent->SetStaticMesh(ItemMesh);
+	}
+	StaticMeshComponent->SetupAttachment(this);
 }
 
 UTexture2D* UItem::GetItemImage()

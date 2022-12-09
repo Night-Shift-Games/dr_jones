@@ -3,15 +3,12 @@
 #include "Tool.h"
 #include "../../RuntimeCharacter.h"
 
-// Virtual function
-void UTool::UseItem() {}
-
 void UTool::BindTool(ARuntimeCharacter* Player)
 {
-	Player->OnActionKeyPressed.AddUniqueDynamic(this, &UTool::UseItem);
+	Player->OnActionKeyPressed.AddUniqueDynamic(this, &UTool::UseTool);
 }
 
 void UTool::UnbindTool(ARuntimeCharacter* Player)
 {
-	Player->OnActionKeyPressed.RemoveDynamic(this, &UTool::UseItem);
+	Player->OnActionKeyPressed.RemoveDynamic(this, &UTool::UseTool);
 }

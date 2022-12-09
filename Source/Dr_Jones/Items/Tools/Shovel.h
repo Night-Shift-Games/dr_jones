@@ -17,7 +17,10 @@ class DR_JONES_API UShovel : public UTool
 
 public:
 
-	virtual void UseItem() override;
+	UPROPERTY(EditAnywhere)
+	float ShovelStrengh = 20;
+
+	virtual void UseTool() override;
 
 protected:
 
