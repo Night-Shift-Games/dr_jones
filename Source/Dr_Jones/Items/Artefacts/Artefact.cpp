@@ -17,6 +17,7 @@ void UArtefact::Interact(APawn* Indicator)
 void UArtefact::Take(APawn* Indicator)
 {
 	Cast<ARuntimeCharacter>(Indicator)->AddArtefact(this);
+	OnArtefactTake(Indicator);
 	this->DestroyComponent();
 }
 

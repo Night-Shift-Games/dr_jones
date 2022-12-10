@@ -15,13 +15,13 @@ class DR_JONES_API UItem : public UStaticMeshComponent
 public:	
 	UItem();
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (DisplayPriority = 1))
 	FName ItemName;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Item", meta=(DisplayPriority = 2))
 	TObjectPtr<UTexture2D> ItemImage;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	UStaticMesh* ItemMesh;
 
 	UFUNCTION(BlueprintCallable)
