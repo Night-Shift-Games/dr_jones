@@ -15,10 +15,35 @@ AExcavationArea::AExcavationArea()
 	bSmoothDigging = false;
 }
 
+void AExcavationArea::PopulateWithArtefacts()
+{
+	for (size_t i = 0; i < ArtefactsQuantity; i++)
+	{
+		SpawnArtefact();
+	}
+}
+
+void AExcavationArea::SpawnArtefact()
+{
+	if (ArtefactsClass.IsEmpty())
+	{
+		return;
+	}
+	UArtefact* NewArtefact = NewObject<UArtefact>(this, ArtefactsClass[FMath::RandRange(0, ArtefactsClass.Num() - 1)]);
+	NewArtefact->RegisterComponent();
+	NewArtefact->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	
+	FVector ArtefactLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(0, 0, -70), FVector(Size / 4, Size / 4, 40));
+	NewArtefact->SetRelativeLocationAndRotation(ArtefactLocation, FRotator(FMath::RandRange(0, 360)));
+
+	Artefacts.Add(NewArtefact);
+}
+
 void AExcavationArea::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateArea();
+	PopulateWithArtefacts();
 }
 
 //void AExcavationArea::OnConstruction(const FTransform& Transform)
