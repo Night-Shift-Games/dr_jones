@@ -7,7 +7,6 @@ ARuntimeCharacter::ARuntimeCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	ToolComponent = CreateDefaultSubobject<UToolComponent>(TEXT("ToolInventory"));
-
 }
 
 void ARuntimeCharacter::BeginPlay()
@@ -36,6 +35,13 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ARuntimeCharacter::PrimaryAction);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ARuntimeCharacter::Interact);
 	PlayerInputComponent->BindAxis("Scroll", this, &ARuntimeCharacter::SwitchItem);
+}
+
+void ARuntimeCharacter::AddArtefact(UArtefact* Artefact)
+{
+	UArtefact* NewArtefact = NewObject<UArtefact>(this, Artefact->StaticClass());
+	NewArtefact->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	Artefacts.Add(NewArtefact);
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
@@ -78,10 +84,18 @@ void ARuntimeCharacter::Interact()
 	{
 		return;
 	}
-	if (IInteractiveObject* IO = Cast<IInteractiveObject>(Hit.GetActor()))
+	IInteractiveObject* IO = Cast<IInteractiveObject>(Hit.GetActor());
+	if (!IO) 
 	{
-		IO->Interact(this);
+		IO = Cast<IInteractiveObject>(Hit.GetComponent());
 	}
+	if (!IO)
+	{
+		return;
+	}
+	
+
+	IO->Interact(this);
 }
 
 void ARuntimeCharacter::SwitchItem(float AxisValue)

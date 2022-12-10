@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Storage/ToolComponent.h"
+#include "Items/Artefacts/Artefact.h"
 #include "Interactive/InteractiveObject.h"
 #include "RuntimeCharacter.generated.h"
 
@@ -25,7 +26,14 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UToolComponent* ToolComponent;
 
+	UPROPERTY(BlueprintReadOnly)
+	TArray<UArtefact*> Artefacts;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UFUNCTION(BlueprintCallable)
+	void AddArtefact(UArtefact* NewArtefact);
+
 private:
 
 	void MoveForward(float AxisValue);
