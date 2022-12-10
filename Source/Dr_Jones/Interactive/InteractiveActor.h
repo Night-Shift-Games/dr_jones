@@ -18,6 +18,7 @@ public:
 	virtual void Interact(APawn* Indicator) override;
 
 protected:
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;
 
 };

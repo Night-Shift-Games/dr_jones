@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Item), meta=(BlueprintSpawnableComponent) )
-class DR_JONES_API UItem : public USceneComponent
+class DR_JONES_API UItem : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 
@@ -28,6 +28,7 @@ public:
 	UTexture2D* GetItemImage();
 
 protected:
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;
 
 };
