@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ExcavationSegment.h"
 #include "DrawDebugHelpers.h"
+#include "Components/BrushComponent.h"
 #include "../Items/Artefacts/Artefact.h"
 #include "ExcavationArea.generated.h"
 
@@ -19,7 +20,9 @@ public:
 
 	void PopulateWithArtefacts();
 
-	void SpawnArtefact();
+	void SpawnArtefact(TSubclassOf<UArtefact>ArtefactClass = nullptr);
+
+	void SpawnAllQuestArtefacts();
 
 	UFUNCTION(CallInEditor)
 	void CreateArea();
@@ -33,6 +36,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray <UArtefact*> Artefacts;
 	
+	UPROPERTY(EditAnywhere, meta=(MakeEditWidget))
+	FVector ArtefactSpawnOrigin;
+	
+	UPROPERTY(EditAnywhere)
+	float ArtefactSpawnAreaX;
+
+	UPROPERTY(EditAnywhere)
+	float ArtefactSpawnAreaY;
+
 	UPROPERTY(EditAnywhere)
 	int ArtefactsQuantity;
 

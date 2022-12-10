@@ -17,26 +17,83 @@ AExcavationArea::AExcavationArea()
 
 void AExcavationArea::PopulateWithArtefacts()
 {
+	SpawnAllQuestArtefacts();
 	for (size_t i = 0; i < ArtefactsQuantity; i++)
 	{
 		SpawnArtefact();
 	}
 }
 
-void AExcavationArea::SpawnArtefact()
+void AExcavationArea::SpawnArtefact(TSubclassOf<UArtefact>ArtefactClass)
 {
 	if (ArtefactsClass.IsEmpty())
 	{
 		return;
 	}
-	UArtefact* NewArtefact = NewObject<UArtefact>(this, ArtefactsClass[FMath::RandRange(0, ArtefactsClass.Num() - 1)]);
+
+	if (!ArtefactClass)
+	{
+		ArtefactClass = ArtefactsClass[FMath::RandRange(0, ArtefactsClass.Num() - 1)];
+	}
+
+	UArtefact* NewArtefact = NewObject<UArtefact>(this, ArtefactClass);
 	NewArtefact->RegisterComponent();
 	NewArtefact->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
-	FVector ArtefactLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(0, 0, -70), FVector(Size / 4, Size / 4, 40));
-	NewArtefact->SetRelativeLocationAndRotation(ArtefactLocation, FRotator(FMath::RandRange(0, 360)));
+	float DigDeep;
+	switch (NewArtefact->Rarity)
+	{
+		case FArtefactRarity::Quest: {}
+		case FArtefactRarity::Lore:
+		{
+			ArtefactsClass.Remove(ArtefactClass);
+			DigDeep = 30;
+			break;
+		}
+		default:
+		{
+			switch (NewArtefact->Size)
+			{
+				case FArtefactSize::Huge:
+				{
+					DigDeep = 0;
+					break;
+				}
+				case FArtefactSize::Medium:
+				{
+					DigDeep = 30;
+					break;
+				}
+				default:
+				{
+					DigDeep = 40;
+					break;
+				}
+			}
+		}
+	}
 
+	FVector ArtefactLocation = UKismetMathLibrary::RandomPointInBoundingBox(ArtefactSpawnOrigin, FVector(ArtefactSpawnAreaX, ArtefactSpawnAreaY, DigDeep));
+	NewArtefact->SetRelativeLocationAndRotation(ArtefactLocation, FRotator(FMath::RandRange(0, 360)));
 	Artefacts.Add(NewArtefact);
+}
+
+void AExcavationArea::SpawnAllQuestArtefacts()
+{
+	TArray <TSubclassOf<UArtefact>> ArtefactsClassCopy = ArtefactsClass;
+	if (ArtefactsClass.IsEmpty())
+	{
+		return;
+	}
+	for (auto& ArtefactClass : ArtefactsClassCopy)
+	{
+		UArtefact* Artefact = Cast<UArtefact>(ArtefactClass->GetDefaultObject());
+		if (Artefact->Rarity == Lore || Artefact->Rarity == Quest)
+		{
+			SpawnArtefact(ArtefactClass);
+		}
+	}
+
 }
 
 void AExcavationArea::BeginPlay()
