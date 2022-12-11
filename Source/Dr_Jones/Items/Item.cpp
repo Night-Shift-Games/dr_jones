@@ -13,6 +13,11 @@ UItem::UItem()
 	StaticMeshComponent->SetupAttachment(this);
 }
 
+FName UItem::GetItemDescription()
+{
+	return ItemName;
+}
+
 UTexture2D* UItem::GetItemImage()
 {
 	return ItemImage;

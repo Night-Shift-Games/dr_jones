@@ -34,8 +34,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddArtefact(UArtefact* NewArtefact);
 
-private:
+	UFUNCTION(BlueprintCallable)
+	FHitResult GetPlayerLookingAt(const float Reach);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddPickupWidget(const FString& InteractSentence);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RemovePickupWidget();
+
+private:
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void Turn(float AxisValue);
@@ -43,7 +51,10 @@ private:
 	void PrimaryAction();
 	void Interact();
 	void SwitchItem(float AxisValue);
+	
+	IInteractiveObject* AsInteractive(FHitResult ObjectHit);
 protected:
+	FHitResult Viewtarget;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

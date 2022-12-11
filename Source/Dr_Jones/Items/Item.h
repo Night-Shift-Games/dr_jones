@@ -18,11 +18,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (DisplayPriority = 1))
 	FName ItemName;
 	
-	UPROPERTY(EditAnywhere, Category = "Item", meta=(DisplayPriority = 2))
+	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 2))
 	TObjectPtr<UTexture2D> ItemImage;
+
+	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 3, MultiLine = true))
+	FString Description;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	UStaticMesh* ItemMesh;
+
+	UFUNCTION(BlueprintCallable)
+	FName GetItemDescription();
 
 	UFUNCTION(BlueprintCallable)
 	UTexture2D* GetItemImage();

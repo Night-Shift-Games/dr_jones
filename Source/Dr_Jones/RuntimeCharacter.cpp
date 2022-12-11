@@ -22,6 +22,17 @@ void ARuntimeCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ARuntimeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	Viewtarget = GetPlayerLookingAt(300);
+	if (auto x = AsInteractive(Viewtarget))
+	{
+		FString Sentence = x->GetInteractSentence();
+		AddPickupWidget(Sentence);
+	}
+	else
+	{
+		RemovePickupWidget();
+	}
 }
 
 void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -42,6 +53,22 @@ void ARuntimeCharacter::AddArtefact(UArtefact* Artefact)
 	UArtefact* NewArtefact = NewObject<UArtefact>(this, Artefact->StaticClass());
 	NewArtefact->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	Artefacts.Add(NewArtefact);
+}
+
+FHitResult ARuntimeCharacter::GetPlayerLookingAt(const float Reach)
+{
+	FVector OUT ControllerViewportLocation;
+	FRotator OUT ControllerViewportRotation;
+
+	GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
+
+	FHitResult OUT Hit;
+
+	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * Reach;
+
+	GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility);
+
+	return Hit;
 }
 
 void ARuntimeCharacter::MoveForward(float AxisValue)
@@ -71,31 +98,10 @@ void ARuntimeCharacter::PrimaryAction()
 
 void ARuntimeCharacter::Interact()
 {
-	FVector OUT ControllerViewportLocation;
-	FRotator OUT ControllerViewportRotation;
-
-	GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
-
-	FHitResult OUT Hit;
-
-	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 500;
-
-	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility))
+	if (IInteractiveObject* IO = AsInteractive(Viewtarget))
 	{
-		return;
+		IO->Interact(this);
 	}
-	IInteractiveObject* IO = Cast<IInteractiveObject>(Hit.GetActor());
-	if (!IO) 
-	{
-		IO = Cast<IInteractiveObject>(Hit.GetComponent());
-	}
-	if (!IO)
-	{
-		return;
-	}
-	
-
-	IO->Interact(this);
 }
 
 void ARuntimeCharacter::SwitchItem(float AxisValue)
@@ -105,4 +111,18 @@ void ARuntimeCharacter::SwitchItem(float AxisValue)
 		return;
 	}
 	ToolComponent->ScrollItem(AxisValue);
+}
+
+IInteractiveObject* ARuntimeCharacter::AsInteractive(FHitResult Interactive)
+{
+	IInteractiveObject* IO = Cast<IInteractiveObject>(Interactive.GetActor());
+	if (!IO)
+	{
+		IO = Cast<IInteractiveObject>(Interactive.GetComponent());
+	}
+	if (!IO)
+	{
+		return nullptr;
+	}
+	return IO;
 }

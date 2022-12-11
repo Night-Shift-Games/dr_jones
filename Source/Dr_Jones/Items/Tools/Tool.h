@@ -17,5 +17,6 @@ public:
 	virtual void UseTool() {};
 
 	virtual void BindTool(ARuntimeCharacter* Player);
+
 	virtual void UnbindTool(ARuntimeCharacter* Player);
 };

@@ -27,6 +27,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UTexture2D> ToolIcon;
 
+	UPROPERTY(EditAnywhere)
+	FName ToolName;
+
 	virtual void Interact(APawn* Indicator) override;
-	
+
+	virtual FString GetInteractSentence() override;
+
 };

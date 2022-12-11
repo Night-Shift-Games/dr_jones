@@ -35,9 +35,6 @@ class DR_JONES_API UArtefact : public UItem, public IInteractiveObject
 	GENERATED_BODY()
 
 public:
-	
-	UPROPERTY(EditAnywhere, Category="Item", meta = (MultiLine = true, DisplayPriority = 3))
-	FString Description;
 
 	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 4))
 	TEnumAsByte<FArtefactRarity> Rarity;
@@ -51,6 +48,12 @@ public:
 
 	void Take(APawn* Taker);
 	
+	UPROPERTY(EditAnywhere)
+	FString InteractionSentence;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FString GetInteractSentence();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnArtefactTake(APawn* Taker);
 };

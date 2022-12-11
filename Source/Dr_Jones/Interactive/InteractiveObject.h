@@ -7,7 +7,7 @@
 #include "InteractiveObject.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, NotBlueprintable)
 class UInteractiveObject : public UInterface
 {
 	GENERATED_BODY()
@@ -24,5 +24,8 @@ class DR_JONES_API IInteractiveObject
 public:
 
 	virtual void Interact(APawn* Indicator);
+
+	UFUNCTION(BlueprintCallable)
+	virtual FString GetInteractSentence();
 
 };

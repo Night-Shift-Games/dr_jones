@@ -1,4 +1,4 @@
-// Property of Night Shift Games, all rights reserved.
+﻿// Property of Night Shift Games, all rights reserved.
 
 
 #include "ToolPickupActor.h"
@@ -16,6 +16,7 @@ void AToolPickupActor::Interact(APawn* Indicator)
 	UTool* NewTool = NewObject<UTool>(Indicator, ToolClass);
 	NewTool->ItemMesh = ToolMesh;
 	NewTool->ItemImage = ToolIcon;
+	NewTool->ItemName = ToolName;
 	if (ARuntimeCharacter* Player = Cast<ARuntimeCharacter>(Indicator))
 	{
 		if (Player->ToolComponent)
@@ -28,4 +29,9 @@ void AToolPickupActor::Interact(APawn* Indicator)
 		}
 	}
 	this->Destroy();
+}
+
+FString AToolPickupActor::GetInteractSentence()
+{
+	return InteractionSentence + ToolName.ToString();
 }

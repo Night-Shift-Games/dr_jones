@@ -8,3 +8,8 @@
 void IInteractiveObject::Interact(APawn* Indicator)
 {
 }
+
+FString IInteractiveObject::GetInteractSentence()
+{
+	return FString("Pickup");
+}

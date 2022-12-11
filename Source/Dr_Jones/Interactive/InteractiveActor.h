@@ -17,6 +17,12 @@ public:
 
 	virtual void Interact(APawn* Indicator) override;
 
+	UPROPERTY(EditAnywhere)
+	FString InteractionSentence;
+
+	UFUNCTION(BlueprintCallable)
+	virtual FString GetInteractSentence() override;
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;

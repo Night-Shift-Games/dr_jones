@@ -13,3 +13,8 @@ void AInteractiveActor::Interact(APawn* Indicator)
 {
 
 }
+
+FString AInteractiveActor::GetInteractSentence()
+{
+	return InteractionSentence;
+}

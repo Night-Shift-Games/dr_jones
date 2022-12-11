@@ -21,3 +21,8 @@ void UArtefact::Take(APawn* Indicator)
 	this->DestroyComponent();
 }
 
+FString UArtefact::GetInteractSentence()
+{
+	return InteractionSentence + ItemName.ToString();
+}
+
