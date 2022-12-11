@@ -47,7 +47,7 @@ void AExcavationArea::SpawnArtefact(TSubclassOf<UArtefact>ArtefactClass)
 		case FArtefactRarity::Lore:
 		{
 			ArtefactsClass.Remove(ArtefactClass);
-			DigDeep = 30;
+			DigDeep = 40;
 			break;
 		}
 		default:
@@ -56,25 +56,30 @@ void AExcavationArea::SpawnArtefact(TSubclassOf<UArtefact>ArtefactClass)
 			{
 				case FArtefactSize::Huge:
 				{
-					DigDeep = 0;
+					DigDeep = 120;
+					break;
+				}
+				case FArtefactSize::Large:
+				{
+					DigDeep = 100;
 					break;
 				}
 				case FArtefactSize::Medium:
 				{
-					DigDeep = 30;
+					DigDeep = 50;
 					break;
 				}
 				default:
 				{
-					DigDeep = 40;
+					DigDeep = 30;
 					break;
 				}
 			}
 		}
 	}
 
-	FVector ArtefactLocation = UKismetMathLibrary::RandomPointInBoundingBox(ArtefactSpawnOrigin, FVector(ArtefactSpawnAreaX, ArtefactSpawnAreaY, DigDeep));
-	NewArtefact->SetRelativeLocationAndRotation(ArtefactLocation, FRotator(FMath::RandRange(0, 360)));
+	FVector ArtefactLocation = UKismetMathLibrary::RandomPointInBoundingBox(ArtefactSpawnOrigin + FVector(0,0,-DigDeep), FVector(ArtefactSpawnAreaX, ArtefactSpawnAreaY, 20));
+	NewArtefact->SetRelativeLocationAndRotation(ArtefactLocation, FRotator(FMath::RandRange(0, 360), FMath::RandRange(0, 360), FMath::RandRange(0, 360)));
 	Artefacts.Add(NewArtefact);
 }
 
