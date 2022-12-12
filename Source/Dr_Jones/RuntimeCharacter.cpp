@@ -35,6 +35,11 @@ void ARuntimeCharacter::Tick(float DeltaTime)
 	}
 }
 
+TArray<UArtefact*> ARuntimeCharacter::GetArtefacts()
+{
+	return Artefacts;
+}
+
 void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -51,6 +56,7 @@ void ARuntimeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void ARuntimeCharacter::AddArtefact(UArtefact* Artefact)
 {
 	UArtefact* NewArtefact = NewObject<UArtefact>(this, Artefact->StaticClass());
+	NewArtefact->SetParameters(Artefact);
 	NewArtefact->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	Artefacts.Add(NewArtefact);
 }

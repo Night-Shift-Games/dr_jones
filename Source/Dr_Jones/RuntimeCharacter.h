@@ -29,6 +29,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<UArtefact*> Artefacts;
 
+	UFUNCTION(BlueprintCallable)
+	TArray<UArtefact*> GetArtefacts();
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	UFUNCTION(BlueprintCallable)

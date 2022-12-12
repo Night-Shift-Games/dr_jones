@@ -26,3 +26,14 @@ FString UArtefact::GetInteractSentence()
 	return InteractionSentence + ItemName.ToString();
 }
 
+void UArtefact::SetParameters(UArtefact* Other)
+{
+	InteractionSentence = Other->InteractionSentence;
+	Rarity = Other->Rarity;
+	Size = Other->Size;
+	ItemImage = Other->ItemImage;
+	ItemName = Other->ItemName;
+	ItemMesh = Other->ItemMesh;
+	Description = Other->Description;
+}
+

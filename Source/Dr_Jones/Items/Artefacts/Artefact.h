@@ -36,7 +36,7 @@ class DR_JONES_API UArtefact : public UItem, public IInteractiveObject
 
 public:
 
-	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 4))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Item", meta = (DisplayPriority = 4))
 	TEnumAsByte<FArtefactRarity> Rarity;
 
 	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 5))
@@ -53,6 +53,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual FString GetInteractSentence();
+
+	void SetParameters(UArtefact* Other);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnArtefactTake(APawn* Taker);
