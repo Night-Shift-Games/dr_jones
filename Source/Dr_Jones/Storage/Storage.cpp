@@ -13,18 +13,12 @@ FItemStorage UStorage::GetStorage()
 	return Storage;
 }
 
-
-void UStorage::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
 void UStorage::AddItem(UItem* ItemToAdd)
 {
-	//Storage.Items.Add(ItemToAdd);
+	Storage.Items.Add(ItemToAdd);
 }
 
 void UStorage::RemoveItem(UItem* ItemToRemove)
 {
+	Storage.Items.Remove(ItemToRemove);
 }

@@ -17,8 +17,6 @@ class DR_JONES_API UShovel : public UTool
 
 public:
 
-	UShovel();
-
 	UPROPERTY(EditAnywhere)
 	float ShovelStrengh = 15;
 	
@@ -31,5 +29,6 @@ protected:
 
 	void Dig();
 	UStaticMeshComponent* DirtComponent;
+	UStaticMeshComponent* PlayerRefrence;
 	bool bFilled = false;
 };

@@ -23,14 +23,16 @@ class DR_JONES_API UStorage : public UActorComponent
 
 public:	
 	UStorage();
-	
-	FItemStorage GetStorage();
 
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintPure)
+	FItemStorage GetStorage();
 	
+	UFUNCTION(BlueprintCallable)
 	virtual void AddItem(UItem* ItemToAdd);
+
+	UFUNCTION(BlueprintCallable)
 	virtual void RemoveItem(UItem* ItemToRemove);
+protected:
 	FItemStorage Storage;
 		
 

@@ -2,15 +2,12 @@
 
 #include "Shovel.h"
 
-UShovel::UShovel()
-{
-	DirtComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Dirt"));
-	DirtComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
-	DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
 void UShovel::UseTool()
 {
+	if (!PlayerRefrence)
+	{
+		PlayerRefrence = GetOwner<ARuntimeCharacter>()->ToolComponent->GetHand();
+	}
 	Dig();
 }
 
@@ -41,15 +38,18 @@ void UShovel::Dig()
 		bFilled = !bFilled;
 		if (bFilled)
 		{
-			if (ShovelDirt)
-			{
-				DirtComponent->SetStaticMesh(ShovelDirt);
-				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Missing Tool Component"));
-			}
+			DirtComponent = NewObject<UStaticMeshComponent>(PlayerRefrence, UStaticMeshComponent::StaticClass());
+			DirtComponent->RegisterComponent();
+			DirtComponent->AttachToComponent(PlayerRefrence, FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
+			DirtComponent->SetStaticMesh(ShovelDirt);
+			DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("dsmponent"));
+			if (DirtComponent)
+			{
+				DirtComponent->DestroyComponent();
+			}
 		}
 	}
 }

@@ -26,6 +26,7 @@ void UToolComponent::AddItem(UItem* NewItem)
 	NewTool->RegisterComponent();
 	Tools.Add(NewTool);
 	SwitchItemInHand(NewTool);
+
 }
 
 void UToolComponent::SwitchItemInHand(UTool* NewTool)

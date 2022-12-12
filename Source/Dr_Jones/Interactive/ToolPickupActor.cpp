@@ -18,21 +18,16 @@ void AToolPickupActor::Interact(APawn* Indicator)
 	NewTool->ItemMesh = ToolMesh;
 	NewTool->ItemImage = ToolIcon;
 	NewTool->ItemName = ToolName;
-	UShovel* Sc = Cast<UShovel>(NewTool);
-	if (Sc)
+	UShovel* Shovel = Cast<UShovel>(NewTool);
+	if (Shovel)
 	{
-		Cast<UShovel>(NewTool)->ShovelDirt = ShovelDirt;
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("dasdast"));
+		Shovel->ShovelDirt = ShovelDirt;
 	}
 	if (ARuntimeCharacter* Player = Cast<ARuntimeCharacter>(Indicator))
 	{
 		if (Player->ToolComponent)
 		{
 			Player->ToolComponent->AddItem(NewTool);
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Missing Tool Component"));
 		}
 	}
 	this->Destroy();

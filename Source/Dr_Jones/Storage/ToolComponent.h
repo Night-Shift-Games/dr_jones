@@ -23,10 +23,10 @@ public:
 	void SwitchItemInHand(UTool* NewTool);
 	
 	UFUNCTION(BlueprintPure)
-		UTool* GetNextItem();
+	UTool* GetNextItem();
 
 	UFUNCTION(BlueprintPure)
-		UTool* GetPreviousItem();
+	UTool* GetPreviousItem();
 
 	UFUNCTION(BlueprintPure)
 	UTool* GetActiveItem();
@@ -37,7 +37,6 @@ public:
 	UFUNCTION(BlueprintPure)
 	TArray<UTool*> GetItems();
 	
-	UFUNCTION(BlueprintCallable)
 	virtual void AddItem(UItem* NewTool) override;
 
 	void ScrollItem(int Direction);
@@ -47,6 +46,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<UTool*> Tools;
+
+
+	UStaticMeshComponent* GetHand() { return Hand; };
 
 private:
 	UStaticMeshComponent* Hand;
