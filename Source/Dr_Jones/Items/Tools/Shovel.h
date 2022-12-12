@@ -17,13 +17,19 @@ class DR_JONES_API UShovel : public UTool
 
 public:
 
+	UShovel();
+
 	UPROPERTY(EditAnywhere)
-	float ShovelStrengh = 20;
+	float ShovelStrengh = 15;
+	
+	UPROPERTY(EditAnywhere)
+	UStaticMesh* ShovelDirt;
 
 	virtual void UseTool() override;
 
 protected:
 
 	void Dig();
+	UStaticMeshComponent* DirtComponent;
 	bool bFilled = false;
 };

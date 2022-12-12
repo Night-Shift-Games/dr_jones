@@ -2,6 +2,13 @@
 
 #include "Shovel.h"
 
+UShovel::UShovel()
+{
+	DirtComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Dirt"));
+	DirtComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
+	DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void UShovel::UseTool()
 {
 	Dig();
@@ -32,6 +39,18 @@ void UShovel::Dig()
 			x->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
 		}
 		bFilled = !bFilled;
+		if (bFilled)
+		{
+			if (ShovelDirt)
+			{
+				DirtComponent->SetStaticMesh(ShovelDirt);
+				GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("Missing Tool Component"));
+			}
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("dsmponent"));
+		}
 	}
 }
 

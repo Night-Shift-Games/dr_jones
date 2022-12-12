@@ -28,6 +28,9 @@ public:
 	TObjectPtr<UTexture2D> ToolIcon;
 
 	UPROPERTY(EditAnywhere)
+	UStaticMesh* ShovelDirt;
+
+	UPROPERTY(EditAnywhere)
 	FName ToolName;
 
 	virtual void Interact(APawn* Indicator) override;

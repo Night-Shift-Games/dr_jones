@@ -2,6 +2,7 @@
 
 
 #include "ToolPickupActor.h"
+#include "../Items/Tools/Shovel.h"
 
 void AToolPickupActor::OnConstruction(const FTransform& Transform)
 {
@@ -17,6 +18,12 @@ void AToolPickupActor::Interact(APawn* Indicator)
 	NewTool->ItemMesh = ToolMesh;
 	NewTool->ItemImage = ToolIcon;
 	NewTool->ItemName = ToolName;
+	UShovel* Sc = Cast<UShovel>(NewTool);
+	if (Sc)
+	{
+		Cast<UShovel>(NewTool)->ShovelDirt = ShovelDirt;
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15, FColor::Red, TEXT("dasdast"));
+	}
 	if (ARuntimeCharacter* Player = Cast<ARuntimeCharacter>(Indicator))
 	{
 		if (Player->ToolComponent)

@@ -42,10 +42,15 @@ public:
 
 	void ScrollItem(int Direction);
 
+	UPROPERTY(EditAnywhere)
+	UTool* ActiveItem;
+
+	UPROPERTY(EditAnywhere)
+	TArray<UTool*> Tools;
+
 private:
 	UStaticMeshComponent* Hand;
 	ARuntimeCharacter* Player;
-	UTool* ActiveItem;
-	TArray<UTool*> Tools;
+
 
 };

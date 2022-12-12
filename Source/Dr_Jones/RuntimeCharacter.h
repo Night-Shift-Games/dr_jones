@@ -23,7 +23,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnActionKeyPressed;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UToolComponent* ToolComponent;
 
 	UPROPERTY(BlueprintReadOnly)
