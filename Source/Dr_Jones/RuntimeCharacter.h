@@ -46,6 +46,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void RemovePickupWidget();
 
+	UPROPERTY(EditAnywhere)
+	USoundBase* DigSound;
+
+	UPROPERTY(EditAnywhere)
+	UAnimMontage* DigAnim;
+
+
 private:
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
