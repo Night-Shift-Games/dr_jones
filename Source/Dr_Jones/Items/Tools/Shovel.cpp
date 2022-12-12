@@ -1,6 +1,7 @@
 // Property of Night Shift Games, all rights reserved.
 
 #include "Shovel.h"
+#include "Kismet/GameplayStatics.h"
 
 void UShovel::UseTool()
 {
@@ -51,6 +52,15 @@ void UShovel::Dig()
 				DirtComponent->DestroyComponent();
 			}
 		}
+		if (USoundBase* SoundDig = GetOwner<ARuntimeCharacter>()->DigSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GWorld, SoundDig, Hit.Location);
+		}
+		if (UAnimMontage* DigAnim = GetOwner<ARuntimeCharacter>()->DigAnim)
+		{
+			GetOwner<ARuntimeCharacter>()->PlayAnimMontage(DigAnim);
+		}
+
 	}
 }
 

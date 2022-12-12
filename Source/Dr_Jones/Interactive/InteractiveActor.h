@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FString GetInteractSentence() override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnInteract(APawn* Indicator);
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComponent;

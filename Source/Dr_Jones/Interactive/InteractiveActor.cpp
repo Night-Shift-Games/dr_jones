@@ -11,7 +11,7 @@ AInteractiveActor::AInteractiveActor()
 
 void AInteractiveActor::Interact(APawn* Indicator)
 {
-
+	OnInteract(Indicator);
 }
 
 FString AInteractiveActor::GetInteractSentence()
