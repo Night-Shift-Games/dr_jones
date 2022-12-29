@@ -9,6 +9,10 @@
 
 class UQuestSystemLogic;
 
+
+DECLARE_DYNAMIC_DELEGATE(FQuestSystemInitializedDynamicDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuestSystemInitializedMCDelegate);
+
 /**
  * 
  */
@@ -22,6 +26,13 @@ class DR_JONES_API ADr_JonesGameModeBase : public AGameModeBase
 	virtual void BeginPlay() override;
 
 	UQuestSystemLogic* GetQuestSystem() const;
+
+	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
+	UFUNCTION(BlueprintCallable, Category = "Quest System")
+	void ExecutePostQuestSystemLoad(UPARAM(DisplayName="Event") const FQuestSystemInitializedDynamicDelegate& Delegate);
+
+private:
+	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta=(AllowPrivateAccess=true))

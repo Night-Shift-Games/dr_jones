@@ -2,6 +2,7 @@
 
 
 #include "Quest/Quest.h"
+#include "Dr_Jones.h"
 
 
 UQuest* UQuest::Construct(const UQuestData& QuestAsset)
@@ -11,7 +12,8 @@ UQuest* UQuest::Construct(const UQuestData& QuestAsset)
 	return Quest;
 }
 
-UQuest::UQuest()
+UQuest::UQuest() :
+	bIsCompleted(false)
 {
 }
 
@@ -29,4 +31,17 @@ void UQuest::OnCompleted()
 {
 	K2_OnCompleted();
 	CompletedDelegate.ExecuteIfBound(this);
+}
+
+void UQuest::MarkAsCompleted()
+{
+	// Notify if calling the 
+	if (bIsCompleted)
+	{
+		UE_LOG(LogDrJones, Warning, TEXT("Quest '%s' is already marked as completed."), *GetQuestName().ToString());
+		return;
+	}
+
+	bIsCompleted = true;
+	OnCompleted();
 }
