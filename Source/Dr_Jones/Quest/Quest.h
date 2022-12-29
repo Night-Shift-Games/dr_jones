@@ -82,5 +82,5 @@ FORCEINLINE const FName& UQuest::GetQuestName() const
 {
 	check(QuestData);
 
-	return QuestData->QuestData.Name;
+	return QuestData->Name;
 }

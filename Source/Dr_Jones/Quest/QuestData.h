@@ -10,12 +10,9 @@
  * 
  */
 USTRUCT(Blueprintable, BlueprintType)
-struct DR_JONES_API FQuestContent
+struct DR_JONES_API FQuestContentData
 {
 	GENERATED_BODY() 
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
-	FName Name;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest System")
 	FText Title;
@@ -46,7 +43,10 @@ class DR_JONES_API UQuestData : public UDataAsset
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
-	FQuestContent QuestData;
+	FName Name;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
+	FQuestContentData QuestContentData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
 	FQuestNoteData QuestNoteData;
