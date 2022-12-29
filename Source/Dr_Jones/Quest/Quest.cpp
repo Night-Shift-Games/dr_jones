@@ -28,4 +28,5 @@ void UQuest::OnRemoved()
 void UQuest::OnCompleted()
 {
 	K2_OnCompleted();
+	CompletedDelegate.ExecuteIfBound(this);
 }

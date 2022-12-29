@@ -6,62 +6,65 @@
 #include "UObject/NoExportTypes.h"
 #include "QuestSystemLogic.generated.h"
 
+class UQuest;
 class UQuestData;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestReceivedSignature, UQuestData*, Quest);
 
 /**
  * 
  */
-UCLASS(BlueprintType, Blueprintable, Category = "Quest System")
+UCLASS(BlueprintType, NotBlueprintable, Category = "Quest System")
 class DR_JONES_API UQuestSystemLogic : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestReceivedSignature, UQuest*, Quest);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQuestCompletedSignature, UQuest*, Quest);
+
 	UFUNCTION(BlueprintCallable, Category = "Quest System")
-	void AddQuest(UQuestData* NewQuest);
+	void AddQuest(UQuest* NewQuest);
 
 	UFUNCTION(BlueprintPure, Category = "Quest System")
-	bool HasReceivedQuest(UQuestData* ExistingQuest) const;
+	bool HasReceivedQuest(const FName& QuestName) const;
 
-	UFUNCTION(BlueprintPure, Category = "Quest System")
-	const TArray<UQuestData*>& GetQuests() const;
+	UFUNCTION(BlueprintCallable, Category = "Quest System")
+	TArray<UQuest*> GetQuestsArray() const;
+
+	const TMap<FName, TObjectPtr<UQuest>>& GetQuestsMap() const;
 
 	/**
 	 * Called when a new quest gets added by the AddQuest function.
 	 */
-	virtual void OnQuestReceived(UQuestData* Quest);
+	virtual void OnQuestReceived(UQuest* Quest);
 
 	UPROPERTY(BlueprintAssignable, Category = "Quest System", meta = (DisplayName = "On Quest Received", ScriptName = "On Quest Received"))
 	FQuestReceivedSignature QuestReceivedDelegate;
 
-	/**
-	 * Called when a new quest gets added by the AddQuest function.
-	 */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Quest System", meta = (DisplayName = "On Quest Received", ScriptName = "On Quest Received"))
-	void K2_OnQuestReceived(UQuestData* Quest);
+	virtual void OnQuestCompleted(UQuest* Quest);
+
+	UPROPERTY(BlueprintAssignable, Category = "Quest System", meta = (DisplayName = "On Quest Completed", ScriptName = "On Quest Completed"))
+	FQuestCompletedSignature QuestCompletedDelegate;
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Quest System")
-	TArray<TObjectPtr<UQuestData>> Quests;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta=(AllowPrivateAccess=true))
+	TMap<FName, TObjectPtr<UQuest>> Quests;
 };
 
-FORCEINLINE void UQuestSystemLogic::AddQuest(UQuestData* NewQuest)
+FORCEINLINE bool UQuestSystemLogic::HasReceivedQuest(const FName& QuestName) const
 {
-	check(NewQuest);
-
-	Quests.Add(NewQuest);
-
-	OnQuestReceived(NewQuest);
+	return Quests.Contains(QuestName);
 }
 
-FORCEINLINE bool UQuestSystemLogic::HasReceivedQuest(UQuestData* ExistingQuest) const
+FORCEINLINE TArray<UQuest*> UQuestSystemLogic::GetQuestsArray() const
 {
-	return Quests.Contains(ExistingQuest);
+	TArray<TObjectPtr<UQuest>> QuestsArray;
+	QuestsArray.Reserve(Quests.Num());
+
+	Quests.GenerateValueArray(QuestsArray);
+	return QuestsArray;
 }
 
-FORCEINLINE const TArray<UQuestData*>& UQuestSystemLogic::GetQuests() const
+FORCEINLINE const TMap<FName, TObjectPtr<UQuest>>& UQuestSystemLogic::GetQuestsMap() const
 {
 	return Quests;
 }

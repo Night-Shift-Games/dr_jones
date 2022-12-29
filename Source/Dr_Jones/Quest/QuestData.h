@@ -46,7 +46,7 @@ class DR_JONES_API UQuestData : public UDataAsset
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
-	FQuestContent QuestContent;
+	FQuestContent QuestData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
 	FQuestNoteData QuestNoteData;

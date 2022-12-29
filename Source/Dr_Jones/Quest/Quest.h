@@ -7,10 +7,7 @@
 #include "Quest.generated.h"
 
 class UQuestData;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuestAddedSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuestRemovedSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuestCompletedSignature);
+class UQuest;
 
 /**
  * 
@@ -21,6 +18,8 @@ class DR_JONES_API UQuest : public UObject
 	GENERATED_BODY()
 
 public:
+	DECLARE_DELEGATE_OneParam(FCompletedSignature, UQuest*);
+
 	static UQuest* Construct(const UQuestData& QuestAsset);
 
 	UQuest();
@@ -31,25 +30,20 @@ public:
 
 	const UQuestData& GetQuestData() const;
 
+	FCompletedSignature CompletedDelegate;
+
 	// Blueprint interface
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest System", meta = (DisplayName = "On Added"))
 	void K2_OnAdded();
 
-	UPROPERTY(BlueprintAssignable, Category = "Quest System", meta = (DisplayName = "On Quest Added"))
-	FQuestAddedSignature QuestAddedDelegate;
-
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest System", meta = (DisplayName = "On Removed"))
 	void K2_OnRemoved();
-
-	UPROPERTY(BlueprintAssignable, Category = "Quest System", meta = (DisplayName = "On Quest Removed"))
-	FQuestRemovedSignature QuestRemovedDelegate;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest System", meta = (DisplayName = "On Completed"))
 	void K2_OnCompleted();
 
-	UPROPERTY(BlueprintAssignable, Category = "Quest System", meta = (DisplayName = "On Quest Completed"))
-	FQuestCompletedSignature QuestCompletedDelegate;
+	// End of Blueprint interface
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
@@ -58,5 +52,7 @@ private:
 
 FORCEINLINE const UQuestData& UQuest::GetQuestData() const
 {
+	check(QuestData);
+
 	return *QuestData;
 }
