@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Engine/DataTable.h"
 #include "QuestData.generated.h"
 
 /**
@@ -51,3 +52,35 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest System")
 	FQuestNoteData QuestNoteData;
 };
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FQuestTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest System")
+	FQuestContentData QuestContentData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest System")
+	FQuestNoteData QuestNoteData;
+
+	static const FQuestTableRow& GetQuestTableRow(const FDataTableRowHandle& DataTableRow);
+};
+
+FORCEINLINE const FQuestTableRow& FQuestTableRow::GetQuestTableRow(const FDataTableRowHandle& DataTableRow)
+{
+	FQuestTableRow* Row = DataTableRow.GetRow<FQuestTableRow>(TEXT("Quest Row"));
+	if (Row)
+	{
+		return *Row;
+	}
+	else
+	{
+		static FQuestTableRow NullRow;
+		return NullRow;
+	}
+}

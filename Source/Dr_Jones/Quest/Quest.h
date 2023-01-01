@@ -22,6 +22,7 @@ public:
 	DECLARE_DELEGATE_OneParam(FCompletedSignature, UQuest*);
 
 	static UQuest* Construct(const UQuestData& QuestAsset);
+	static UQuest* Construct(const FDataTableRowHandle& QuestRow);
 
 	UQuest();
 
@@ -41,6 +42,11 @@ public:
 
 	const UQuestData& GetQuestData() const;
 
+	const FDataTableRowHandle& GetQuestTableRow() const;
+
+	UFUNCTION(BlueprintPure, Category = "Quest System")
+	const FQuestTableRow& GetQuestTableRowData() const;
+
 	FCompletedSignature CompletedDelegate;
 
 	// Blueprint interface
@@ -59,6 +65,9 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
 	TObjectPtr<const UQuestData> QuestData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess=true, ExposeOnSpawn=true))
+	FDataTableRowHandle QuestTableRow;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess=true))
 	uint8 bIsCompleted : 1;
@@ -82,5 +91,15 @@ FORCEINLINE const FName& UQuest::GetQuestName() const
 {
 	check(QuestData);
 
-	return QuestData->Name;
+	return QuestTableRow.RowName;
+}
+
+FORCEINLINE const FDataTableRowHandle& UQuest::GetQuestTableRow() const
+{
+	return QuestTableRow;
+}
+
+FORCEINLINE const FQuestTableRow& UQuest::GetQuestTableRowData() const
+{
+	return FQuestTableRow::GetQuestTableRow(QuestTableRow);
 }

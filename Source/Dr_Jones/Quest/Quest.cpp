@@ -12,6 +12,13 @@ UQuest* UQuest::Construct(const UQuestData& QuestAsset)
 	return Quest;
 }
 
+UQuest* UQuest::Construct(const FDataTableRowHandle& QuestRow)
+{
+	UQuest* Quest = NewObject<UQuest>();
+	Quest->QuestTableRow = QuestRow;
+	return Quest;
+}
+
 UQuest::UQuest() :
 	bIsCompleted(false)
 {

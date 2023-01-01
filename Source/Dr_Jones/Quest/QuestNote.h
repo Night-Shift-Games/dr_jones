@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interactive/InteractiveObject.h"
+#include "QuestData.h"
 #include "QuestNote.generated.h"
 
 class UStaticMesh;
@@ -21,10 +22,13 @@ public:
 
 	AQuestNote();
 
-	/** Call before spawn to set the Quest data*/
-	void Initialize(UQuestData& QuestDataObject);
+	/** Call before spawn to set the Quest Row */
+	void Initialize(const FDataTableRowHandle& QuestRow);
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UFUNCTION(BlueprintPure, Category = "Quest System")
+	const FQuestTableRow& GetQuestTableRow() const;
 
 	// IInteractiveObject overrides
 
@@ -44,4 +48,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true, ExposeOnSpawn=true))
 	TObjectPtr<UQuestData> QuestData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true, ExposeOnSpawn=true))
+	FDataTableRowHandle QuestTableRow;
 };
+
+FORCEINLINE const FQuestTableRow& AQuestNote::GetQuestTableRow() const
+{
+	return FQuestTableRow::GetQuestTableRow(QuestTableRow);
+}

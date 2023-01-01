@@ -15,9 +15,9 @@ AQuestNote::AQuestNote()
 	RootComponent = NoteMeshComponent;
 }
 
-void AQuestNote::Initialize(UQuestData& QuestDataObject)
+void AQuestNote::Initialize(const FDataTableRowHandle& QuestRow)
 {
-	QuestData = &QuestDataObject;
+	QuestTableRow = QuestRow;
 }
 
 void AQuestNote::OnConstruction(const FTransform& Transform)
@@ -35,5 +35,15 @@ void AQuestNote::Interact(APawn* Indicator)
 
 FString AQuestNote::GetInteractSentence()
 {
-	return TEXT("Pickup Note");
+	const FQuestTableRow* Row = QuestTableRow.GetRow<FQuestTableRow>("QuestRow");
+	check(Row);
+
+	// @TODO: TEMPORARY:
+	auto Builder = TStringBuilder<2000>();
+	Builder.Append(TEXT("Pickup "));
+	Builder.Append(Row->QuestContentData.Title.ToString());
+	Builder.Append(TEXT(" ("));
+	Builder.Append(QuestTableRow.RowName.ToString());
+	Builder.Append(TEXT(")"));
+	return Builder.ToString();
 }
