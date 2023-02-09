@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class DR_JONES_API UWorldMapWidget : public UUserWidget
 {
 	GENERATED_BODY()
