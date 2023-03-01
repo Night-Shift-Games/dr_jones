@@ -28,6 +28,11 @@ void UWorldMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, TEXT("World Map OnComponentCreated"));
+}
+
+void UWorldMapComponent::UpdateConstruct()
+{
 	UWidgetComponent* WorldMapWidgetComponent = GetWidgetComponent();
 	if (!WorldMapWidgetComponent)
 	{
@@ -36,6 +41,13 @@ void UWorldMapComponent::OnComponentCreated()
 	}
 
 	WorldMapWidgetComponent->SetWidgetClass(WidgetClass);
+}
+
+void UWorldMapComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, TEXT("World Map Component PostInitProperties"));
 }
 
 #if WITH_EDITOR
@@ -52,6 +64,6 @@ void UWorldMapComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 
 UWidgetComponent* UWorldMapComponent::GetWidgetComponent() const
 {
-	return Cast<UWidgetComponent>(WidgetComponent.GetComponent(GetOwner()));
+	return WidgetComponent;
 }
 

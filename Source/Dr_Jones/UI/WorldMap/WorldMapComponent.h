@@ -10,6 +10,23 @@
 class UWorldMapWidget;
 class UWidgetComponent;
 
+
+USTRUCT(BlueprintType, Category="UI|World Map")
+struct FWorldMapMarker
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText DisplayName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D Position;
+};
+
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), Category = "UI|World Map", meta=(BlueprintSpawnableComponent))
 class DR_JONES_API UWorldMapComponent : public UActorComponent
 {
@@ -22,6 +39,11 @@ public:
 
 	virtual void OnComponentCreated() override;
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateConstruct();
+
+	virtual void PostInitProperties() override;
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -32,8 +54,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "UI|World Map")
 	TObjectPtr<UWorldMapWidget> WorldMapWidget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI|World Map")
-	FComponentReference WidgetComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI|World Map")
+	TObjectPtr<UWidgetComponent> WidgetComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI|World Map")
 	TSubclassOf<UWorldMapWidget> WidgetClass;
