@@ -3,38 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "GameFramework/Actor.h"
+
 #include "Item.generated.h"
 
+class ADrJonesCharacter;
 
-UCLASS( ClassGroup=(Item), meta=(BlueprintSpawnableComponent) )
-class DR_JONES_API UItem : public UStaticMeshComponent
+UCLASS()
+class DR_JONES_API AItem : public AActor
 {
 	GENERATED_BODY()
 
-public:	
-	UItem();
-	
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Item", meta = (DisplayPriority = 1))
-	FName ItemName;
-	
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Item", meta = (DisplayPriority = 2))
-	TObjectPtr<UTexture2D> ItemImage;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Item", meta = (DisplayPriority = 3, MultiLine = true))
-	FString Description;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Item")
-	UStaticMesh* ItemMesh;
-
-	UFUNCTION(BlueprintCallable)
-	FName GetItemDescription();
-
-	UFUNCTION(BlueprintCallable)
-	UTexture2D* GetItemImage();
-
-protected:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* StaticMeshComponent;
+public:
 
 };
