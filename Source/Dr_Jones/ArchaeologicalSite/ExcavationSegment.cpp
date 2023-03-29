@@ -65,7 +65,6 @@ void UExcavationSegment::Dig(FTransform CollisionPoint, FVector Dig)
 	{
 		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30)))
 		{
-
 			bool bIsBottomEdge = i > vertices.Num() - FullResolution - 2;
 			bool bIsTopEdge = i < FullResolution;
 			bool bIsRightEdge = (i % FullResolution == 0);

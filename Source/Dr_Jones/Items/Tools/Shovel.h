@@ -19,7 +19,6 @@ public:
 	virtual void UseToolPrimaryAction() override;
 	void PlayFX(FHitResult Hit);
 	void FillShovel();
-	FHitResult GetHit();
 
 protected:
 
@@ -33,6 +32,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float ShovelStrength = 15;
+
+	UPROPERTY(EditAnywhere);
+	float ShovelReach = 250;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UStaticMesh> ShovelDirt;

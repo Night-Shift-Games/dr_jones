@@ -19,6 +19,7 @@ public:
 	ADrJonesCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	static void DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit);
 
 	UFUNCTION(BlueprintCallable)
 	static FHitResult GetPlayerLookingAt(const float Reach);
@@ -51,9 +52,9 @@ public:
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 
 	// TODO: InputComponent;
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnPrimaryActionKeyPressed;
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintAssignable, Category = "Interaction")
 	FOnUseItem OnSecondaryActionKeyPressed;
 
 	// TODO: AudioComponent
@@ -68,6 +69,8 @@ public:
 	// TODO: WidgetComponent
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> InteractionWidgetUIClass;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UUserWidget> InteractionWidget;
 
 	UPROPERTY(EditAnywhere, Category = "UI")

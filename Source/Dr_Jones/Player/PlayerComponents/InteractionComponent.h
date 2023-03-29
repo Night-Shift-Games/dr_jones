@@ -9,6 +9,14 @@
 
 class ADrJonesCharacter;
 
+static TAutoConsoleVariable<bool> CVarInteraction(
+	TEXT("NS.Interaction"),
+	false,
+	TEXT("Interaction helper function"),
+	ECVF_Default
+
+);
+
 UCLASS(ClassGroup = "PlayerComponents", meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UInteractionComponent : public UActorComponent
 {
@@ -25,4 +33,5 @@ protected:
 	float InteractionRange = 150;
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
 	TObjectPtr<AActor> ActorToInteract;
+	TObjectPtr<AActor> PreviousActorToInteract;
 };

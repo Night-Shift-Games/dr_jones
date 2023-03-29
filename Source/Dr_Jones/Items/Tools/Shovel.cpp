@@ -6,10 +6,6 @@
 
 void AShovel::UseToolPrimaryAction()
 {
-	if (!PlayerReference)
-	{
-		Player = Cast<ADrJonesCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	}
 	Dig();
 }
 
@@ -45,31 +41,16 @@ void AShovel::FillShovel()
 	}
 }
 
-FHitResult AShovel::GetHit()
-{
-	FVector OUT ControllerViewportLocation;
-	FRotator OUT ControllerViewportRotation;
-
-	Player->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
-
-	FHitResult OUT Hit;
-
-	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 350;
-
-	GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility);
-
-	return Hit;
-}
-
 void AShovel::Dig()
 {
-	FHitResult Hit = GetHit();
+	Player = Cast<ADrJonesCharacter>(UGameplayStatics::GetPlayerCharacter(GWorld, 0));
+	FHitResult Hit = Player->GetPlayerLookingAt(ShovelReach);
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
 		// TODO: Shovel shouldn't know anything about terrain.
 
 		FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(bFilled)));
-		
+
 		ExcavationSite->Dig(FTransform(Player->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), Player->GetActorScale3D()), DigDir);
 		for (UExcavationSegment* x : ExcavationSite->Neighbors)
 		{

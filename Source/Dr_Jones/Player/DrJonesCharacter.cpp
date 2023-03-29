@@ -51,6 +51,20 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
 }
 
+void ADrJonesCharacter::DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit)
+{
+	if (CVarInteraction.GetValueOnAnyThread() != 0)
+	{
+		DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 1.f / 60, 0, 1);
+		FString Debug = FString(TEXT("Pointed Actor: "));
+		if (AActor* Actor = Hit.GetActor())
+		{
+			Debug += Actor->GetName();
+		}
+		GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
+	}
+}
+
 /*static*/ FHitResult ADrJonesCharacter::GetPlayerLookingAt(const float Reach)
 {
 	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
@@ -69,8 +83,9 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	FHitResult Hit;
 
 	GWorld->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECollisionChannel::ECC_Visibility);
-	DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 1.f / 60, 0, 1);
 
+	DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
+	
 	return Hit;
 }
 
@@ -121,9 +136,13 @@ void ADrJonesCharacter::SwitchItem(float AxisValue)
 
 void ADrJonesCharacter::ShowInteractionUI()
 {
-	if (IsValid(InteractionWidgetUIClass))
+	if (InteractionWidget && !InteractionWidget->IsInViewport())
 	{
-		InteractionWidget = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), InteractionWidgetUIClass, TEXT("Interaction"));
+		InteractionWidget->AddToViewport();
+	}
+	if (InteractionWidgetUIClass && !InteractionWidget)
+	{
+		InteractionWidget = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), InteractionWidgetUIClass, MakeUniqueObjectName(GetController(), UUserWidget::StaticClass()));
 
 		if (IsValid(InteractionWidget))
 		{
@@ -136,6 +155,6 @@ void ADrJonesCharacter::HideInteractionUI()
 {
 	if (InteractionWidget && InteractionWidget->IsInViewport())
 	{
-		InteractionWidget->RemoveFromParent();
+		InteractionWidget->RemoveFromViewport();
 	}
 }

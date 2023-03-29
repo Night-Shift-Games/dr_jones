@@ -26,6 +26,12 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 	ActorToInteract = Owner->GetPlayerLookingAt(InteractionRange).GetActor();
 
+	if (ActorToInteract == PreviousActorToInteract)
+	{
+		return;
+	}
+	PreviousActorToInteract = ActorToInteract;
+
 	if (!ActorToInteract)
 	{
 		Owner->HideInteractionUI();
