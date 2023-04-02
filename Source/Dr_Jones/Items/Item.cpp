@@ -2,23 +2,6 @@
 
 #include "Item.h"
 
-UItem::UItem()
-{
-	PrimaryComponentTick.bCanEverTick = false;
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-	if (ItemMesh)
-	{
-		StaticMeshComponent->SetStaticMesh(ItemMesh);
-	}
-	StaticMeshComponent->SetupAttachment(this);
-}
+#include "Player/DrJonesCharacter.h"
 
-FName UItem::GetItemDescription()
-{
-	return ItemName;
-}
 
-UTexture2D* UItem::GetItemImage()
-{
-	return ItemImage;
-}

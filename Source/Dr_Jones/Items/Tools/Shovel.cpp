@@ -1,66 +1,63 @@
 // Property of Night Shift Games, all rights reserved.
 
 #include "Shovel.h"
+#include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Kismet/GameplayStatics.h"
 
-void UShovel::UseTool()
+void AShovel::UseToolPrimaryAction()
 {
-	if (!PlayerRefrence)
-	{
-		PlayerRefrence = GetOwner<ARuntimeCharacter>()->ToolComponent->GetHand();
-	}
 	Dig();
 }
 
-void UShovel::Dig()
+void AShovel::PlayFX(FHitResult Hit)
 {
-	FVector OUT ControllerViewportLocation;
-	FRotator OUT ControllerViewportRotation;
-
-	Cast<APawn>(GetOwner())->GetController()->GetActorEyesViewPoint(ControllerViewportLocation, ControllerViewportRotation);
-
-	FHitResult OUT Hit;
-
-	FVector LineEnd = ControllerViewportLocation + ControllerViewportRotation.Vector() * 350;
-
-	if (!GWorld->LineTraceSingleByChannel(Hit, ControllerViewportLocation, LineEnd, ECollisionChannel::ECC_Visibility))
+	if (USoundBase* SoundDig = Player->DigSound)
 	{
-		return;
+		UGameplayStatics::PlaySoundAtLocation(GWorld, SoundDig, Hit.Location);
 	}
+	if (UAnimMontage* DigAnim = Player->DigAnim)
+	{
+		Player->PlayAnimMontage(DigAnim);
+	}
+}
+
+void AShovel::FillShovel()
+{
+	bFilled = !bFilled;
+	if (bFilled)
+	{
+		/*DirtComponent = NewObject<UStaticMeshComponent>(PlayerRefrence, UStaticMeshComponent::StaticClass());
+		DirtComponent->RegisterComponent();
+		DirtComponent->AttachToComponent(PlayerRefrence, FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
+		DirtComponent->SetStaticMesh(ShovelDirt);
+		DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
+	}
+	else
+	{
+		if (DirtComponent)
+		{
+			DirtComponent->DestroyComponent();
+		}
+	}
+}
+
+void AShovel::Dig()
+{
+	Player = Cast<ADrJonesCharacter>(UGameplayStatics::GetPlayerCharacter(GWorld, 0));
+	FHitResult Hit = Player->GetPlayerLookingAt(ShovelReach);
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
-		FVector DigDir = FVector(0, 0, -ShovelStrengh + (2 * ShovelStrengh * (int)bFilled));
-		
-		ExcavationSite->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
+		// TODO: Shovel shouldn't know anything about terrain.
+
+		FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(bFilled)));
+
+		ExcavationSite->Dig(FTransform(Player->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSite->GetComponentLocation() - Hit.Location), Player->GetActorScale3D()), DigDir);
 		for (UExcavationSegment* x : ExcavationSite->Neighbors)
 		{
-			x->Dig(FTransform(GetOwner()->GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), GetOwner()->GetActorScale3D()), DigDir);
+			x->Dig(FTransform(Player->GetActorRotation(), FVector(0, 0, 0) - (x->GetComponentLocation() - Hit.Location), Player->GetActorScale3D()), DigDir);
 		}
-		bFilled = !bFilled;
-		if (bFilled)
-		{
-			DirtComponent = NewObject<UStaticMeshComponent>(PlayerRefrence, UStaticMeshComponent::StaticClass());
-			DirtComponent->RegisterComponent();
-			DirtComponent->AttachToComponent(PlayerRefrence, FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
-			DirtComponent->SetStaticMesh(ShovelDirt);
-			DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		else
-		{
-			if (DirtComponent)
-			{
-				DirtComponent->DestroyComponent();
-			}
-		}
-		if (USoundBase* SoundDig = GetOwner<ARuntimeCharacter>()->DigSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(GWorld, SoundDig, Hit.Location);
-		}
-		if (UAnimMontage* DigAnim = GetOwner<ARuntimeCharacter>()->DigAnim)
-		{
-			GetOwner<ARuntimeCharacter>()->PlayAnimMontage(DigAnim);
-		}
-
+		FillShovel();
+		PlayFX(Hit);
 	}
 }
 

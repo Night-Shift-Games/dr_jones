@@ -2,33 +2,41 @@
 
 #pragma once
 
-#pragma once
-
 #include "CoreMinimal.h"
 #include "Tool.h"
-#include "../../Archeological Site/ExcavationArea.h"
-#include "../../RuntimeCharacter.h"
+#include "Player/DrJonesCharacter.h"
+#include "ArchaeologicalSite/ArchaeologicalSite.h"
+
 #include "Shovel.generated.h"
 
 UCLASS(ClassGroup = (Item), meta = (BlueprintSpawnableComponent))
-class DR_JONES_API UShovel : public UTool
+class DR_JONES_API AShovel final : public ATool
 {
 	GENERATED_BODY()
 
 public:
 
-	UPROPERTY(EditAnywhere)
-	float ShovelStrengh = 15;
-	
-	UPROPERTY(EditAnywhere)
-	UStaticMesh* ShovelDirt;
-
-	virtual void UseTool() override;
+	virtual void UseToolPrimaryAction() override;
+	void PlayFX(FHitResult Hit);
+	void FillShovel();
 
 protected:
 
 	void Dig();
-	UStaticMeshComponent* DirtComponent;
-	UStaticMeshComponent* PlayerRefrence;
+	TObjectPtr<UStaticMeshComponent> DirtComponent;
+	TObjectPtr<UStaticMeshComponent> PlayerReference;
+	TObjectPtr<ADrJonesCharacter> Player;
 	bool bFilled = false;
+
+public:
+
+	UPROPERTY(EditAnywhere)
+	float ShovelStrength = 15;
+
+	UPROPERTY(EditAnywhere);
+	float ShovelReach = 250;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMesh> ShovelDirt;
+
 };

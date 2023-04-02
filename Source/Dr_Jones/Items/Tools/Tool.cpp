@@ -1,14 +1,26 @@
 // Property of Night Shift Games, all rights reserved.
 
-#include "Tool.h"
-#include "../../RuntimeCharacter.h"
+#include "Items/Tools/Tool.h"
 
-void UTool::BindTool(ARuntimeCharacter* Player)
+#include "Player/DrJonesCharacter.h"
+#include "SharedComponents/InteractableComponent.h"
+
+ATool::ATool()
 {
-	Player->OnActionKeyPressed.AddUniqueDynamic(this, &UTool::UseTool);
+	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("InteractableComponent"));
 }
 
-void UTool::UnbindTool(ARuntimeCharacter* Player)
+void ATool::BindTool(ADrJonesCharacter& Player)
 {
-	Player->OnActionKeyPressed.RemoveDynamic(this, &UTool::UseTool);
+	Player.OnPrimaryActionKeyPressed.AddUniqueDynamic(this, &ATool::UseToolPrimaryAction);
+}
+
+void ATool::UnbindTool(ADrJonesCharacter& Player)
+{
+	Player.OnPrimaryActionKeyPressed.RemoveDynamic(this, &ATool::UseToolPrimaryAction);
+}
+
+void ATool::PickUp()
+{
+
 }

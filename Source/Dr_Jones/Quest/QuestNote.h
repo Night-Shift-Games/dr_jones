@@ -4,19 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interactive/InteractiveObject.h"
 #include "QuestData.h"
 #include "QuestNote.generated.h"
 
 class UStaticMesh;
 class UQuestData;
 
-
 UCLASS(Blueprintable, BlueprintType, Category="Quest System")
-class DR_JONES_API AQuestNote : public AActor, public IInteractiveObject
+class DR_JONES_API AQuestNote : public AActor
 {
 	GENERATED_BODY()
-
 public:
 	static FName NoteMeshComponentName;
 
@@ -32,10 +29,10 @@ public:
 
 	// IInteractiveObject overrides
 
-	virtual void Interact(APawn* Indicator) override;
+	virtual void Interact(APawn* Indicator); // TODO; override
 
-	UFUNCTION(BlueprintCallable, Category="Interactive")
-	virtual FString GetInteractSentence() override;
+	UFUNCTION(BlueprintCallable, Category = "Interactive")
+	virtual FString GetInteractSentence();// TODO; override;
 
 	// End of IInteractiveObject overrides
 

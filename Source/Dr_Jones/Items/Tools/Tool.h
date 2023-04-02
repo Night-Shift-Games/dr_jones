@@ -3,20 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../Item.h"
+#include "Items/Item.h"
+
 #include "Tool.generated.h"
-class ARuntimeCharacter;
+
+class UInteractableComponent;
 
 UCLASS()
-class DR_JONES_API UTool : public UItem
+class DR_JONES_API ATool : public AItem
 {
 	GENERATED_BODY()
-
 public:
+	ATool();
 	UFUNCTION(BlueprintCallable)
-	virtual void UseTool() {};
+	virtual void UseToolPrimaryAction() {};
 
-	virtual void BindTool(ARuntimeCharacter* Player);
+	UFUNCTION(BlueprintCallable)
+	virtual void UseToolSecondaryAction() {};
 
-	virtual void UnbindTool(ARuntimeCharacter* Player);
+	virtual void BindTool(ADrJonesCharacter& Player);
+	virtual void UnbindTool(ADrJonesCharacter& Player);
+
+	virtual void PickUp();
+
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UInteractableComponent> InteractableComponent;
 };
