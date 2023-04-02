@@ -7,11 +7,12 @@
 ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 {
 	DefaultPawnClass = ADrJonesCharacter::StaticClass();
+	QuestSystem = CreateDefaultSubobject<UQuestSystemLogic>(TEXT("QuestSystemLogic"));
 }
 
 void ADr_JonesGameModeBase::BeginPlay()
 {
-	QuestSystem = NewObject<UQuestSystemLogic>();
+	//QuestSystem = NewObject<UQuestSystemLogic>();
 	OnQuestSystemInitializedDelegate.Broadcast();
 }
 
