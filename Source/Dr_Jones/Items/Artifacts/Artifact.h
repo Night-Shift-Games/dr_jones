@@ -27,32 +27,26 @@ enum class EArtifactSize
 	Huge
 };
 
-
 UCLASS(Blueprintable)
 class DR_JONES_API AArtifact : public AItem
 {
 	GENERATED_BODY()
 
 public:
-	
 	virtual void Interact(APawn* Indicator);
 
 	void Take(APawn* Taker);
-	
-	UPROPERTY(EditAnywhere)
-	FString InteractionSentence;
 
 	void SetParameters(AArtifact* Other);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnArtifactTake(APawn* Taker);
-
 public:
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Item", meta = (DisplayPriority = 4))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (DisplayPriority = 4))
 	EArtifactRarity Rarity;
 
-	UPROPERTY(EditAnywhere, Category = "Item", meta = (DisplayPriority = 5))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (DisplayPriority = 5))
 	EArtifactSize Size;
 };
 

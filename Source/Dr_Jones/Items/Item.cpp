@@ -2,6 +2,9 @@
 
 #include "Item.h"
 
-#include "Player/DrJonesCharacter.h"
+#include "SharedComponents/InteractableComponent.h"
 
-
+AItem::AItem()
+{
+	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("InteractableComponent"));
+}

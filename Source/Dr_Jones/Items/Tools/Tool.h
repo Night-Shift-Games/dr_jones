@@ -7,6 +7,7 @@
 
 #include "Tool.generated.h"
 
+class UActionComponent;
 class UInteractableComponent;
 
 UCLASS()
@@ -15,17 +16,12 @@ class DR_JONES_API ATool : public AItem
 	GENERATED_BODY()
 public:
 	ATool();
-	UFUNCTION(BlueprintCallable)
-	virtual void UseToolPrimaryAction() {};
-
-	UFUNCTION(BlueprintCallable)
-	virtual void UseToolSecondaryAction() {};
-
-	virtual void BindTool(ADrJonesCharacter& Player);
-	virtual void UnbindTool(ADrJonesCharacter& Player);
-
-	virtual void PickUp();
-
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	void PickUp();
+protected:
 	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UInteractableComponent> InteractableComponent;
+	TObjectPtr<UActionComponent> ActionComponent;
 };

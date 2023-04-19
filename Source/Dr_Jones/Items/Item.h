@@ -7,13 +7,17 @@
 
 #include "Item.generated.h"
 
-class ADrJonesCharacter;
+class UInteractableComponent;
 
-UCLASS()
+UCLASS(HideCategories = (Rendering, Replication, Collision, HLOD, Input, "Code View", Cooking, Actor))
 class DR_JONES_API AItem : public AActor
 {
 	GENERATED_BODY()
-
+	
 public:
+	AItem();
 
+protected:
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UInteractableComponent> InteractableComponent;
 };

@@ -13,7 +13,7 @@ struct DR_JONES_API FInventoryItem
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Item", meta = (DisplayPriority = 2))
-	FName ItemID;
+	FName ItemID = NAME_None;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Item", meta = (DisplayPriority = 3))
 	FText ItemDisplayName;

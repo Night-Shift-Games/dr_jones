@@ -3,24 +3,27 @@
 #include "Items/Tools/Tool.h"
 
 #include "Player/DrJonesCharacter.h"
+#include "SharedComponents/ActionComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 
 ATool::ATool()
 {
-	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("InteractableComponent"));
+	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
-void ATool::BindTool(ADrJonesCharacter& Player)
+void ATool::BeginPlay()
 {
-	Player.OnPrimaryActionKeyPressed.AddUniqueDynamic(this, &ATool::UseToolPrimaryAction);
+	Super::BeginPlay();
+	InteractableComponent->InteractDelegate.AddUniqueDynamic(this, &ATool::PickUp);
 }
 
-void ATool::UnbindTool(ADrJonesCharacter& Player)
+void ATool::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Player.OnPrimaryActionKeyPressed.RemoveDynamic(this, &ATool::UseToolPrimaryAction);
+	Super::EndPlay(EndPlayReason);
+	InteractableComponent->InteractDelegate.RemoveDynamic(this, &ATool::PickUp);
 }
 
 void ATool::PickUp()
 {
-
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, "Test");
 }

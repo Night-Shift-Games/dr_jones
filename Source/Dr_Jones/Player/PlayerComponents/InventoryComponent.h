@@ -2,19 +2,16 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "CoreMinimal.h"
 #include "Items/InventoryItem.h"
 
 #include "InventoryComponent.generated.h"
 
-UCLASS(ClassGroup = "Storage", meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = "Player Components", meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-public:
-	static uint32 WrapIndexToArray(int32 Index, uint16 ArraySize);
 
 protected:
 	TArray<TObjectPtr<FInventoryItem>> Items;

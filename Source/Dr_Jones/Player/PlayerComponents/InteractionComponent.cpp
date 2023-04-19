@@ -49,6 +49,7 @@ void UInteractionComponent::Interact()
 	{
 		return;
 	}
+
 	UInteractableComponent* Interactable = ActorToInteract->FindComponentByClass<UInteractableComponent>();
 	if (!Interactable)
 	{

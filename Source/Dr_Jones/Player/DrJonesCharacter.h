@@ -10,6 +10,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 class UInteractionComponent;
+class UReactionComponent;
+class UToolBarComponent;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -21,12 +23,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	static void DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	// Input Component
@@ -41,6 +42,7 @@ private:
 
 	// Action Component
 	void Interact();
+	
 	void SwitchItem(float AxisValue);
 public:
 	// Widget Component
@@ -48,24 +50,22 @@ public:
 	void HideInteractionUI();
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 
-	// TODO: InputComponent;
-	UPROPERTY(EditAnywhere, BlueprintAssignable, Category = "Interaction")
-	FOnUseItem OnPrimaryActionKeyPressed;
-	UPROPERTY(EditAnywhere, BlueprintAssignable, Category = "Interaction")
-	FOnUseItem OnSecondaryActionKeyPressed;
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UReactionComponent> ReactionComponent;
 
-	// TODO: AudioComponent
-	UPROPERTY(EditAnywhere, Category = "FX|Sound")
-	TObjectPtr<USoundBase> DigSound;
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UToolBarComponent> ToolbarComponent;
 
 	// TODO: AnimationComponent
+	UPROPERTY(EditAnywhere, Category = "FX|Sound")
+	TObjectPtr<USoundBase> DigSound;
+	
 	UPROPERTY(EditAnywhere, Category = "FX|Anim")
 	TObjectPtr<UAnimMontage> DigAnim;
-
-
+	
 	// TODO: WidgetComponent
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> InteractionWidgetUIClass;
