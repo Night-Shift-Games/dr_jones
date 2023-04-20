@@ -4,10 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Items/Tools/Tool.h"
+#include "ItemMontageDispatcher.h"
 #include "CharacterAnimationComponent.generated.h"
-
-
-class ATool;
 
 
 USTRUCT(BlueprintType, Category = "Animation")
@@ -36,7 +35,7 @@ struct FCharacterToolAnimations
 };
 
 
-UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( Blueprintable, BlueprintType, ClassGroup=(Animation), meta=(BlueprintSpawnableComponent) )
 class DR_JONES_API UCharacterAnimationComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -56,10 +55,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
-	const FCharacterToolAnimations& FindAnimationsForTool(FName Tool, bool& bOutFound) const;
+	const FCharacterToolAnimations& FindAnimationsForTool(const TSubclassOf<ATool>& Tool, bool& bOutFound) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
-	UAnimMontage* FindToolMontage(FName Tool, FName Montage) const;
+	UAnimMontage* FindToolMontage(const TSubclassOf<ATool>& Tool, FName Montage) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void DispatchToolAction(TSubclassOf<ATool> Tool, FName Action);
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
@@ -69,5 +71,11 @@ private:
 	FCharacterAnimations CharacterAnimations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<FName, FCharacterToolAnimations> CharacterToolAnimations;
+	TMap<TSubclassOf<ATool>, FCharacterToolAnimations> CharacterToolAnimations;
+
+	UPROPERTY(EditAnywhere, Category = "Animation", meta = (AllowPrivateAccess = true))
+	TMap<TSubclassOf<ATool>, TSubclassOf<UItemMontageDispatcher>> ItemMontageDispatchers;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
+	TMap<TSubclassOf<ATool>, TObjectPtr<UItemMontageDispatcher>> ItemMontageDispatcherInstances;
 };
