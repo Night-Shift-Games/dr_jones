@@ -4,14 +4,17 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "Blueprint/UserWidget.h"
-#include "Camera/CameraComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
+#include "PlayerComponents/ReactionComponent.h"
+#include "PlayerComponents/ToolBarComponent.h"
+
 
 ADrJonesCharacter::ADrJonesCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
+	ToolbarComponent = CreateDefaultSubobject<UToolBarComponent>(TEXT("ToolbarComponent"));
 }
 
 void ADrJonesCharacter::BeginPlay()
@@ -26,11 +29,6 @@ void ADrJonesCharacter::BeginPlay()
 			UI->AddToViewport();
 		}
 	}
-}
-
-void ADrJonesCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	OnPrimaryActionKeyPressed.RemoveAll(this);
 }
 
 void ADrJonesCharacter::Tick(float DeltaTime)
@@ -49,6 +47,7 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ADrJonesCharacter::PrimaryAction);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ADrJonesCharacter::Interact);
 	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
+	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
 }
 
 void ADrJonesCharacter::DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit)
@@ -111,12 +110,12 @@ void ADrJonesCharacter::LookUp(float AxisValue)
 
 void ADrJonesCharacter::PrimaryAction()
 {
-	OnPrimaryActionKeyPressed.Broadcast();
+	ReactionComponent->CallAction();
 }
 
 void ADrJonesCharacter::SecondaryAction()
 {
-	OnSecondaryActionKeyPressed.Broadcast();
+	//OnSecondaryActionKeyPressed.Broadcast();
 }
 
 void ADrJonesCharacter::Interact()

@@ -5,38 +5,34 @@
 #include "CoreMinimal.h"
 #include "Tool.h"
 #include "Player/DrJonesCharacter.h"
-#include "ArchaeologicalSite/ArchaeologicalSite.h"
 
 #include "Shovel.generated.h"
 
-UCLASS(ClassGroup = (Item), meta = (BlueprintSpawnableComponent))
-class DR_JONES_API AShovel final : public ATool
+UCLASS(ClassGroup = (Item), Blueprintable)
+class DR_JONES_API AShovel : public ATool
 {
 	GENERATED_BODY()
 
 public:
-
-	virtual void UseToolPrimaryAction() override;
 	void PlayFX(FHitResult Hit);
 	void FillShovel();
 
 protected:
-
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void Dig();
-	TObjectPtr<UStaticMeshComponent> DirtComponent;
-	TObjectPtr<UStaticMeshComponent> PlayerReference;
-	TObjectPtr<ADrJonesCharacter> Player;
-	bool bFilled = false;
 
 public:
-
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings")
 	float ShovelStrength = 15;
 
-	UPROPERTY(EditAnywhere);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings");
 	float ShovelReach = 250;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings|FX")
 	TObjectPtr<UStaticMesh> ShovelDirt;
-
+	
+protected:
+	TObjectPtr<UStaticMeshComponent> DirtComponent;
+	TObjectPtr<ADrJonesCharacter> Player;
+	bool bFilled = false;
 };

@@ -1,13 +1,10 @@
 // Property of Night Shift Games, all rights reserved.
 
 #include "Shovel.h"
+
+#include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Kismet/GameplayStatics.h"
-
-void AShovel::UseToolPrimaryAction()
-{
-	Dig();
-}
 
 void AShovel::PlayFX(FHitResult Hit)
 {

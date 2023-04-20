@@ -7,12 +7,12 @@
 
 #include "Bucket.generated.h"
 
-UCLASS()
+UCLASS(ClassGroup = (Item), Blueprintable)
 class DR_JONES_API ABucket : public ATool
 {
 	GENERATED_BODY()
 	
 public:
-
-	virtual void UseToolPrimaryAction() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tool Settings")
+	int BucketCapacity = 5;
 };
