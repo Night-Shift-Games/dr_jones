@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
-#include "PlayerComponents/ToolBarComponent.h"
+#include "PlayerComponents\HotBarComponent.h"
 
 
 ADrJonesCharacter::ADrJonesCharacter()
@@ -14,7 +14,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
-	ToolbarComponent = CreateDefaultSubobject<UToolBarComponent>(TEXT("ToolbarComponent"));
+	ToolbarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
 }
 
 void ADrJonesCharacter::BeginPlay()
@@ -44,7 +44,6 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ADrJonesCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ADrJonesCharacter::PrimaryAction);
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ADrJonesCharacter::Interact);
 	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
@@ -106,16 +105,6 @@ void ADrJonesCharacter::Turn(float AxisValue)
 void ADrJonesCharacter::LookUp(float AxisValue)
 {
 	AddControllerPitchInput(AxisValue);
-}
-
-void ADrJonesCharacter::PrimaryAction()
-{
-	ReactionComponent->CallAction();
-}
-
-void ADrJonesCharacter::SecondaryAction()
-{
-	//OnSecondaryActionKeyPressed.Broadcast();
 }
 
 void ADrJonesCharacter::Interact()

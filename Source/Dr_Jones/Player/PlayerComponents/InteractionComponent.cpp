@@ -55,7 +55,7 @@ void UInteractionComponent::Interact()
 	{
 		return;
 	}
-	Interactable->Interact();
+	Interactable->Interact(Owner.Get());
 }
 
 

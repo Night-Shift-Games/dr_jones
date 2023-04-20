@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Items/Item.h"
+#include "Player/DrJonesCharacter.h"
 
 #include "Tool.generated.h"
 
@@ -20,7 +21,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
-	void PickUp();
+	void PickUp(ADrJonesCharacter* Player);
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UActionComponent> ActionComponent;

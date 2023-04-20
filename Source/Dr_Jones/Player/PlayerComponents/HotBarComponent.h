@@ -4,25 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Items/Tools/Tool.h"
 
-#include "ToolBarComponent.generated.h"
+#include "HotBarComponent.generated.h"
 
 class ADrJonesCharacter;
 class ATool;
 
 UCLASS(Blueprintable)
-class DR_JONES_API UToolBarComponent : public UActorComponent
+class DR_JONES_API UHotBarComponent : public UActorComponent
 {
 	GENERATED_BODY()
-public:
-	TArray<TObjectPtr<ATool>> Tools;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tools")
-	TObjectPtr<ATool> ActiveTool;
 	
-	void AddTool(ATool& ToolToAdd);
+public:
+	void AddTool(ATool* ToolToAdd);
 	void RemoveTool(ATool& ToolToRemove);
 	void SetActiveItem(ATool& NewActiveTool);
 	ATool* GetActiveTool() const;
 	void ChangeActiveItem(const int8 Value);
+	
+public:
+	UPROPERTY()
+	TSet<TObjectPtr<ATool>> Tools;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tools")
+	TObjectPtr<ATool> ActiveTool;
 };

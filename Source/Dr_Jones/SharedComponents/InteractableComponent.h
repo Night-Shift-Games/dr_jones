@@ -4,10 +4,11 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "Player/DrJonesCharacter.h"
 
 #include "InteractableComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteract);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, ADrJonesCharacter*, Player);
 
 UCLASS( ClassGroup = "Shared Components", meta=(BlueprintSpawnableComponent) )
 class DR_JONES_API UInteractableComponent : public UActorComponent
@@ -18,7 +19,7 @@ public:
 	UInteractableComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void Interact();
+	void Interact(ADrJonesCharacter* Player);
 
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteract InteractDelegate;

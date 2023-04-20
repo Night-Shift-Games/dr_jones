@@ -11,7 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 class UInteractionComponent;
 class UReactionComponent;
-class UToolBarComponent;
+class UHotBarComponent;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -36,10 +36,6 @@ private:
 	void Turn(float AxisValue);
 	void LookUp(float AxisValue);
 
-	// Interaction Component
-	void PrimaryAction();
-	void SecondaryAction();
-
 	// Action Component
 	void Interact();
 	
@@ -57,7 +53,7 @@ public:
 	TObjectPtr<UReactionComponent> ReactionComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UToolBarComponent> ToolbarComponent;
+	TObjectPtr<UHotBarComponent> ToolbarComponent;
 
 	// TODO: AnimationComponent
 	UPROPERTY(EditAnywhere, Category = "FX|Sound")
