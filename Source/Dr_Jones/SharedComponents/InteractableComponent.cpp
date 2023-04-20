@@ -7,9 +7,11 @@ UInteractableComponent::UInteractableComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UInteractableComponent::Interact()
+void UInteractableComponent::Interact(ADrJonesCharacter* Player)
 {
-	InteractDelegate.Broadcast();
+	checkf(Player, TEXT("Player is missing"));
+	
+	InteractDelegate.Broadcast(Player);
 }
 
 void UInteractableComponent::BeginPlay()

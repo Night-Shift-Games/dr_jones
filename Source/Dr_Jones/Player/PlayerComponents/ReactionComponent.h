@@ -16,13 +16,13 @@ class DR_JONES_API UReactionComponent : public UActorComponent
 	
 public:
 	void CallAction();
-
 	void SetActiveItem(AItem& NewActiveItem);
 	
 	UFUNCTION(BlueprintPure, Category = "DrJones")
 	AItem* GetActiveItem() const;
 
 	void SetupPlayerInput(UInputComponent* InputComponent);
+	
 protected:
 	TTuple<TObjectPtr<AItem>, TObjectPtr<UActionComponent>> ActiveItem;
 };

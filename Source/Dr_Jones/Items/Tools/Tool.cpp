@@ -3,6 +3,7 @@
 #include "Items/Tools/Tool.h"
 
 #include "Player/DrJonesCharacter.h"
+#include "Player/PlayerComponents/HotBarComponent.h"
 #include "SharedComponents/ActionComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 
@@ -23,7 +24,23 @@ void ATool::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	InteractableComponent->InteractDelegate.RemoveDynamic(this, &ATool::PickUp);
 }
 
-void ATool::PickUp()
+void ATool::PickUp(ADrJonesCharacter* Player)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, "Test");
+	checkf(Player, TEXT("Player is missing!"));
+
+	GetRootComponent()->SetMobility(EComponentMobility::Movable);
+	
+	SetActorEnableCollision(false);
+	
+	if (!Player->ToolbarComponent)
+	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, TEXT("Cursed array"));
+		return;
+	}
+	Player->ToolbarComponent->AddTool(this);
+	Player->ToolbarComponent->SetActiveItem(*this);
+
+	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("RightHandSocket"));
+
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, TEXT("Test"));
 }
