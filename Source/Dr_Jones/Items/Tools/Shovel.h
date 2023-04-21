@@ -14,7 +14,7 @@ class DR_JONES_API AShovel : public ATool
 	GENERATED_BODY()
 
 public:
-	void PlayFX(FHitResult Hit);
+	void PlayFX(const FHitResult& Hit);
 	void FillShovel();
 
 protected:

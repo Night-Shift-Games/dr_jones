@@ -6,7 +6,6 @@
 
 #include "InventoryItem.generated.h"
 
-
 USTRUCT(BlueprintType)
 struct DR_JONES_API FInventoryItem
 {
