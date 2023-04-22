@@ -1,7 +1,10 @@
+// Property of Night Shift Games, all rights reserved.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "WidgetManager.generated.h"
 
 UCLASS()
 class UWidgetManager : public UObject

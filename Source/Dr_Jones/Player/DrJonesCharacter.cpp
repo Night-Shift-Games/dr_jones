@@ -2,6 +2,7 @@
 
 #include "DrJonesCharacter.h"
 
+#include "Animation/CharacterAnimationComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerComponents/HotBarComponent.h"
@@ -14,6 +15,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
 	HotBarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
+	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 }
 
 void ADrJonesCharacter::BeginPlay()

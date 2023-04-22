@@ -1,3 +1,5 @@
+// Property of Night Shift Games, all rights reserved.
+
 #include "WidgetManager.h"
 
 void UWidgetManager::AddWidget(const TSubclassOf<UUserWidget> WidgetClass)

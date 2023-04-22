@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 class UInteractionComponent;
 class UReactionComponent;
 class UHotBarComponent;
+class UCharacterAnimationComponent;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -54,6 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<UHotBarComponent> HotBarComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 
 	// TODO: AnimationComponent
 	UPROPERTY(EditAnywhere, Category = "FX|Sound")
