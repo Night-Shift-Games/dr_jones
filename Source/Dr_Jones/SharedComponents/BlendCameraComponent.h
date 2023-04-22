@@ -7,7 +7,8 @@
 
 #include "BlendCameraComponent.generated.h"
 
-UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent),
+	HideCategories=(Tick))
 class DR_JONES_API UBlendCameraComponent : public UActorComponent
 {
 	GENERATED_BODY()

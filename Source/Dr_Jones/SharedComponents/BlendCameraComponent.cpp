@@ -7,7 +7,6 @@
 UBlendCameraComponent::UBlendCameraComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 void UBlendCameraComponent::BeginPlay()
