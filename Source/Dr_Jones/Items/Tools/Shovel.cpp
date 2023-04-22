@@ -41,7 +41,7 @@ void AShovel::Dig()
 	const FHitResult Hit = Player->GetPlayerLookingAt(ShovelReach);
 	if (UExcavationSegment* ExcavationSite = Cast<UExcavationSegment>(Hit.GetComponent()))
 	{
-		// TODO: Shovel shouldn't know anything about terrain.
+		// TODO: Shovel shouldn't know anything about excavation segments.
 
 		const FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(bFilled)));
 
