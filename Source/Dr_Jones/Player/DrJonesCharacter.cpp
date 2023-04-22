@@ -14,7 +14,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
-	ToolbarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
+	HotBarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
 }
 
 void ADrJonesCharacter::BeginPlay()

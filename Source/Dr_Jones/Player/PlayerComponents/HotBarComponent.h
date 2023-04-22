@@ -17,7 +17,7 @@ class DR_JONES_API UHotBarComponent : public UActorComponent
 	GENERATED_BODY()
 	
 public:
-	void AddTool(ATool* ToolToAdd);
+	void AddTool(ATool& ToolToAdd);
 	void RemoveTool(ATool& ToolToRemove);
 	void SetActiveItem(ATool& NewActiveTool);
 	ATool* GetActiveTool() const;

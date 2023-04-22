@@ -5,12 +5,12 @@
 #include "ReactionComponent.h"
 #include "Utilities.h"
 
-void UHotBarComponent::AddTool(ATool* ToolToAdd)
+void UHotBarComponent::AddTool(ATool& ToolToAdd)
 {
-	Tools.Emplace(ToolToAdd);
+	Tools.Emplace(&ToolToAdd);
 	if (Tools.Num() < 2)
 	{
-		SetActiveItem(*ToolToAdd);
+		SetActiveItem(ToolToAdd);
 	}
 }
 

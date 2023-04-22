@@ -53,7 +53,7 @@ public:
 	TObjectPtr<UReactionComponent> ReactionComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	TObjectPtr<UHotBarComponent> ToolbarComponent;
+	TObjectPtr<UHotBarComponent> HotBarComponent;
 
 	// TODO: AnimationComponent
 	UPROPERTY(EditAnywhere, Category = "FX|Sound")
