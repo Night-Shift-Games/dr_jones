@@ -1,12 +1,9 @@
 // Property of Night Shift Games, all rights reserved.
 
-
 #include "BlendCameraComponent.h"
-#include "GameFramework/Character.h"
-#include "Kismet/GameplayStatics.h"
+
 #include "Blueprint/UserWidget.h"
 
-// Sets default values for this component's properties
 UBlendCameraComponent::UBlendCameraComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -48,8 +45,8 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 		InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
 		Controller->SetInputMode(InputMode);
 
-		UWorld* World = Controller->GetWorld();
-		check(World);
+		const UWorld* World = Controller->GetWorld();
+		ensureAlwaysMsgf(World, TEXT("Camera is not in the world!"));
 		UGameViewportClient* Viewport = World->GetGameViewport();
 		check(Viewport);
 		Viewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
@@ -71,7 +68,7 @@ void UBlendCameraComponent::ResetViewTarget()
 	FInputModeGameOnly InputMode;
 	Controller->SetInputMode(InputMode);
 
-	UWorld* World = Controller->GetWorld();
+	const UWorld* World = Controller->GetWorld();
 	check(World);
 	UGameViewportClient* Viewport = World->GetGameViewport();
 	check(Viewport);

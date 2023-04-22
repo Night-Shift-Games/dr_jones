@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "BlendCameraComponent.generated.h"
+#include "CoreMinimal.h"
 
+#include "BlendCameraComponent.generated.h"
 
 UCLASS( Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DR_JONES_API UBlendCameraComponent : public UActorComponent
@@ -14,17 +14,17 @@ class DR_JONES_API UBlendCameraComponent : public UActorComponent
 
 public:
 	UBlendCameraComponent();
-
 	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable)
+	
+	APlayerController* GetViewingController() const;
+	
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Camera")
 	void SetViewTarget(AActor* NewViewTarget, UUserWidget* WidgetToFocus);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Camera")
 	void ResetViewTarget();
-
-	APlayerController* GetViewingController() const;
-
+	
+public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	TObjectPtr<AActor> MainViewTarget = nullptr;
 };
