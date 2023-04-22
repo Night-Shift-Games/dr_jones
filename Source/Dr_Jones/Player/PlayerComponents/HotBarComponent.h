@@ -21,11 +21,12 @@ public:
 	void RemoveTool(ATool& ToolToRemove);
 	void SetActiveItem(ATool& NewActiveTool);
 	ATool* GetActiveTool() const;
-	void ChangeActiveItem(const int8 Value);
+
+	void ChangeActiveItem(int8 Value);
 	
 public:
 	UPROPERTY()
-	TSet<TObjectPtr<ATool>> Tools;
+	TArray<TObjectPtr<ATool>> Tools;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tools")
 	TObjectPtr<ATool> ActiveTool;

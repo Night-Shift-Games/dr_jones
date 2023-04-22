@@ -27,20 +27,17 @@ void ATool::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ATool::PickUp(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing!"));
-
+	OwningPlayer = Player;
+	
 	GetRootComponent()->SetMobility(EComponentMobility::Movable);
-	
-	SetActorEnableCollision(false);
-	
-	if (!Player->ToolbarComponent)
+	if (UMeshComponent* Mesh = GetMeshComponent())
 	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, TEXT("Cursed array"));
-		return;
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
-	Player->ToolbarComponent->AddTool(this);
-	Player->ToolbarComponent->SetActiveItem(*this);
 
-	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("RightHandSocket"));
-
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10, FColor::Red, TEXT("Test"));
+	checkf(Player->HotBarComponent, TEXT("Toolbar component is missing!"));
+	Player->HotBarComponent->AddTool(*this);
+	// TODO: Attaching & reattaching should be inside Hotbar.
+	Player->HotBarComponent->SetActiveItem(*this);
+	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
 }

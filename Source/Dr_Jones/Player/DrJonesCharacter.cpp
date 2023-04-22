@@ -4,10 +4,9 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerComponents/HotBarComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
-#include "PlayerComponents\HotBarComponent.h"
-
 
 ADrJonesCharacter::ADrJonesCharacter()
 {
@@ -119,7 +118,7 @@ void ADrJonesCharacter::SwitchItem(float AxisValue)
 	{
 		return;
 	}
-//	ToolInventory->ScrollItem(AxisValue);
+	HotBarComponent->ChangeActiveItem(AxisValue);
 }
 
 void ADrJonesCharacter::ShowInteractionUI()

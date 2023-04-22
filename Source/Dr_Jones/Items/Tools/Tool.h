@@ -25,4 +25,7 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UActionComponent> ActionComponent;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ADrJonesCharacter> OwningPlayer;
 };

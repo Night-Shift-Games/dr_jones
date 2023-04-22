@@ -17,7 +17,12 @@ class DR_JONES_API AItem : public AActor
 public:
 	AItem();
 
+	UMeshComponent* GetMeshComponent() const;
+	
 protected:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UInteractableComponent> InteractableComponent;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Item")
+	FName AttachmentSocket = TEXT("RightHandSocket");
 };

@@ -21,7 +21,14 @@ void UHotBarComponent::RemoveTool(ATool& ToolToRemove)
 
 void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
 {
+	if (ActiveTool)
+	{
+		// TODO: Recreating & Destroying mesh
+		ActiveTool->GetMeshComponent()->SetVisibility(false);
+	}
+	
 	ActiveTool = &NewActiveTool;
+	ActiveTool->GetMeshComponent()->SetVisibility(true);
 	GetOwner<ADrJonesCharacter>()->ReactionComponent->SetActiveItem(NewActiveTool);
 }
 
@@ -36,9 +43,9 @@ void UHotBarComponent::ChangeActiveItem(const int8 Value)
 	{
 		return;
 	}
-//	int32 ActiveItemID;
-//	if (Tools.Find(ActiveTool, ActiveItemID))
-//	{
-//		SetActiveItem(*Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)]);
-//	}
+	int32 ActiveItemID;
+	if (Tools.Find(ActiveTool, ActiveItemID))
+	{
+		SetActiveItem(*Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)]);
+	}
 }
