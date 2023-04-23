@@ -46,6 +46,7 @@ void UCharacterAnimationComponent::InitializeComponent()
 		{
 			UItemMontageDispatcher* Dispatcher = NewObject<UItemMontageDispatcher>(this, DispatcherClass);
 			check(Dispatcher);
+			Dispatcher->CharacterMesh = CharacterMeshComponent;
 
 			ItemMontageDispatcherInstances.Emplace(ToolClass, Dispatcher);
 		}
@@ -65,37 +66,15 @@ void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	// ...
 }
 
-const FCharacterToolAnimations& UCharacterAnimationComponent::FindAnimationsForTool(const TSubclassOf<ATool>& Tool, bool& bOutFound) const
+void UCharacterAnimationComponent::DispatchItemAction(TSubclassOf<AItem> Item, FName Action)
 {
-	if (const FCharacterToolAnimations* Animations = CharacterToolAnimations.Find(Tool))
-	{
-		bOutFound = true;
-		return *Animations;
-	}
-
-	bOutFound = false;
-	static FCharacterToolAnimations NullAnimations {};
-	return NullAnimations;
-}
-
-UAnimMontage* UCharacterAnimationComponent::FindToolMontage(const TSubclassOf<ATool>& Tool, FName Montage) const
-{
-	if (const FCharacterToolAnimations* Animations = CharacterToolAnimations.Find(Tool))
-	{
-		return Animations->Montages.FindRef(Montage);
-	}
-	return nullptr;
-}
-
-void UCharacterAnimationComponent::DispatchToolAction(TSubclassOf<ATool> Tool, FName Action)
-{
-	if (UItemMontageDispatcher* Dispatcher = ItemMontageDispatcherInstances.FindRef(Tool))
+	if (UItemMontageDispatcher* Dispatcher = ItemMontageDispatcherInstances.FindRef(Item))
 	{
 		Dispatcher->Dispatch(Action);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Montage Dispatcher not found for tool %s"), *Tool->GetName());
+		UE_LOG(LogTemp, Error, TEXT("Montage Dispatcher not found for tool %s"), *Item->GetName());
 	}
 }
 

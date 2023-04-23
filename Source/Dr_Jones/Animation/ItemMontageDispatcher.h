@@ -17,6 +17,10 @@ class DR_JONES_API UItemMontageDispatcher : public UObject
 public:
 	void Dispatch(const FName& Action);
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category = "Animation")
 	void OnDispatch(const FName& Action);
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	TObjectPtr<USkeletalMeshComponent> CharacterMesh;
 };

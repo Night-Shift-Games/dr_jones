@@ -41,6 +41,9 @@ private:
 	void Interact();
 	
 	void SwitchItem(float AxisValue);
+
+	// Character Animation Component
+	void PlayItemMontage();
 public:
 	// Widget Component
 	void ShowInteractionUI();

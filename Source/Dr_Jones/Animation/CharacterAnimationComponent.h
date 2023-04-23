@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Items/Tools/Tool.h"
+#include "Items/Item.h"
 #include "ItemMontageDispatcher.h"
 #include "CharacterAnimationComponent.generated.h"
 
@@ -55,13 +55,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
-	const FCharacterToolAnimations& FindAnimationsForTool(const TSubclassOf<ATool>& Tool, bool& bOutFound) const;
-
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	UAnimMontage* FindToolMontage(const TSubclassOf<ATool>& Tool, FName Montage) const;
-
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	void DispatchToolAction(TSubclassOf<ATool> Tool, FName Action);
+	void DispatchItemAction(TSubclassOf<AItem> Item, FName Action);
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
@@ -71,11 +65,11 @@ private:
 	FCharacterAnimations CharacterAnimations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<TSubclassOf<ATool>, FCharacterToolAnimations> CharacterToolAnimations;
+	TMap<TSubclassOf<AItem>, FCharacterToolAnimations> CharacterToolAnimations;
 
 	UPROPERTY(EditAnywhere, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<TSubclassOf<ATool>, TSubclassOf<UItemMontageDispatcher>> ItemMontageDispatchers;
+	TMap<TSubclassOf<AItem>, TSubclassOf<UItemMontageDispatcher>> ItemMontageDispatchers;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<TSubclassOf<ATool>, TObjectPtr<UItemMontageDispatcher>> ItemMontageDispatcherInstances;
+	TMap<TSubclassOf<AItem>, TObjectPtr<UItemMontageDispatcher>> ItemMontageDispatcherInstances;
 };

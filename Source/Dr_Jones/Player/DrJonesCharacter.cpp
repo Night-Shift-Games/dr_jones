@@ -48,6 +48,8 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ADrJonesCharacter::Interact);
 	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &ADrJonesCharacter::PlayItemMontage);
 }
 
 void ADrJonesCharacter::DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit)
@@ -121,6 +123,17 @@ void ADrJonesCharacter::SwitchItem(float AxisValue)
 		return;
 	}
 	HotBarComponent->ChangeActiveItem(AxisValue);
+}
+
+void ADrJonesCharacter::PlayItemMontage()
+{
+	checkf(CharacterAnimationComponent, TEXT("Animation component is null."));
+
+	if (const AItem* ActiveItem = HotBarComponent->GetActiveTool())
+	{
+		// @TODO: Unhardcode "Dig"
+		CharacterAnimationComponent->DispatchItemAction(ActiveItem->GetClass(), "Dig");
+	}
 }
 
 void ADrJonesCharacter::ShowInteractionUI()
