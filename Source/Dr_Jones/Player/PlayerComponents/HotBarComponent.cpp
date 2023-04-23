@@ -4,6 +4,8 @@
 
 #include "ReactionComponent.h"
 #include "Utilities.h"
+#include "Player/WidgetManager.h"
+#include "UI/DrJonesWidgetBase.h"
 
 void UHotBarComponent::AddTool(ATool& ToolToAdd)
 {
@@ -43,6 +45,9 @@ void UHotBarComponent::ChangeActiveItem(const int8 Value)
 	{
 		return;
 	}
+
+	GetOwner<ADrJonesCharacter>()->WidgetManager->UpdateWidget(HotBarUI);
+	
 	int32 ActiveItemID;
 	if (Tools.Find(ActiveTool, ActiveItemID))
 	{

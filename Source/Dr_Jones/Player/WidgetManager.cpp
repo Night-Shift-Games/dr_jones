@@ -2,13 +2,45 @@
 
 #include "WidgetManager.h"
 
-void UWidgetManager::AddWidget(const TSubclassOf<UUserWidget> WidgetClass)
+#include "Blueprint/UserWidget.h"
+#include "DrJonesCharacter.h"
+#include "UI/DrJonesWidgetBase.h"
+
+void UWidgetManager::BeginPlay()
 {
-	UUserWidget* NewWidget = CreateWidget(GetWorld(), WidgetClass);
-	Widgets.Add(WidgetClass, NewWidget);
+	Super::BeginPlay();
+	OwningPlayer = GetOwner<ADrJonesCharacter>();
+	OwningController = OwningPlayer->GetController<APlayerController>();
+	for (const auto& KV : BeginPlayWidgets)
+	{
+		AddWidget(KV);
+		ShowWidget(KV);
+	}
 }
 
-void UWidgetManager::ShowWidget(const TSubclassOf<UUserWidget> Widget)
+void UWidgetManager::AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
+{
+	UDrJonesWidgetBase* NewWidget = CreateWidget<UDrJonesWidgetBase>(OwningController.Get(), WidgetClass);
+	Widgets.Emplace(WidgetClass, NewWidget);
+}
+
+void UWidgetManager::ShowWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+{
+	if (UDrJonesWidgetBase* WidgetToShow = Widgets.Find(Widget)->Get(); !WidgetToShow->IsInViewport())
+	{
+		WidgetToShow->AddToViewport();
+	}
+}
+
+void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+{
+	if (UDrJonesWidgetBase* WidgetToHide = Widgets.Find(Widget)->Get(); WidgetToHide->IsInViewport())
+	{
+		WidgetToHide->RemoveFromViewport();
+	}
+}
+
+void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
 {
 	if (UUserWidget* WidgetToShow = Widgets.Find(Widget)->Get(); !WidgetToShow->IsInViewport())
 	{
@@ -16,10 +48,11 @@ void UWidgetManager::ShowWidget(const TSubclassOf<UUserWidget> Widget)
 	}
 }
 
-void UWidgetManager::HideWidget(const TSubclassOf<UUserWidget> Widget)
+void UWidgetManager::UpdateWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
 {
-	if (UUserWidget* WidgetToHide = Widgets.Find(Widget)->Get(); WidgetToHide->IsInViewport())
+	check(this);
+	if (UDrJonesWidgetBase* WidgetToUpdate = Widgets.FindRef(Widget))
 	{
-		WidgetToHide->RemoveFromViewport();
+		WidgetToUpdate->UpdateData();
 	}
 }

@@ -3,21 +3,38 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+
 #include "WidgetManager.generated.h"
 
+class UDrJonesWidgetBase;
+class ADrJonesCharacter;
+class UUserWidget;
+
 UCLASS()
-class UWidgetManager : public UObject
+class UWidgetManager : public UActorComponent
 {
 	GENERATED_BODY()
 	
 public:
-	void AddWidget(const TSubclassOf<UUserWidget> WidgetClass);
-	void ShowWidget(const TSubclassOf<UUserWidget> Widget);
-	void HideWidget(const TSubclassOf<UUserWidget> Widget);
-	void RemoveWidget(const TSubclassOf<UUserWidget> Widget);
-	void UpdateWidget(const TSubclassOf<UUserWidget> Widget);
+	virtual void BeginPlay() override;
+	
+	void AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	void ShowWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
+	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
+	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
+	void UpdateWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
+	
 public:
-	UPROPERTY()
-	TMap<TSubclassOf<UUserWidget>, TObjectPtr<UUserWidget>> Widgets;
+	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (DisplayName = "Widgets"))
+	TSet<TSubclassOf<UDrJonesWidgetBase>> BeginPlayWidgets;
+	
+	UPROPERTY(Transient)
+	TMap<TSubclassOf<UDrJonesWidgetBase>, TObjectPtr<UDrJonesWidgetBase>> Widgets;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ADrJonesCharacter> OwningPlayer;
+
+	UPROPERTY(Transient)
+	TObjectPtr<APlayerController> OwningController;
+	
 };

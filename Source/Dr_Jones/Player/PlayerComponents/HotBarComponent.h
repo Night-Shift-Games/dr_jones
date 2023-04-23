@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Items/Tools/Tool.h"
+#include "UI/DrJonesWidgetBase.h"
 
 #include "HotBarComponent.generated.h"
 
@@ -28,6 +29,9 @@ public:
 	UPROPERTY()
 	TArray<TObjectPtr<ATool>> Tools;
 
+	UPROPERTY(EditAnywhere, Category="UI");
+	TSubclassOf<UDrJonesWidgetBase> HotBarUI;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tools")
 	TObjectPtr<ATool> ActiveTool;
 };

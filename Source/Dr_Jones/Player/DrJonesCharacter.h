@@ -13,6 +13,7 @@ class UInteractionComponent;
 class UReactionComponent;
 class UHotBarComponent;
 class UCharacterAnimationComponent;
+class UWidgetManager;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -55,7 +56,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<UReactionComponent> ReactionComponent;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Components")
+	TObjectPtr<UWidgetManager> WidgetManager;
+	
 	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<UHotBarComponent> HotBarComponent;
 
