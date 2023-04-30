@@ -2,7 +2,6 @@
 
 #include "DrJonesCharacter.h"
 
-#include "WidgetManager.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,15 +23,6 @@ ADrJonesCharacter::ADrJonesCharacter()
 void ADrJonesCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(RunTimeUIClass))
-	{
-		UUserWidget* UI = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), RunTimeUIClass, TEXT("Runtime"));
-
-		if (IsValid(UI))
-		{
-			UI->AddToViewport();
-		}
-	}
 }
 
 void ADrJonesCharacter::Tick(float DeltaTime)

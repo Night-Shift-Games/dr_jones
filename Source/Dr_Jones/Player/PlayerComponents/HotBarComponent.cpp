@@ -46,7 +46,7 @@ void UHotBarComponent::ChangeActiveItem(const int8 Value)
 		return;
 	}
 
-	GetOwner<ADrJonesCharacter>()->WidgetManager->UpdateWidget(HotBarUI);
+	GetOwner<ADrJonesCharacter>()->WidgetManager;
 	
 	int32 ActiveItemID;
 	if (Tools.Find(ActiveTool, ActiveItemID))

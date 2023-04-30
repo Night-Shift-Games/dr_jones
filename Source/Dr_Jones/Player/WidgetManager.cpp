@@ -48,11 +48,7 @@ void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
 	}
 }
 
-void UWidgetManager::UpdateWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const
 {
-	check(this);
-	if (UDrJonesWidgetBase* WidgetToUpdate = Widgets.FindRef(Widget))
-	{
-		WidgetToUpdate->UpdateData();
-	}
+	return Widgets.FindRef(Widget);
 }
