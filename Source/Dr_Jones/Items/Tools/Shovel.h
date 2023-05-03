@@ -17,6 +17,9 @@ public:
 	void PlayFX(const FHitResult& Hit);
 	void FillShovel();
 
+	UFUNCTION(BlueprintPure, Category = "DrJones")
+	bool IsFilled() const;
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void Dig();

@@ -35,6 +35,11 @@ void AShovel::FillShovel()
 	}
 }
 
+bool AShovel::IsFilled() const
+{
+	return bFilled;
+}
+
 void AShovel::Dig()
 {
 	Player = Cast<ADrJonesCharacter>(UGameplayStatics::GetPlayerCharacter(GWorld, 0));
