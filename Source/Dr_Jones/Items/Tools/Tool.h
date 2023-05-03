@@ -22,6 +22,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void PickUp(ADrJonesCharacter* Player);
+
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void PlayToolMontage(FName MontageName);
+	
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UActionComponent> ActionComponent;

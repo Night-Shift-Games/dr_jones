@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "ItemMontageDispatcher.generated.h"
 
+class AItem;
+
 /**
  * 
  */
@@ -15,10 +17,10 @@ class DR_JONES_API UItemMontageDispatcher : public UObject
 	GENERATED_BODY()
 
 public:
-	void Dispatch(const FName& Action);
+	void Dispatch(AItem& Item, const FName& Action);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animation")
-	void OnDispatch(const FName& Action);
+	void OnDispatch(AItem* Item, const FName& Action);
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")

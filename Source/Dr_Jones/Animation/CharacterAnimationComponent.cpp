@@ -66,11 +66,12 @@ void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	// ...
 }
 
-void UCharacterAnimationComponent::DispatchItemAction(TSubclassOf<AItem> Item, FName Action)
+void UCharacterAnimationComponent::DispatchItemAction(AItem* Item, FName Action)
 {
-	if (UItemMontageDispatcher* Dispatcher = ItemMontageDispatcherInstances.FindRef(Item))
+	checkf(Item, TEXT("Item was null"));
+	if (UItemMontageDispatcher* Dispatcher = ItemMontageDispatcherInstances.FindRef(Item->GetClass()))
 	{
-		Dispatcher->Dispatch(Action);
+		Dispatcher->Dispatch(*Item, Action);
 	}
 	else
 	{

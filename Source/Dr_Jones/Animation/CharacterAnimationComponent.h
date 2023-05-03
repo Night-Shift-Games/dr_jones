@@ -55,7 +55,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
-	void DispatchItemAction(TSubclassOf<AItem> Item, FName Action);
+	void DispatchItemAction(AItem* Item, FName Action);
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))

@@ -3,7 +3,7 @@
 
 #include "Animation/ItemMontageDispatcher.h"
 
-void UItemMontageDispatcher::Dispatch(const FName& Action)
+void UItemMontageDispatcher::Dispatch(AItem& Item, const FName& Action)
 {
-	OnDispatch(Action);
+	OnDispatch(&Item, Action);
 }

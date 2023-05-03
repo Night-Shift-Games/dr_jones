@@ -14,6 +14,7 @@ class UReactionComponent;
 class UHotBarComponent;
 class UCharacterAnimationComponent;
 class UWidgetManager;
+class AItem;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -27,6 +28,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
+
+	// Character Animation Component
+	void PlayItemMontage(AItem& Item, const FName& MontageName);
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,9 +46,7 @@ private:
 	void Interact();
 	
 	void SwitchItem(float AxisValue);
-
-	// Character Animation Component
-	void PlayItemMontage();
+	
 public:
 	// Widget Component
 	void ShowInteractionUI();
