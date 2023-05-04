@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Tool.h"
+#include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Player/DrJonesCharacter.h"
 
 #include "Shovel.generated.h"
@@ -20,9 +21,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "DrJones")
 	bool IsFilled() const;
 
-protected:
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void Dig();
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	void Dump();
+
+	UShapeComponent* GetDigCollision() const;
+
+private:
+	void DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const;
+
+	bool TraceDig(FHitResult& OutHit) const;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings")
@@ -33,6 +43,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings|FX")
 	TObjectPtr<UStaticMesh> ShovelDirt;
+
+private:
+	UPROPERTY()
+	mutable TObjectPtr<UShapeComponent> DigCollisionComponent;
 	
 protected:
 	TObjectPtr<UStaticMeshComponent> DirtComponent;
