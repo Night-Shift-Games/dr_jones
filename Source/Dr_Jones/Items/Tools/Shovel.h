@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Tool.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
-#include "Player/DrJonesCharacter.h"
 
 #include "Shovel.generated.h"
 
@@ -15,8 +14,10 @@ class DR_JONES_API AShovel : public ATool
 	GENERATED_BODY()
 
 public:
-	void PlayFX(const FHitResult& Hit);
 	void FillShovel();
+	void EmptyShovel();
+	
+	UShapeComponent* GetDigCollision() const;
 
 	UFUNCTION(BlueprintPure, Category = "DrJones")
 	bool IsFilled() const;
@@ -26,8 +27,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void Dump();
-
-	UShapeComponent* GetDigCollision() const;
 
 private:
 	void DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const;
@@ -45,11 +44,9 @@ public:
 	TObjectPtr<UStaticMesh> ShovelDirt;
 
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	mutable TObjectPtr<UShapeComponent> DigCollisionComponent;
-	
-protected:
+
+	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> DirtComponent;
-	TObjectPtr<ADrJonesCharacter> Player;
-	bool bFilled = false;
 };

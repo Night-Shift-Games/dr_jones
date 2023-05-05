@@ -2,27 +2,13 @@
 
 #include "Shovel.h"
 
-#include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
-#include "Kismet/GameplayStatics.h"
-
-void AShovel::PlayFX(const FHitResult& Hit)
-{
-	if (USoundBase* SoundDig = Player->DigSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(GWorld, SoundDig, Hit.Location);
-	}
-	if (UAnimMontage* DigAnim = Player->DigAnim)
-	{
-		Player->PlayAnimMontage(DigAnim);
-	}
-}
+#include "Player/DrJonesCharacter.h"
 
 void AShovel::FillShovel()
 {
-	bFilled = !bFilled;
-	if (bFilled)
+	if (!IsFilled())
 	{
 		DirtComponent = NewObject<UStaticMeshComponent>(GetRootComponent(), UStaticMeshComponent::StaticClass());
 		DirtComponent->RegisterComponent();
@@ -30,65 +16,15 @@ void AShovel::FillShovel()
 		DirtComponent->SetStaticMesh(ShovelDirt);
 		DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-	else if (DirtComponent)
+}
+
+void AShovel::EmptyShovel()
+{
+	if (IsFilled())
 	{
 		DirtComponent->DestroyComponent();
+		DirtComponent = nullptr;
 	}
-}
-
-bool AShovel::IsFilled() const
-{
-	return bFilled;
-}
-
-void AShovel::Dig()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, TEXT("Dig"));
-
-	if (!OwningPlayer)
-	{
-		return;
-	}
-
-	FHitResult Hit;
-	if (!TraceDig(Hit))
-	{
-		return;
-	}
-	
-	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
-	if (!ExcavationSegment)
-	{
-		return;
-	}
-	
-	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
-	FillShovel();
-}
-
-void AShovel::Dump()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, TEXT("Dump"));
-
-	if (!OwningPlayer)
-	{
-		return;
-	}
-
-	const FHitResult Hit = OwningPlayer->GetPlayerLookingAt(150.0f);
-	if (!Hit.bBlockingHit)
-	{
-		return;
-	}
-	
-	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
-	if (!ExcavationSegment)
-	{
-		return;
-	}
-	
-	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
-	FillShovel();
 }
 
 UShapeComponent* AShovel::GetDigCollision() const
@@ -115,13 +51,64 @@ UShapeComponent* AShovel::GetDigCollision() const
 	return DigCollisionComponent;
 }
 
+bool AShovel::IsFilled() const
+{
+	return !DirtComponent.IsNull();
+}
+
+void AShovel::Dig()
+{
+	if (!OwningPlayer)
+	{
+		return;
+	}
+
+	FHitResult Hit;
+	if (!TraceDig(Hit))
+	{
+		return;
+	}
+	
+	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
+	if (!ExcavationSegment)
+	{
+		return;
+	}
+	
+	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
+	FillShovel();
+}
+
+void AShovel::Dump()
+{
+	if (!OwningPlayer)
+	{
+		return;
+	}
+
+	const FHitResult Hit = OwningPlayer->GetPlayerLookingAt(150.0f);
+	if (!Hit.bBlockingHit)
+	{
+		return;
+	}
+	
+	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
+	if (!ExcavationSegment)
+	{
+		return;
+	}
+	
+	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
+	EmptyShovel();
+}
+
 void AShovel::DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const
 {
 	// TODO: Shovel shouldn't know anything about excavation segments.
 
 	checkf(OwningPlayer, TEXT("The Shovel %s is not owned by any player."), *this->GetName());
 
-	const FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(bFilled)));
+	const FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(IsFilled())));
 
 	ExcavationSegment.Dig(FTransform(OwningPlayer->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSegment.GetComponentLocation() - Location), OwningPlayer->GetActorScale3D()), DigDir);
 	for (UExcavationSegment* Neighbor : ExcavationSegment.Neighbors)
