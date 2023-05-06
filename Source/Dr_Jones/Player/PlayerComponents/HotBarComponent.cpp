@@ -14,6 +14,8 @@ void UHotBarComponent::AddTool(ATool& ToolToAdd)
 	{
 		SetActiveItem(ToolToAdd);
 	}
+	TOptional<float> None;
+	GetOwner<ADrJonesCharacter>()->WidgetManager->RequestWidgetUpdate(HotBarUI, None);
 }
 
 void UHotBarComponent::RemoveTool(ATool& ToolToRemove)
@@ -45,8 +47,8 @@ void UHotBarComponent::ChangeActiveItem(const int8 Value)
 	{
 		return;
 	}
-
-	GetOwner<ADrJonesCharacter>()->WidgetManager;
+	
+	GetOwner<ADrJonesCharacter>()->WidgetManager->RequestWidgetUpdate(HotBarUI, Value);
 	
 	int32 ActiveItemID;
 	if (Tools.Find(ActiveTool, ActiveItemID))

@@ -52,3 +52,21 @@ UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBa
 {
 	return Widgets.FindRef(Widget);
 }
+
+void UWidgetManager::RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget,
+	TOptional<float> AxisValue) const
+{
+	UDrJonesWidgetBase* WidgetToUpdate = Widgets.Find(Widget)->Get();
+	if (!WidgetToUpdate)
+	{
+		return;
+	}
+	if (AxisValue.IsSet())
+	{
+		WidgetToUpdate->UpdateDataAxis(AxisValue.GetValue());	
+	}
+	else
+	{
+		WidgetToUpdate->UpdateData();
+	}
+}

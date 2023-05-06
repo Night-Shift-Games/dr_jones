@@ -11,5 +11,8 @@ class UDrJonesWidgetBase : public UUserWidget
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateData();	
+	void UpdateData();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateDataAxis(float AxisValue = 0);
 };

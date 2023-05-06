@@ -23,6 +23,7 @@ public:
 	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
 	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
 	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const;
+	void RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget, TOptional<float> AxisValue) const;
 public:
 	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (DisplayName = "Widgets"))
 	TSet<TSubclassOf<UDrJonesWidgetBase>> BeginPlayWidgets;
