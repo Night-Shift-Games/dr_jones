@@ -25,6 +25,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	void PlayToolMontage(FName MontageName);
+
+	UAnimMontage* FindActionMontage(const FName& MontageName) const;
 	
 protected:
 	UPROPERTY(BlueprintReadWrite)

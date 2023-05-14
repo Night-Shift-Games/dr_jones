@@ -2,6 +2,7 @@
 
 #include "Items/Tools/Tool.h"
 
+#include "Animation/CharacterAnimationComponent.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/PlayerComponents/HotBarComponent.h"
 #include "SharedComponents/ActionComponent.h"
@@ -51,4 +52,16 @@ void ATool::PlayToolMontage(FName MontageName)
 	}
 
 	OwningPlayer->PlayItemMontage(*this, MontageName);
+}
+
+UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
+{
+	if (!OwningPlayer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot play tool montage because the tool is not owned by any player."));
+		return nullptr;
+	}
+
+	checkf(OwningPlayer->CharacterAnimationComponent, TEXT("Animation Component is null"));
+	return OwningPlayer->CharacterAnimationComponent->FindItemActionMontage(*this, MontageName);
 }

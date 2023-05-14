@@ -10,7 +10,7 @@ public class Dr_Jones : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "UMG", "Slate", "SlateCore" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "AnimGraphRuntime" });
 
 		PublicIncludePaths.AddRange(new string[] { "Dr_Jones" });
 

@@ -2,9 +2,12 @@
 
 #include "Shovel.h"
 
+#include "PlayMontageCallbackProxy.h"
+#include "Animation/CharacterAnimationComponent.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
 #include "Player/DrJonesCharacter.h"
+#include "Player/PlayerComponents/HotBarComponent.h"
 #include "SharedComponents/ActionComponent.h"
 
 void AShovel::BeginPlay()
@@ -113,14 +116,59 @@ void AShovel::Dump()
 
 void AShovel::PrimaryAction()
 {
-	if (IsFilled())
+	UAnimMontage* Montage;
+	
+	FHitResult DigLocationHit;
+	if (TraceForDesiredDigLocation(DigLocationHit))
 	{
-		PlayToolMontage(TEXT("Dump"));
+		const FVector& IKTrackLocation = DigLocationHit.Location;
+		Montage = FindActionMontage(IsFilled() ? TEXT("Dump") : TEXT("Dig"));
 	}
 	else
 	{
-		PlayToolMontage(TEXT("Dig"));
+		Montage = FindActionMontage(TEXT("Drop"));
 	}
+
+	if (!Montage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Animation Montage not set."));
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
+
+	OwningPlayer->CharacterAnimationComponent->PlayMontage(Montage);
+	OwningPlayer->CharacterAnimationComponent->OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
+	OwningPlayer->CharacterAnimationComponent->OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
+}
+
+void AShovel::DispatchMontageNotify(FName NotifyName)
+{
+	if (OwningPlayer->HotBarComponent->ActiveTool != this)
+	{
+		return;
+	}
+	
+	// TODO Map?
+	if (NotifyName.IsEqual(TEXT("OnDug")))
+	{
+		Dig();
+	}
+	else if (NotifyName.IsEqual(TEXT("OnDump")))
+	{
+		Dump();
+	}
+}
+
+void AShovel::MontageCompletedEvent(bool bInterrupted)
+{
+	if (!OwningPlayer || bInterrupted)
+	{
+		return;
+	}
+	
+	OwningPlayer->CharacterAnimationComponent->OnMontageNotifyBegin.RemoveDynamic(this, &AShovel::DispatchMontageNotify);
+	OwningPlayer->CharacterAnimationComponent->OnMontageCompleted.RemoveDynamic(this, &AShovel::MontageCompletedEvent);
 }
 
 void AShovel::DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const

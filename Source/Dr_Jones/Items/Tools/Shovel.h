@@ -33,6 +33,12 @@ public:
 	UFUNCTION()
 	void PrimaryAction();
 
+	UFUNCTION()
+	void DispatchMontageNotify(FName NotifyName);
+
+	UFUNCTION()
+	void MontageCompletedEvent(bool bInterrupted);
+
 private:
 	void DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const;
 
