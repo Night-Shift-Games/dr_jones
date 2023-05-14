@@ -14,6 +14,8 @@ class DR_JONES_API AShovel : public ATool
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
+	
 	void FillShovel();
 	void EmptyShovel();
 	
@@ -27,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void Dump();
+
+	UFUNCTION()
+	void PrimaryAction();
 
 private:
 	void DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const;

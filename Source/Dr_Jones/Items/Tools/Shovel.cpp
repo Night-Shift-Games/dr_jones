@@ -5,6 +5,15 @@
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
 #include "Player/DrJonesCharacter.h"
+#include "SharedComponents/ActionComponent.h"
+
+void AShovel::BeginPlay()
+{
+	Super::BeginPlay();
+
+	checkf(ActionComponent, TEXT("Action Component is not set."));
+	ActionComponent->PrimaryActionDelegate.AddDynamic(this, &AShovel::PrimaryAction);
+}
 
 void AShovel::FillShovel()
 {
@@ -100,6 +109,18 @@ void AShovel::Dump()
 	
 	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
 	EmptyShovel();
+}
+
+void AShovel::PrimaryAction()
+{
+	if (IsFilled())
+	{
+		PlayToolMontage(TEXT("Dump"));
+	}
+	else
+	{
+		PlayToolMontage(TEXT("Dig"));
+	}
 }
 
 void AShovel::DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const
