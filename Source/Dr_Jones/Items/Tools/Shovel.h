@@ -44,6 +44,8 @@ private:
 
 	bool TraceDig(FHitResult& OutHit) const;
 
+	bool TraceForDesiredDigLocation(FHitResult& OutHit) const;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tool Settings")
 	float ShovelStrength = 15;

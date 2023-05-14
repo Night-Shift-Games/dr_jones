@@ -11,6 +11,13 @@
 class UActionComponent;
 class UInteractableComponent;
 
+static TAutoConsoleVariable CVarToolDebug(
+	TEXT("NS.ToolDebug"),
+	false,
+	TEXT("Draw debug shapes for the tools' functionality"),
+	ECVF_Cheat
+);
+
 UCLASS()
 class DR_JONES_API ATool : public AItem
 {

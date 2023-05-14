@@ -116,15 +116,24 @@ void AShovel::Dump()
 
 void AShovel::PrimaryAction()
 {
-	UAnimMontage* Montage;
+	checkf(OwningPlayer->CharacterAnimationComponent, TEXT("Character has no animation component"));
+	UCharacterAnimationComponent& AnimationComponent = *OwningPlayer->CharacterAnimationComponent;
+	
+	UAnimMontage* Montage = nullptr;
 	
 	FHitResult DigLocationHit;
 	if (TraceForDesiredDigLocation(DigLocationHit))
 	{
-		const FVector& IKTrackLocation = DigLocationHit.Location;
+		AnimationComponent.ItemIKData.IKTrackLocation = DigLocationHit.Location;
+#if ENABLE_DRAW_DEBUG
+		if (CVarToolDebug.GetValueOnGameThread())
+		{
+			DrawDebugSphere(GetWorld(), AnimationComponent.ItemIKData.IKTrackLocation, 10.0f, 16, FColor::Green, false, 2.0f);
+		}
+#endif
 		Montage = FindActionMontage(IsFilled() ? TEXT("Dump") : TEXT("Dig"));
 	}
-	else
+	else if (IsFilled())
 	{
 		Montage = FindActionMontage(TEXT("Drop"));
 	}
@@ -137,9 +146,9 @@ void AShovel::PrimaryAction()
 
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
 
-	OwningPlayer->CharacterAnimationComponent->PlayMontage(Montage);
-	OwningPlayer->CharacterAnimationComponent->OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
-	OwningPlayer->CharacterAnimationComponent->OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
+	AnimationComponent.PlayMontage(Montage);
+	AnimationComponent.OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
+	AnimationComponent.OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
 }
 
 void AShovel::DispatchMontageNotify(FName NotifyName)
@@ -196,8 +205,6 @@ bool AShovel::TraceDig(FHitResult& OutHit) const
 		UE_LOG(LogTemp, Error, TEXT("Cannot find Dig Collision component in %s"), *this->GetName());
 		return false;
 	}
-#else
-	checkf(DigCollision, TEXT("Cannot find Dig Collision component in %s"), *this->GetName());
 #endif
 
 	const UWorld* World = GetWorld();
@@ -212,5 +219,11 @@ bool AShovel::TraceDig(FHitResult& OutHit) const
 	Params.AddIgnoredActor(this);
 
 	return World->SweepSingleByChannel(OutHit, StartLocation, EndLocation, Rotation, ECC_Visibility, DigCollision->GetCollisionShape(), Params);
+}
+
+bool AShovel::TraceForDesiredDigLocation(FHitResult& OutHit) const
+{
+	OutHit = OwningPlayer->GetPlayerLookingAt(ShovelReach);
+	return OutHit.bBlockingHit;
 }
 

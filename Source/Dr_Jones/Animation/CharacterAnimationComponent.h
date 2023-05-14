@@ -34,6 +34,15 @@ struct FCharacterToolAnimations
 	TMap<FName, TObjectPtr<UAnimMontage>> Montages;
 };
 
+USTRUCT(BlueprintType, Category = "Animation|Item")
+struct FItemIKData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Animation|Item")
+	FVector IKTrackLocation = FVector::ZeroVector;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageNotifyBeginDelegate, FName, NotifyName);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageCompletedDelegate, bool, bInterrupted);
 
@@ -75,6 +84,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Animation")
 	FOnMontageCompletedDelegate OnMontageCompleted;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation|Item")
+	FItemIKData ItemIKData;
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
