@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tool.h"
+
 #include "ArchaeologicalSite/ExcavationSegment.h"
+#include "Tool.h"
 
 #include "Shovel.generated.h"
 
@@ -15,10 +16,12 @@ class DR_JONES_API AShovel : public ATool
 
 public:
 	virtual void BeginPlay() override;
-	
+
 	void FillShovel();
 	void EmptyShovel();
 	
+	void PrimaryActionMontageBehavior(ADrJonesCharacter* Character);
+
 	UShapeComponent* GetDigCollision() const;
 
 	UFUNCTION(BlueprintPure, Category = "DrJones")

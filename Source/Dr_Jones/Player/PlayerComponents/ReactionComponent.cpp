@@ -12,7 +12,7 @@ void UReactionComponent::CallAction()
 	{
 		return;
 	}
-	ActiveItem.Value->CallPrimaryAction();
+	ActiveItem.Value->CallPrimaryAction(GetOwner<ADrJonesCharacter>());
 }
 
 void UReactionComponent::SetActiveItem(AItem& NewActiveItem)

@@ -2,7 +2,6 @@
 
 #include "Shovel.h"
 
-#include "PlayMontageCallbackProxy.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
@@ -16,6 +15,7 @@ void AShovel::BeginPlay()
 
 	checkf(ActionComponent, TEXT("Action Component is not set."));
 	ActionComponent->PrimaryActionDelegate.AddDynamic(this, &AShovel::PrimaryAction);
+	ActionComponent->PrimaryActionMontageBehaviorDelegate.BindUObject(this, &AShovel::PrimaryActionMontageBehavior);
 }
 
 void AShovel::FillShovel()
@@ -37,6 +37,43 @@ void AShovel::EmptyShovel()
 		DirtComponent->DestroyComponent();
 		DirtComponent = nullptr;
 	}
+}
+
+void AShovel::PrimaryActionMontageBehavior(ADrJonesCharacter* Character)
+{
+	checkf(Character->CharacterAnimationComponent, TEXT("Character has no animation component"));
+	UCharacterAnimationComponent& AnimationComponent = *Character->CharacterAnimationComponent;
+	
+	UAnimMontage* Montage = nullptr;
+	
+	FHitResult DigLocationHit;
+	if (TraceForDesiredDigLocation(DigLocationHit))
+	{
+		AnimationComponent.ItemIKData.IKTrackLocation = DigLocationHit.Location;
+#if ENABLE_DRAW_DEBUG
+		if (CVarToolDebug.GetValueOnGameThread())
+		{
+			DrawDebugSphere(GetWorld(), AnimationComponent.ItemIKData.IKTrackLocation, 10.0f, 16, FColor::Green, false, 2.0f);
+		}
+#endif
+		Montage = FindActionMontage(IsFilled() ? TEXT("Dump") : TEXT("Dig"));
+	}
+	else if (IsFilled())
+	{
+		Montage = FindActionMontage(TEXT("Drop"));
+	}
+
+	if (!Montage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Animation Montage not set."));
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
+
+	AnimationComponent.PlayMontage(Montage);
+	AnimationComponent.OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
+	AnimationComponent.OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
 }
 
 UShapeComponent* AShovel::GetDigCollision() const
@@ -116,39 +153,7 @@ void AShovel::Dump()
 
 void AShovel::PrimaryAction()
 {
-	checkf(OwningPlayer->CharacterAnimationComponent, TEXT("Character has no animation component"));
-	UCharacterAnimationComponent& AnimationComponent = *OwningPlayer->CharacterAnimationComponent;
-	
-	UAnimMontage* Montage = nullptr;
-	
-	FHitResult DigLocationHit;
-	if (TraceForDesiredDigLocation(DigLocationHit))
-	{
-		AnimationComponent.ItemIKData.IKTrackLocation = DigLocationHit.Location;
-#if ENABLE_DRAW_DEBUG
-		if (CVarToolDebug.GetValueOnGameThread())
-		{
-			DrawDebugSphere(GetWorld(), AnimationComponent.ItemIKData.IKTrackLocation, 10.0f, 16, FColor::Green, false, 2.0f);
-		}
-#endif
-		Montage = FindActionMontage(IsFilled() ? TEXT("Dump") : TEXT("Dig"));
-	}
-	else if (IsFilled())
-	{
-		Montage = FindActionMontage(TEXT("Drop"));
-	}
 
-	if (!Montage)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Animation Montage not set."));
-		return;
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
-
-	AnimationComponent.PlayMontage(Montage);
-	AnimationComponent.OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
-	AnimationComponent.OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
 }
 
 void AShovel::DispatchMontageNotify(FName NotifyName)

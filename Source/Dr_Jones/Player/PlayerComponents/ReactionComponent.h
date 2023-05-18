@@ -7,6 +7,7 @@
 
 #include "ReactionComponent.generated.h"
 
+class AItem;
 class UActionComponent;
 
 UCLASS(ClassGroup = "Player Components", meta = (BlueprintSpawnableComponent))
