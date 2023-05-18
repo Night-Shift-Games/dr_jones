@@ -45,25 +45,6 @@ void UCharacterAnimationComponent::InitializeComponent()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Skeletal Mesh Component not found in the owner of Character Animation Component."));
 	}
-
-	// Initialize Tool Montage Dispatchers:
-
-	ItemMontageDispatcherInstances.Reserve(ItemMontageDispatchers.Num());
-	for (auto& [ToolClass, DispatcherClass] : ItemMontageDispatchers)
-	{
-		if (ToolClass && DispatcherClass)
-		{
-			UItemMontageDispatcher* Dispatcher = NewObject<UItemMontageDispatcher>(this, DispatcherClass);
-			check(Dispatcher);
-			Dispatcher->CharacterMesh = CharacterMeshComponent;
-
-			ItemMontageDispatcherInstances.Emplace(ToolClass, Dispatcher);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Invalid Tool or Dispatcher class specified in the Character Animation Component."));
-		}
-	}
 }
 
 
@@ -73,19 +54,6 @@ void UCharacterAnimationComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-}
-
-void UCharacterAnimationComponent::DispatchItemAction(AItem* Item, FName Action)
-{
-	checkf(Item, TEXT("Item was null"));
-	if (UItemMontageDispatcher* Dispatcher = ItemMontageDispatcherInstances.FindRef(Item->GetClass()))
-	{
-		Dispatcher->Dispatch(*Item, Action);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Montage Dispatcher not found for tool %s"), *Item->GetName());
-	}
 }
 
 void UCharacterAnimationComponent::PlayMontage(UAnimMontage* Montage)

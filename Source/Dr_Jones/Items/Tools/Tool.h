@@ -29,10 +29,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void PickUp(ADrJonesCharacter* Player);
-
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	void PlayToolMontage(FName MontageName);
-
+	
 	UAnimMontage* FindActionMontage(const FName& MontageName) const;
 	
 protected:

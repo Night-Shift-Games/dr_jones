@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Items/Item.h"
-#include "ItemMontageDispatcher.h"
 #include "CharacterAnimationComponent.generated.h"
 
 
@@ -65,9 +64,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Animation")
-	void DispatchItemAction(AItem* Item, FName Action);
-
 	void PlayMontage(UAnimMontage* Montage);
 
 	UAnimMontage* FindItemActionMontage(const AItem& Item, const FName& Action);
@@ -97,12 +93,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
 	TMap<TSubclassOf<AItem>, FCharacterToolAnimations> CharacterToolAnimations;
-
-	UPROPERTY(EditAnywhere, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<TSubclassOf<AItem>, TSubclassOf<UItemMontageDispatcher>> ItemMontageDispatchers;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
-	TMap<TSubclassOf<AItem>, TObjectPtr<UItemMontageDispatcher>> ItemMontageDispatcherInstances;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimInstance> CharacterMeshAnimInstance;

@@ -43,17 +43,6 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
 }
 
-void ATool::PlayToolMontage(FName MontageName)
-{
-	if (!OwningPlayer)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Cannot play tool montage because the tool is not owned by any player."));
-		return;
-	}
-
-	OwningPlayer->PlayItemMontage(*this, MontageName);
-}
-
 UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
 {
 	if (!OwningPlayer)

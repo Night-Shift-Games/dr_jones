@@ -116,13 +116,6 @@ void ADrJonesCharacter::SwitchItem(float AxisValue)
 	HotBarComponent->ChangeActiveItem(AxisValue);
 }
 
-void ADrJonesCharacter::PlayItemMontage(AItem& Item, const FName& MontageName)
-{
-	checkf(CharacterAnimationComponent, TEXT("Animation component is null."));
-
-	CharacterAnimationComponent->DispatchItemAction(&Item, MontageName);
-}
-
 void ADrJonesCharacter::ShowInteractionUI()
 {
 	if (InteractionWidget && !InteractionWidget->IsInViewport())

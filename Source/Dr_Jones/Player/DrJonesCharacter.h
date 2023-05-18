@@ -29,9 +29,6 @@ public:
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
 
-	// Character Animation Component
-	void PlayItemMontage(AItem& Item, const FName& MontageName);
-
 protected:
 	virtual void BeginPlay() override;
 
