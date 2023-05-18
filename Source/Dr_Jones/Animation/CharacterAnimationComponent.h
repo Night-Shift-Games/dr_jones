@@ -61,9 +61,6 @@ protected:
 	virtual void InitializeComponent() override;
 
 public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void PlayMontage(UAnimMontage* Montage);
 
 	UAnimMontage* FindItemActionMontage(const AItem& Item, const FName& Action);
