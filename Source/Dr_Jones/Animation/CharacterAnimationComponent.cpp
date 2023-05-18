@@ -1,23 +1,17 @@
 // Property of Night Shift Games, all rights reserved.
 
-
 #include "Animation/CharacterAnimationComponent.h"
 
 #include "Player/DrJonesCharacter.h"
 
-// Sets default values for this component's properties
 UCharacterAnimationComponent::UCharacterAnimationComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	bWantsInitializeComponent = true;
 }
 
-
-// Called when the game starts
 void UCharacterAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -82,4 +76,3 @@ void UCharacterAnimationComponent::OnMontageNotifyBeginEvent(FName NotifyName,
 {
 	OnMontageNotifyBegin.Broadcast(NotifyName);
 }
-

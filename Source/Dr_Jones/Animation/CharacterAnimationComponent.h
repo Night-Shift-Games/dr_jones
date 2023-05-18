@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Components/ActorComponent.h"
 #include "Items/Item.h"
-#include "CharacterAnimationComponent.generated.h"
 
+#include "CharacterAnimationComponent.generated.h"
 
 USTRUCT(BlueprintType, Category = "Animation")
 struct FCharacterAnimations
@@ -19,7 +20,6 @@ struct FCharacterAnimations
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	TObjectPtr<UBlendSpace> Movement;
 };
-
 
 USTRUCT(BlueprintType, Category = "Animation")
 struct FCharacterToolAnimations
@@ -45,19 +45,16 @@ struct FItemIKData
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageNotifyBeginDelegate, FName, NotifyName);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageCompletedDelegate, bool, bInterrupted);
 
-UCLASS( Blueprintable, BlueprintType, ClassGroup=(Animation), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Animation), meta=(BlueprintSpawnableComponent))
 class DR_JONES_API UCharacterAnimationComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	UCharacterAnimationComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
-
 	virtual void InitializeComponent() override;
 
 public:
