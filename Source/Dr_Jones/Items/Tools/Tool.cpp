@@ -10,7 +10,7 @@
 
 ATool::ATool()
 {
-	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
+
 }
 
 void ATool::BeginPlay()

@@ -33,9 +33,6 @@ public:
 	UAnimMontage* FindActionMontage(const FName& MontageName) const;
 	
 protected:
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UActionComponent> ActionComponent;
-
 	UPROPERTY(Transient)
 	TObjectPtr<ADrJonesCharacter> OwningPlayer;
 };

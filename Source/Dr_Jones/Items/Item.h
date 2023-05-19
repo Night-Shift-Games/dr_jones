@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "GameFramework/Actor.h"
 
 #include "Item.generated.h"
 
 class UInteractableComponent;
+class UActionComponent;
 
 UCLASS(HideCategories = (Rendering, Replication, Collision, HLOD, Input, "Code View", Cooking, Actor))
 class DR_JONES_API AItem : public AActor
@@ -16,12 +18,14 @@ class DR_JONES_API AItem : public AActor
 	
 public:
 	AItem();
-
 	UMeshComponent* GetMeshComponent() const;
 	
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UInteractableComponent> InteractableComponent;
+
+	UPROPERTY(BlueprintReadWrite, Category = "DrJones|WorldComponents")
+	TObjectPtr<UActionComponent> ActionComponent;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Item")
 	FName AttachmentSocket = TEXT("RightHandSocket");
