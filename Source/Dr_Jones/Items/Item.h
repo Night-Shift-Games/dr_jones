@@ -8,8 +8,8 @@
 
 #include "Item.generated.h"
 
-class UInteractableComponent;
 class UActionComponent;
+class UInteractableComponent;
 
 UCLASS(HideCategories = (Rendering, Replication, Collision, HLOD, Input, "Code View", Cooking, Actor))
 class DR_JONES_API AItem : public AActor
@@ -21,10 +21,10 @@ public:
 	UMeshComponent* GetMeshComponent() const;
 	
 protected:
-	UPROPERTY(BlueprintReadWrite, Category = "DrJones|WorldComponents")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UInteractableComponent> InteractableComponent;
 
-	UPROPERTY(BlueprintReadWrite, Category = "DrJones|WorldComponents")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UActionComponent> ActionComponent;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Item")

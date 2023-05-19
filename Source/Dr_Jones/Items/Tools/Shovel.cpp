@@ -15,7 +15,6 @@ void AShovel::BeginPlay()
 
 	checkf(ActionComponent, TEXT("Action Component is not set."));
 	ActionComponent->PrimaryActionDelegate.AddDynamic(this, &AShovel::PrimaryAction);
-	ActionComponent->PrimaryActionMontageBehaviorDelegate.BindUObject(this, &AShovel::PrimaryActionMontageBehavior);
 }
 
 void AShovel::FillShovel()
@@ -39,10 +38,10 @@ void AShovel::EmptyShovel()
 	}
 }
 
-void AShovel::PrimaryActionMontageBehavior(ADrJonesCharacter* Character)
+void AShovel::PrimaryActionMontageBehavior()
 {
-	checkf(Character->CharacterAnimationComponent, TEXT("Character has no animation component"));
-	UCharacterAnimationComponent& AnimationComponent = *Character->CharacterAnimationComponent;
+	checkf(OwningPlayer->CharacterAnimationComponent, TEXT("Character has no animation component"));
+	UCharacterAnimationComponent& AnimationComponent = *OwningPlayer->CharacterAnimationComponent;
 	
 	UAnimMontage* Montage = nullptr;
 	
@@ -68,16 +67,20 @@ void AShovel::PrimaryActionMontageBehavior(ADrJonesCharacter* Character)
 		UE_LOG(LogTemp, Warning, TEXT("Animation Montage not set."));
 		return;
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
-
+	
+#if ENABLE_DRAW_DEBUG
+	if (CVarToolDebug.GetValueOnGameThread())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
+	}
+#endif
 	AnimationComponent.PlayMontage(Montage);
-	AnimationComponent.OnMontageNotifyBegin.AddUniqueDynamic(this, &AShovel::DispatchMontageNotify);
 	AnimationComponent.OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
 }
 
 UShapeComponent* AShovel::GetDigCollision() const
 {
+// TODO:
 	if (DigCollisionComponent)
 	{
 		return DigCollisionComponent;
@@ -107,6 +110,7 @@ bool AShovel::IsFilled() const
 
 void AShovel::Dig()
 {
+	GetWorldTimerManager().ClearTimer(ActionComponent->AnimationTimer);
 	if (!OwningPlayer)
 	{
 		return;
@@ -130,6 +134,7 @@ void AShovel::Dig()
 
 void AShovel::Dump()
 {
+	GetWorldTimerManager().ClearTimer(ActionComponent->AnimationTimer);
 	if (!OwningPlayer)
 	{
 		return;
@@ -146,42 +151,36 @@ void AShovel::Dump()
 	{
 		return;
 	}
-	
 	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
 	EmptyShovel();
 }
 
 void AShovel::PrimaryAction()
 {
+	FTimerHandle& Handle = ActionComponent->AnimationTimer;
 
-}
-
-void AShovel::DispatchMontageNotify(FName NotifyName)
-{
-	if (OwningPlayer->HotBarComponent->GetActiveTool() != this)
+	if (Handle.IsValid())
 	{
+		GEngine->AddOnScreenDebugMessage(10, 2, FColor::Red, __func__);
 		return;
 	}
-	
-	// TODO Map?
-	if (NotifyName.IsEqual(TEXT("OnDug")))
+	PrimaryActionMontageBehavior();
+	if (IsFilled())
 	{
-		Dig();
+		GetWorldTimerManager().SetTimer(Handle, this, &AShovel::Dump, 1, false, 1);
 	}
-	else if (NotifyName.IsEqual(TEXT("OnDump")))
+	else
 	{
-		Dump();
+		GetWorldTimerManager().SetTimer(Handle, this, &AShovel::Dig, 1, false, 1);
 	}
 }
 
 void AShovel::MontageCompletedEvent(bool bInterrupted)
 {
-	if (!OwningPlayer || bInterrupted)
+	if (!OwningPlayer)
 	{
 		return;
 	}
-	
-	OwningPlayer->CharacterAnimationComponent->OnMontageNotifyBegin.RemoveDynamic(this, &AShovel::DispatchMontageNotify);
 	OwningPlayer->CharacterAnimationComponent->OnMontageCompleted.RemoveDynamic(this, &AShovel::MontageCompletedEvent);
 }
 

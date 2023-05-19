@@ -19,8 +19,9 @@ public:
 
 	void FillShovel();
 	void EmptyShovel();
-	
-	void PrimaryActionMontageBehavior(ADrJonesCharacter* Character);
+
+	UFUNCTION()
+	void PrimaryActionMontageBehavior();
 
 	UShapeComponent* GetDigCollision() const;
 
@@ -35,10 +36,7 @@ public:
 
 	UFUNCTION()
 	void PrimaryAction();
-
-	UFUNCTION()
-	void DispatchMontageNotify(FName NotifyName);
-
+	
 	UFUNCTION()
 	void MontageCompletedEvent(bool bInterrupted);
 

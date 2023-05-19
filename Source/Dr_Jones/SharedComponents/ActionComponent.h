@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Components/ActorComponent.h"
+#include "TimerManager.h"
 
 #include "ActionComponent.generated.h"
 
@@ -44,12 +44,14 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "DrJones|Delegates")
 	FAction SecondaryActionDelegate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Animation", meta = (EditCondition = "PrimaryActionMontageBehavior.IsBound()"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Animation")
 	TObjectPtr<UAnimMontage> PrimaryActionMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Animation", meta = (EditCondition = "SecondaryActionMontageBehavior.IsBound()"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Animation")
 	TObjectPtr<UAnimMontage> SecondaryActionMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Animation")
 	TObjectPtr<UBlendSpace> MovementBlendSpaceOverride;
+	
+	FTimerHandle AnimationTimer;
 };
