@@ -158,7 +158,7 @@ void AShovel::PrimaryAction()
 
 void AShovel::DispatchMontageNotify(FName NotifyName)
 {
-	if (OwningPlayer->HotBarComponent->ActiveTool != this)
+	if (OwningPlayer->HotBarComponent->GetActiveTool() != this)
 	{
 		return;
 	}

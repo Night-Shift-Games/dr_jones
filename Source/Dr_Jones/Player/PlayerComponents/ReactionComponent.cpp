@@ -3,6 +3,7 @@
 #include "ReactionComponent.h"
 
 #include "Items/Item.h"
+#include "Player/DrJonesCharacter.h"
 #include "SharedComponents/ActionComponent.h"
 
 void UReactionComponent::CallAction()

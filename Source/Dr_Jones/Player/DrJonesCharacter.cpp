@@ -3,7 +3,6 @@
 #include "DrJonesCharacter.h"
 
 #include "Animation/CharacterAnimationComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerComponents/HotBarComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
@@ -28,50 +27,9 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ADrJonesCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
+	HotBarComponent->SetupPlayerInput(PlayerInputComponent);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
 	InteractionComponent->SetupPlayerInput(PlayerInputComponent);
-}
-#if ENABLE_DRAW_DEBUG
-void ADrJonesCharacter::DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit)
-{
-	if (CVarInteraction.GetValueOnAnyThread() == 0)
-	{
-		return;
-	}
-	DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 0, 0, 1);
-	FString Debug = FString(TEXT("Pointed Actor: "));
-	if (const AActor* Actor = Hit.GetActor())
-	{
-		Debug += Actor->GetName();
-	}
-	GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
-}
-#endif
-/*static*/ FHitResult ADrJonesCharacter::GetPlayerLookingAt(const float Reach)
-{
-	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
-
-	int32 ViewportX, ViewportY;
-	Controller->GetViewportSize(ViewportX, ViewportY);
-	FVector2D ScreenCenter = FVector2D(ViewportX / 2, ViewportY / 2);
-
-	FVector WorldLocation, WorldDirection;
-	if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
-	{
-		return {};
-	}
-
-	FVector LineEnd = WorldLocation + WorldDirection * Reach;
-	FHitResult Hit;
-
-	static FCollisionQueryParams CollisionQueryParams;
-	
-	GWorld->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECollisionChannel::ECC_Visibility);
-#if ENABLE_DRAW_DEBUG
-	DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
-#endif
-	return Hit;
 }
 
 void ADrJonesCharacter::MoveForward(float AxisValue)
@@ -94,12 +52,43 @@ void ADrJonesCharacter::LookUp(float AxisValue)
 	AddControllerPitchInput(AxisValue);
 }
 
-void ADrJonesCharacter::SwitchItem(float AxisValue)
+/*static*/ FHitResult ADrJonesCharacter::GetPlayerLookingAt(const float Reach)
 {
-	if (AxisValue == 0)
+	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
+
+	int32 ViewportX, ViewportY;
+	Controller->GetViewportSize(ViewportX, ViewportY);
+	FVector2D ScreenCenter = FVector2D(ViewportX / 2, ViewportY / 2);
+
+	FVector WorldLocation, WorldDirection;
+	if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
+	{
+		return {};
+	}
+
+	FVector LineEnd = WorldLocation + WorldDirection * Reach;
+	FHitResult Hit;
+	
+	GWorld->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECollisionChannel::ECC_Visibility);
+#if ENABLE_DRAW_DEBUG
+	DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
+#endif
+	return Hit;
+}
+
+#if ENABLE_DRAW_DEBUG
+void ADrJonesCharacter::DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit)
+{
+	if (CVarInteraction.GetValueOnAnyThread() == 0)
 	{
 		return;
 	}
-	HotBarComponent->ChangeActiveItem(AxisValue);
+	DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 0, 0, 1);
+	FString Debug = FString(TEXT("Pointed Actor: "));
+	if (const AActor* Actor = Hit.GetActor())
+	{
+		Debug += Actor->GetName();
+	}
+	GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
 }
-
+#endif

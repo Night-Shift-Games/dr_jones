@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Components/ActorComponent.h"
 #include "Items/Tools/Tool.h"
 #include "UI/DrJonesWidgetBase.h"
@@ -18,20 +19,28 @@ class DR_JONES_API UHotBarComponent : public UActorComponent
 	GENERATED_BODY()
 	
 public:
+	virtual void BeginPlay() override;
+	void SetupPlayerInput(UInputComponent* InputComponent);
+	
+	void ChangeActiveItem(float Value);
 	void AddTool(ATool& ToolToAdd);
 	void RemoveTool(ATool& ToolToRemove);
 	void SetActiveItem(ATool& NewActiveTool);
 	ATool* GetActiveTool() const;
 
-	void ChangeActiveItem(int8 Value);
+	UFUNCTION(BlueprintPure)
+	TArray<ATool*> GetTools() const;
 	
-public:
-	UPROPERTY()
-	TArray<TObjectPtr<ATool>> Tools;
-
-	UPROPERTY(EditAnywhere, Category="UI");
+protected:
+	UPROPERTY(EditAnywhere, Category = "UI");
 	TSubclassOf<UDrJonesWidgetBase> HotBarUI;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Tools")
+private:
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ATool>> Tools;
+	
+	UPROPERTY(Transient)
 	TObjectPtr<ATool> ActiveTool;
+	
+	TWeakObjectPtr<ADrJonesCharacter> Owner;
 };

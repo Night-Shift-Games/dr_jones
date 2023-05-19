@@ -9,12 +9,12 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
+class AItem;
 class UInteractionComponent;
 class UReactionComponent;
 class UHotBarComponent;
 class UCharacterAnimationComponent;
 class UWidgetManager;
-class AItem;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -24,10 +24,11 @@ public:
 	ADrJonesCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; };
-	static void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
+
+	static void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 
 private:
 	// Input Component
@@ -35,11 +36,6 @@ private:
 	void MoveRight(float AxisValue);
 	void Turn(float AxisValue);
 	void LookUp(float AxisValue);
-
-	// Action Component
-	void Interact();
-	
-	void SwitchItem(float AxisValue);
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Components")

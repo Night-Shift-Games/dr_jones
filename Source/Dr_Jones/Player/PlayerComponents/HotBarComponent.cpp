@@ -6,6 +6,33 @@
 #include "Utilities.h"
 #include "Player/WidgetManager.h"
 
+void UHotBarComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	Owner = GetOwner<ADrJonesCharacter>();
+}
+
+void UHotBarComponent::SetupPlayerInput(UInputComponent* InputComponent)
+{
+	InputComponent->BindAxis("Scroll", this, &UHotBarComponent::ChangeActiveItem);
+}
+
+void UHotBarComponent::ChangeActiveItem(float Value)
+{
+	if (Value == 0 || Tools.Num() < 2)
+	{
+		return;
+	}
+	
+	Owner->GetWidgetManager()->RequestWidgetUpdate(HotBarUI, Value);
+	
+	int32 ActiveItemID;
+	if (Tools.Find(ActiveTool, ActiveItemID))
+	{
+		SetActiveItem(*Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)]);
+	}
+}
+
 void UHotBarComponent::AddTool(ATool& ToolToAdd)
 {
 	Tools.Emplace(&ToolToAdd);
@@ -13,8 +40,8 @@ void UHotBarComponent::AddTool(ATool& ToolToAdd)
 	{
 		SetActiveItem(ToolToAdd);
 	}
-	TOptional<float> None;
-	GetOwner<ADrJonesCharacter>()->WidgetManager->RequestWidgetUpdate(HotBarUI, None);
+	const TOptional<float> None;
+	Owner->WidgetManager->RequestWidgetUpdate(HotBarUI, None);
 }
 
 void UHotBarComponent::RemoveTool(ATool& ToolToRemove)
@@ -32,7 +59,7 @@ void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
 	
 	ActiveTool = &NewActiveTool;
 	ActiveTool->GetMeshComponent()->SetVisibility(true);
-	GetOwner<ADrJonesCharacter>()->ReactionComponent->SetActiveItem(NewActiveTool);
+	Owner->ReactionComponent->SetActiveItem(NewActiveTool);
 }
 
 ATool* UHotBarComponent::GetActiveTool() const
@@ -40,18 +67,7 @@ ATool* UHotBarComponent::GetActiveTool() const
 	return ActiveTool;
 }
 
-void UHotBarComponent::ChangeActiveItem(const int8 Value)
+TArray<ATool*> UHotBarComponent::GetTools() const
 {
-	if (Tools.Num() < 2)
-	{
-		return;
-	}
-	
-	GetOwner<ADrJonesCharacter>()->WidgetManager->RequestWidgetUpdate(HotBarUI, Value);
-	
-	int32 ActiveItemID;
-	if (Tools.Find(ActiveTool, ActiveItemID))
-	{
-		SetActiveItem(*Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)]);
-	}
+	return Tools;
 }
