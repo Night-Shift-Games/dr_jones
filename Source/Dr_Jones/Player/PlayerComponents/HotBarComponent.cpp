@@ -5,7 +5,6 @@
 #include "ReactionComponent.h"
 #include "Utilities.h"
 #include "Player/WidgetManager.h"
-#include "UI/DrJonesWidgetBase.h"
 
 void UHotBarComponent::AddTool(ATool& ToolToAdd)
 {

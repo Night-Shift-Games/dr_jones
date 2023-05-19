@@ -20,16 +20,6 @@ ADrJonesCharacter::ADrJonesCharacter()
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 }
 
-void ADrJonesCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void ADrJonesCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -38,25 +28,26 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ADrJonesCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ADrJonesCharacter::Interact);
 	PlayerInputComponent->BindAxis("Scroll", this, &ADrJonesCharacter::SwitchItem);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
+	InteractionComponent->SetupPlayerInput(PlayerInputComponent);
 }
-
-void ADrJonesCharacter::DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit)
+#if ENABLE_DRAW_DEBUG
+void ADrJonesCharacter::DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit)
 {
-	if (CVarInteraction.GetValueOnAnyThread() != 0)
+	if (CVarInteraction.GetValueOnAnyThread() == 0)
 	{
-		DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 1.f / 60, 0, 1);
-		FString Debug = FString(TEXT("Pointed Actor: "));
-		if (AActor* Actor = Hit.GetActor())
-		{
-			Debug += Actor->GetName();
-		}
-		GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
+		return;
 	}
+	DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 0, 0, 1);
+	FString Debug = FString(TEXT("Pointed Actor: "));
+	if (const AActor* Actor = Hit.GetActor())
+	{
+		Debug += Actor->GetName();
+	}
+	GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
 }
-
+#endif
 /*static*/ FHitResult ADrJonesCharacter::GetPlayerLookingAt(const float Reach)
 {
 	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
@@ -74,10 +65,12 @@ void ADrJonesCharacter::DrawInteractionDebugInfo(FVector WorldLocation, FVector 
 	FVector LineEnd = WorldLocation + WorldDirection * Reach;
 	FHitResult Hit;
 
-	GWorld->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECollisionChannel::ECC_Visibility);
-
-	DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
+	static FCollisionQueryParams CollisionQueryParams;
 	
+	GWorld->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECollisionChannel::ECC_Visibility);
+#if ENABLE_DRAW_DEBUG
+	DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
+#endif
 	return Hit;
 }
 
@@ -101,12 +94,6 @@ void ADrJonesCharacter::LookUp(float AxisValue)
 	AddControllerPitchInput(AxisValue);
 }
 
-void ADrJonesCharacter::Interact()
-{
-	checkf(InteractionComponent, TEXT("InteractionComponent is missing!"));
-	InteractionComponent->Interact();
-}
-
 void ADrJonesCharacter::SwitchItem(float AxisValue)
 {
 	if (AxisValue == 0)
@@ -116,27 +103,3 @@ void ADrJonesCharacter::SwitchItem(float AxisValue)
 	HotBarComponent->ChangeActiveItem(AxisValue);
 }
 
-void ADrJonesCharacter::ShowInteractionUI()
-{
-	if (InteractionWidget && !InteractionWidget->IsInViewport())
-	{
-		InteractionWidget->AddToViewport();
-	}
-	if (InteractionWidgetUIClass && !InteractionWidget)
-	{
-		InteractionWidget = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), InteractionWidgetUIClass, MakeUniqueObjectName(GetController(), UUserWidget::StaticClass()));
-
-		if (IsValid(InteractionWidget))
-		{
-			InteractionWidget->AddToViewport();
-		}
-	}
-}
-
-void ADrJonesCharacter::HideInteractionUI()
-{
-	if (InteractionWidget && InteractionWidget->IsInViewport())
-	{
-		InteractionWidget->RemoveFromViewport();
-	}
-}

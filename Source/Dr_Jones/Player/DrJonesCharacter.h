@@ -22,15 +22,12 @@ class DR_JONES_API ADrJonesCharacter : public ACharacter
 	GENERATED_BODY()
 public:
 	ADrJonesCharacter();
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	static void DrawInteractionDebugInfo(FVector WorldLocation, FVector LineEnd, FHitResult Hit);
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	UWidgetManager* GetWidgetManager() const { return WidgetManager; };
+	static void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
-
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	// Input Component
@@ -43,11 +40,6 @@ private:
 	void Interact();
 	
 	void SwitchItem(float AxisValue);
-	
-public:
-	// Widget Component
-	void ShowInteractionUI();
-	void HideInteractionUI();
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Components")
@@ -71,15 +63,4 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "FX|Anim")
 	TObjectPtr<UAnimMontage> DigAnim;
-	
-	// TODO: WidgetComponent
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UUserWidget> InteractionWidgetUIClass;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UUserWidget> InteractionWidget;
-
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> RunTimeUIClass;
-
 };

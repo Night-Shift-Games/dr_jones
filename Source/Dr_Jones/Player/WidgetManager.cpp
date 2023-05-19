@@ -20,29 +20,49 @@ void UWidgetManager::BeginPlay()
 
 void UWidgetManager::AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
+	if (!WidgetClass)
+	{
+		return;
+	}
 	UDrJonesWidgetBase* NewWidget = CreateWidget<UDrJonesWidgetBase>(OwningController.Get(), WidgetClass);
 	Widgets.Emplace(WidgetClass, NewWidget);
 }
 
-void UWidgetManager::ShowWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+void UWidgetManager::ShowWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
-	if (UDrJonesWidgetBase* WidgetToShow = Widgets.Find(Widget)->Get(); !WidgetToShow->IsInViewport())
+	if (!WidgetClass)
 	{
-		WidgetToShow->AddToViewport();
+		return;
 	}
+	UDrJonesWidgetBase* WidgetToShow = Widgets.FindRef(WidgetClass);
+	if (!WidgetToShow || WidgetToShow->IsInViewport())
+	{
+		return;
+	}
+	WidgetToShow->AddToViewport();
 }
 
-void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
-	if (UDrJonesWidgetBase* WidgetToHide = Widgets.Find(Widget)->Get(); WidgetToHide->IsInViewport())
+	if (!WidgetClass)
 	{
-		WidgetToHide->RemoveFromViewport();
+		return;
 	}
+	UDrJonesWidgetBase* WidgetToHide = Widgets.FindRef(WidgetClass);
+	if (!WidgetToHide || !WidgetToHide->IsInViewport())
+	{
+		return;
+	}
+	WidgetToHide->RemoveFromViewport();
 }
 
-void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget)
+void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
-	if (UUserWidget* WidgetToShow = Widgets.Find(Widget)->Get(); !WidgetToShow->IsInViewport())
+	if (!WidgetClass)
+	{
+		return;
+	}
+	if (UUserWidget* WidgetToShow = Widgets.Find(WidgetClass)->Get(); !WidgetToShow->IsInViewport())
 	{
 		WidgetToShow->AddToViewport();
 	}

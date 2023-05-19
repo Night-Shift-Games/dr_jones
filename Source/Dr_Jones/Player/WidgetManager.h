@@ -6,8 +6,8 @@
 
 #include "WidgetManager.generated.h"
 
-class UDrJonesWidgetBase;
 class ADrJonesCharacter;
+class UDrJonesWidgetBase;
 class UUserWidget;
 
 UCLASS()
@@ -19,11 +19,11 @@ public:
 	virtual void BeginPlay() override;
 	
 	void AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
-	void ShowWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
-	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
-	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> Widget);
-	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const;
+	void ShowWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget, TOptional<float> AxisValue) const;
+	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const;
 public:
 	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (DisplayName = "Widgets"))
 	TSet<TSubclassOf<UDrJonesWidgetBase>> BeginPlayWidgets;
@@ -36,5 +36,4 @@ public:
 
 	UPROPERTY(Transient)
 	TObjectPtr<APlayerController> OwningController;
-	
 };

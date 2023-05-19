@@ -3,35 +3,52 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Components/ActorComponent.h"
+#include "SharedComponents/InteractableComponent.h"
 
 #include "InteractionComponent.generated.h"
 
 class ADrJonesCharacter;
+class UDrJonesWidgetBase;
 
 static TAutoConsoleVariable<bool> CVarInteraction(
 	TEXT("NS.Interaction"),
 	false,
 	TEXT("Interaction helper function"),
-	ECVF_Default
-
+	ECVF_Cheat
 );
 
 UCLASS(ClassGroup = "PlayerComponents", meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
+	
 public:	
 	UInteractionComponent();
-	void Interact();
+	void SetupPlayerInput(UInputComponent* InputComponent);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void Interact();
+	bool IsInteractable() const;
+	void UpdateInteractionWidget();
+
 protected:
-	UPROPERTY(EditAnywhere, Category = "Interaction")
-	float InteractionRange = 150;
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
+	TWeakObjectPtr<UWidgetManager> WidgetManager;
+	
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	float InteractionRange = 150.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
+	
+	UPROPERTY(Transient)
 	TObjectPtr<AActor> ActorToInteract;
+
+	UPROPERTY(Transient)
 	TObjectPtr<AActor> PreviousActorToInteract;
 };

@@ -3,7 +3,6 @@
 #include "ReactionComponent.h"
 
 #include "Items/Item.h"
-#include "Player/DrJonesCharacter.h"
 #include "SharedComponents/ActionComponent.h"
 
 void UReactionComponent::CallAction()
@@ -28,6 +27,5 @@ AItem* UReactionComponent::GetActiveItem() const
 
 void UReactionComponent::SetupPlayerInput(UInputComponent* InputComponent)
 {
-	ADrJonesCharacter* Owner = GetOwner<ADrJonesCharacter>();
 	InputComponent->BindAction("PrimaryItemAction", IE_Pressed, this, &UReactionComponent::CallAction);
 }
