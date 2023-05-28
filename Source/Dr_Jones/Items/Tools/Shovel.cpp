@@ -105,7 +105,7 @@ UShapeComponent* AShovel::GetDigCollision() const
 
 bool AShovel::IsFilled() const
 {
-	return !DirtComponent.IsNull();
+	return DirtComponent != nullptr;
 }
 
 void AShovel::Dig()

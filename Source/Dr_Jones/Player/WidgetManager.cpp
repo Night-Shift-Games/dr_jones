@@ -53,11 +53,12 @@ void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClas
 	{
 		return;
 	}
-	WidgetToHide->RemoveFromViewport();
+	WidgetToHide->RemoveFromParent();
 }
 
 void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
+	// TODO: It's not actually removing anything xD
 	if (!WidgetClass)
 	{
 		return;
