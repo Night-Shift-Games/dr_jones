@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SpatialData.h"
 #include "UObject/Object.h"
 
 #include "WorldRegionalData.generated.h"
