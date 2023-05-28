@@ -17,10 +17,12 @@ public class DrJonesEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "AssetTools",
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore"
+                "SlateCore",
+                "UnrealEd"
             }
         );
     }
