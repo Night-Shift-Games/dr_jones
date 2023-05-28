@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
 #include "Factories/Factory.h"
+#include "UObject/ObjectMacros.h"
 
 #include "WorldRegionalDataFactory.generated.h"
 
