@@ -1,6 +1,7 @@
 ﻿#include "DrJonesEditor.h"
 
 #include "AssetTypeActions/AssetTypeActions_WorldRegionalData.h"
+#include "AssetTypeActions/AssetTypeActions_WorldSpatialData.h"
 
 DEFINE_LOG_CATEGORY(LogDrJonesEditor);
 
@@ -11,6 +12,7 @@ void FDrJonesEditorModule::StartupModule()
 	UE_LOG(LogDrJonesEditor, Log, TEXT("DrJonesEditor Module startup"));
 
 	AssetTypeActionsArray.Add(MakeShared<FAssetTypeActions_WorldRegionalData>());
+	AssetTypeActionsArray.Add(MakeShared<FAssetTypeActions_WorldSpatialData>());
 	RegisterAssetTypeActions();
 }
 
