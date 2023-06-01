@@ -7,10 +7,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "WorldData.h"
 
-#include "WorldRegionalDataUtilities.generated.h"
+#include "WorldDataUtilities.generated.h"
 
 UCLASS()
-class DR_JONES_API UWorldRegionalDataUtilities : public UBlueprintFunctionLibrary
+class DR_JONES_API UWorldDataUtilities : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
