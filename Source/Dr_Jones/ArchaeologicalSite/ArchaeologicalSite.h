@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/DynamicMeshComponent.h"
 #include "GameFramework/Actor.h"
-#include "ExcavationSegment.h"
-#include "Items/Artifacts/Artifact.h"
+
 #include "ArchaeologicalSite.generated.h"
 
 UCLASS()
@@ -16,64 +16,12 @@ class DR_JONES_API AArchaeologicalSite : public AActor
 public:	
 	AArchaeologicalSite();
 
-	void PopulateWithArtefacts();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 
-	void SpawnArtefact(TSubclassOf<AArtifact>ArtefactClass = nullptr);
-
-	void SpawnAllQuestArtefacts();
-
-	UFUNCTION(CallInEditor)
-	void CreateArea();
-
-	UFUNCTION(CallInEditor)
-	void RefreshArena();
+	UFUNCTION(BlueprintCallable)
+	void TestDig(FTransform SphereOrigin);
 	
-	UPROPERTY(EditAnywhere)
-	TArray <TSubclassOf<AArtifact>> ArtefactsClass;
-	
-	UPROPERTY(EditAnywhere)
-	TArray <AArtifact*> Artefacts;
-	
-	UPROPERTY(EditAnywhere, meta=(MakeEditWidget))
-	FVector ArtefactSpawnOrigin;
-	
-	UPROPERTY(EditAnywhere)
-	float ArtefactSpawnAreaX;
-
-	UPROPERTY(EditAnywhere)
-	float ArtefactSpawnAreaY;
-
-	UPROPERTY(EditAnywhere)
-	int ArtefactsQuantity;
-
-	UPROPERTY(EditAnywhere)
-	float Size;
-
-	UPROPERTY(EditAnywhere)
-	int AreaResolution;
-
-	UPROPERTY(EditAnywhere)
-	int Resolution;
-
-	UPROPERTY(EditAnywhere)
-	bool bSmoothDigging;
-
-	UPROPERTY(EditAnywhere)
-	UMaterialInterface* ExcavateMaterial;
-
-	USceneComponent* Root;
-
-	TArray<UExcavationSegment*> ExcavationSegments;
-
-protected:
-
-	virtual void BeginPlay() override;
-
-	//virtual void OnConstruction(const FTransform& Transform) override;
-
-private:
-
-	void DestroyArea();
-	bool bIsArenaGenerated;
-	float SegmentSize;
+	UFUNCTION(BlueprintCallable)
+	UDynamicMesh* AllocateDynamicMesh();
 };
