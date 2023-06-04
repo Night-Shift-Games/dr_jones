@@ -24,4 +24,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	UDynamicMesh* AllocateDynamicMesh();
+
+	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, float Radius) const;
 };
