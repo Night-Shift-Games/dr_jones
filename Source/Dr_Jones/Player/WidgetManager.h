@@ -10,7 +10,8 @@ class ADrJonesCharacter;
 class UDrJonesWidgetBase;
 class UUserWidget;
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup = "Player Components",
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class UWidgetManager : public UActorComponent
 {
 	GENERATED_BODY()

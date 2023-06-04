@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Components/ActorComponent.h"
 #include "Items/Item.h"
 
@@ -45,7 +44,8 @@ struct FItemIKData
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageNotifyBeginDelegate, FName, NotifyName);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMontageCompletedDelegate, bool, bInterrupted);
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup=(Animation), meta=(BlueprintSpawnableComponent))
+UCLASS(Blueprintable, BlueprintType, ClassGroup = "Player Components", meta = (BlueprintSpawnableComponent),
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UCharacterAnimationComponent : public UActorComponent
 {
 	GENERATED_BODY()

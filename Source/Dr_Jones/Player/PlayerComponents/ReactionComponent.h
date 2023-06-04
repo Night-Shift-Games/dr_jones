@@ -11,7 +11,8 @@
 class AItem;
 class UActionComponent;
 
-UCLASS(ClassGroup = "Player Components", meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = "Player Components", meta = (BlueprintSpawnableComponent),
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UReactionComponent : public UActorComponent
 {
 	GENERATED_BODY()

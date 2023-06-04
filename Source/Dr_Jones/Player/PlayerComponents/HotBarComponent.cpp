@@ -2,9 +2,10 @@
 
 #include "HotBarComponent.h"
 
+#include "Items/Tools/Tool.h"
+#include "Player/WidgetManager.h"
 #include "ReactionComponent.h"
 #include "Utilities.h"
-#include "Player/WidgetManager.h"
 
 void UHotBarComponent::BeginPlay()
 {

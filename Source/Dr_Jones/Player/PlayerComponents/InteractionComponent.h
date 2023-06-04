@@ -3,14 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Components/ActorComponent.h"
-#include "SharedComponents/InteractableComponent.h"
 
 #include "InteractionComponent.generated.h"
 
 class ADrJonesCharacter;
 class UDrJonesWidgetBase;
+class UWidgetManager;
 
 static TAutoConsoleVariable<bool> CVarInteraction(
 	TEXT("NS.Interaction"),
@@ -19,7 +18,8 @@ static TAutoConsoleVariable<bool> CVarInteraction(
 	ECVF_Cheat
 );
 
-UCLASS(ClassGroup = "PlayerComponents", meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = "PlayerComponents", meta = (BlueprintSpawnableComponent),
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()

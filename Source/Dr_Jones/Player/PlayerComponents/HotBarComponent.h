@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Components/ActorComponent.h"
-#include "Items/Tools/Tool.h"
 #include "UI/DrJonesWidgetBase.h"
 
 #include "HotBarComponent.generated.h"
@@ -13,7 +11,8 @@
 class ADrJonesCharacter;
 class ATool;
 
-UCLASS(Blueprintable)
+UCLASS(Blueprintable, ClassGroup = "Player Components",
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UHotBarComponent : public UActorComponent
 {
 	GENERATED_BODY()
