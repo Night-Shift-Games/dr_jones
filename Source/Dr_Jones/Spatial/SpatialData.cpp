@@ -161,7 +161,7 @@ TSharedRef<FSpatialDataBuffer> FSpatialDataBufferBuilder::Build(const FIntVector
 	check(Dimensions.Y >= 0);
 	check(Dimensions.Z >= 0);
 	check(Dimensions.W >= 0);
-	check(Dimensions.X * Dimensions.Y * Dimensions.Z * Dimensions.W <= sizeof(int32));
+	check(Dimensions.X * Dimensions.Y * Dimensions.Z * Dimensions.W <= TNumericLimits<int32>::Max());
 	
 	const TSharedRef<FSpatialDataBufferLayout> Layout = MakeShareable(new FSpatialDataBufferLayout);
 	Layout->Attributes = Attributes;
@@ -171,7 +171,7 @@ TSharedRef<FSpatialDataBuffer> FSpatialDataBufferBuilder::Build(const FIntVector
 	Buffer->Layout = Layout;
 	Buffer->Dimensions = Dimensions;
 	Buffer->TexelCount = Dimensions.X * Dimensions.Y * Dimensions.Z * Dimensions.W;
-	Buffer->Data.Reserve(Buffer->TexelCount * Layout->CachedTexelSize);
+	Buffer->Data.SetNumUninitialized(Buffer->TexelCount * Layout->CachedTexelSize);
 
 	return Buffer;
 }

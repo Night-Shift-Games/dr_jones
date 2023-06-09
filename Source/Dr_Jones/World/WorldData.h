@@ -19,7 +19,7 @@ struct FWorldLocation
 	FText DisplayName;
 
 	/** Latitude and Longitude */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GeoLocation", meta = (ShowInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GeoLocation", meta = (ShowOnlyInnerProperties))
 	FGeoLocation GeoLocation;
 
 	/** Radius of a circle shown on the map that indicates the approximate
@@ -71,7 +71,7 @@ struct FWorldCity
 	FText DisplayName;
 
 	/** Latitude and Longitude */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City", meta = (ShowInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City", meta = (ShowOnlyInnerProperties))
 	FGeoLocation GeoLocation;
 
 	/** Radius of a circle shown on the map that indicates the approximate

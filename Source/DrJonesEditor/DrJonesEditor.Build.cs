@@ -22,7 +22,8 @@ public class DrJonesEditor : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "UnrealEd"
+                "ToolMenus",
+                "UnrealEd",
             }
         );
     }

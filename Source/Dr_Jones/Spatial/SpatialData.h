@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Dr_Jones.h"
 
 struct FGeoLocation;
@@ -8,6 +9,7 @@ enum class ESpatialDataTexelAttributeType : uint8
 	Raw = 0,
 	Float,
 	Int32,
+	Byte,
 	
 	NUM UMETA(Hidden)
 };
@@ -27,6 +29,12 @@ struct TGetSpatialTexelAttributeType<int32>
 	static constexpr ESpatialDataTexelAttributeType Type = ESpatialDataTexelAttributeType::Int32;
 };
 
+template<>
+struct TGetSpatialTexelAttributeType<uint8>
+{
+	static constexpr ESpatialDataTexelAttributeType Type = ESpatialDataTexelAttributeType::Byte;
+};
+
 struct FSpatialDataTexelAttributeDescriptor
 {
 	FName Name;
@@ -35,7 +43,7 @@ struct FSpatialDataTexelAttributeDescriptor
 	ESpatialDataTexelAttributeType Type;
 };
 
-class FSpatialDataBufferLayout
+class DR_JONES_API FSpatialDataBufferLayout
 {
 	FSpatialDataBufferLayout();
 
@@ -53,7 +61,7 @@ private:
 	friend class FSpatialDataBufferBuilder;
 };
 
-class FSpatialDataTexelAccessor
+class DR_JONES_API FSpatialDataTexelAccessor
 {
 	FSpatialDataTexelAccessor(const FSpatialDataBufferLayout& Layout, const uint8* Data);
 
@@ -68,7 +76,7 @@ private:
 	friend class FSpatialDataBuffer;
 };
 
-class FSpatialDataBuffer
+class DR_JONES_API FSpatialDataBuffer
 {
 public:
 	using ByteArray = TArray<uint8>;
@@ -85,6 +93,7 @@ public:
 	bool TryCopyAttributeRaw(int32 Index, const FName& Attribute, FSpatialDataBuffer& OutOther) const;
 
 	int32 GetBufferSize() const;
+	int32 GetTexelCount() const;
 
 private:
 	bool IsIndexValid(int32 Index) const;
@@ -99,7 +108,7 @@ private:
 	friend class FSpatialDataBufferBuilder;
 };
 
-class FSpatialDataBufferBuilder
+class DR_JONES_API FSpatialDataBufferBuilder
 {
 public:
 	FSpatialDataBufferBuilder();
@@ -147,7 +156,14 @@ const DataT* FSpatialDataTexelAccessor::GetAttributeData(const FName& Name) cons
 
 FORCEINLINE int32 FSpatialDataBuffer::GetBufferSize() const
 {
+	check(Data.Num() == TexelCount * Layout->GetTexelSize());
 	return Data.Num();
+}
+
+FORCEINLINE int32 FSpatialDataBuffer::GetTexelCount() const
+{
+	check(TexelCount == Data.Num() / Layout->GetTexelSize());
+	return TexelCount;
 }
 
 FORCEINLINE bool FSpatialDataBuffer::IsIndexValid(int32 Index) const

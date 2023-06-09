@@ -65,4 +65,16 @@ class DR_JONES_API UWorldDataUtilities : public UBlueprintFunctionLibrary
 		
 		return Target->SampleAtLocation<int32>(Attribute, GeoLocation);
 	}
+
+	UFUNCTION(BlueprintCallable, Category = "Spatial")
+	static uint8 SampleByteAtLocation(UWorldSpatialData* Target, FName Attribute, FGeoLocation GeoLocation, float Year)
+	{
+		if (!Target)
+		{
+			UE_LOG(LogDrJones, Error, TEXT("Target was null."));
+			return 0;
+		}
+		
+		return Target->SampleAtLocation<uint8>(Attribute, GeoLocation);
+	}
 };

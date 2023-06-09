@@ -12,6 +12,8 @@ ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 
 void ADr_JonesGameModeBase::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	//QuestSystem = NewObject<UQuestSystemLogic>();
 	OnQuestSystemInitializedDelegate.Broadcast();
 }
