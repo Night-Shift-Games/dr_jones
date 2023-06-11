@@ -51,7 +51,7 @@ float AArchaeologicalSite::CalculateAngleBetweenTwoVectors(const FVector& Direct
 }
 
 // TODO: This should end up in some utility
-float AArchaeologicalSite::GetChordLenght(const float SphereRadius, const FVector& Direction, const FVector& Second) const
+float AArchaeologicalSite::GetChordLength(const float SphereRadius, const FVector& Direction, const FVector& Second) const
 {
 	const float Angle = CalculateAngleBetweenTwoVectors(Direction, Second);
 	const float CenterAngle = PI - (2 * Angle);
@@ -69,7 +69,7 @@ FVector AArchaeologicalSite::CalculateSphereDeform(const FVector& VertexPosition
 	FVector OriginDirection = SphereOrigin - DigDirection;
 	OriginDirection.Normalize();
 
-	const float ChordLenght = GetChordLenght(SphereRadius, VertexDirection, OriginDirection);
+	const float ChordLenght = GetChordLength(SphereRadius, VertexDirection, OriginDirection);
 	const float DeformLenght = ChordLenght - HalfSize;
 
 	return VertexPosition + VertexDirection * DeformLenght;
