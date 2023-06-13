@@ -63,7 +63,7 @@ void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetCl
 	{
 		return;
 	}
-	if (UUserWidget* WidgetToShow = Widgets.Find(WidgetClass)->Get(); !WidgetToShow->IsInViewport())
+	if (UUserWidget* WidgetToShow = Widgets.FindRef(WidgetClass); !WidgetToShow->IsInViewport())
 	{
 		WidgetToShow->AddToViewport();
 	}
@@ -77,7 +77,7 @@ UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBa
 void UWidgetManager::RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget,
 	TOptional<float> AxisValue) const
 {
-	UDrJonesWidgetBase* WidgetToUpdate = Widgets.Find(Widget)->Get();
+	UDrJonesWidgetBase* WidgetToUpdate = Widgets.FindRef(Widget);
 	if (!WidgetToUpdate)
 	{
 		return;
