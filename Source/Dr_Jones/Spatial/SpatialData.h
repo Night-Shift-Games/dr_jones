@@ -132,13 +132,15 @@ public:
 	
 	template<typename T>
 	void AddAttribute(const FName& Name);
-	void AddAttribute(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor);
 	void AddAttributesFromExistingLayout(TSharedRef<FSpatialDataBufferLayout> Layout);
+	
+	void AddAttributeDynamic(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor);
 
 	TSharedRef<FSpatialDataBuffer> Build(const FIntVector4& Dimensions) const;
 	TSharedRef<FSpatialDataBuffer> Rebuild(const FSpatialDataBuffer& Other) const;
 
 	void Reset();
+	int32 GetAttributeCount() const;
 
 private:
 	void AddAttribute_Internal(const FName& Name, int32 AttributeSize, ESpatialDataTexelAttributeType AttributeType);
@@ -214,4 +216,9 @@ FORCEINLINE void FSpatialDataBufferBuilder::AddAttribute(const FName& Name)
 		"Attributes should not be larger than 8 bytes. More attributes should be used to store that kind of data instead.");
 	
 	AddAttribute_Internal(Name, sizeof(T), TGetSpatialTexelAttributeType<T>::Type);
+}
+
+FORCEINLINE int32 FSpatialDataBufferBuilder::GetAttributeCount() const
+{
+	return Attributes.Num();
 }

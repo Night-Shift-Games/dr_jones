@@ -166,7 +166,7 @@ FSpatialDataBufferBuilder::FSpatialDataBufferBuilder()
 {
 }
 
-void FSpatialDataBufferBuilder::AddAttribute(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor)
+void FSpatialDataBufferBuilder::AddAttributeDynamic(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor)
 {
 	AddAttribute_Internal(AttributeDescriptor.Name, AttributeDescriptor.Size, AttributeDescriptor.Type);
 }
