@@ -42,8 +42,14 @@ FSpatialDataTexelAccessor::FSpatialDataTexelAccessor(const FSpatialDataBufferLay
 }
 
 FSpatialDataBuffer::FSpatialDataBuffer()
-	: TexelCount(0)
+	: TexelCount(0),
+	  Dimensions()
 {
+}
+
+TSharedRef<FSpatialDataBuffer> FSpatialDataBuffer::Default(const FIntVector4& Dimensions)
+{
+	return FSpatialDataBufferBuilder().Build(Dimensions);
 }
 
 FSpatialDataTexelAccessor FSpatialDataBuffer::Sample3D(int32 X, int32 Y, int32 Z) const
@@ -52,7 +58,7 @@ FSpatialDataTexelAccessor FSpatialDataBuffer::Sample3D(int32 X, int32 Y, int32 Z
 	checkf(X >= 0 && X < Dimensions.X, TEXT("Invalid X coordinate"));
 	checkf(Y >= 0 && Y < Dimensions.Y, TEXT("Invalid Y coordinate"));
 	checkf(Z >= 0 && Z < Dimensions.Z, TEXT("Invalid Z coordinate"));
-	checkf(IsIndexValid(X * Y * Z), TEXT("Index out of bounds"));
+	checkf(IsIndexValid(X + Y * Dimensions.X + Z * Dimensions.X * Dimensions.Y), TEXT("Index out of bounds"));
 	
 	const int32 TexelSize = Layout->GetTexelSize();
 	const int32 TexelIndex = X + Y * Dimensions.X + Z * Dimensions.X * Dimensions.Y;
@@ -150,9 +156,25 @@ bool FSpatialDataBuffer::TryCopyAttributeRaw(int32 Index, const FName& Attribute
 	return true;
 }
 
+void FSpatialDataBuffer::SetRawData(const ByteArray& Bytes)
+{
+	Data = Bytes;
+}
+
 FSpatialDataBufferBuilder::FSpatialDataBufferBuilder()
 	: CurrentStride(0)
 {
+}
+
+void FSpatialDataBufferBuilder::AddAttribute(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor)
+{
+	AddAttribute_Internal(AttributeDescriptor.Name, AttributeDescriptor.Size, AttributeDescriptor.Type);
+}
+
+void FSpatialDataBufferBuilder::AddAttributesFromExistingLayout(TSharedRef<FSpatialDataBufferLayout> Layout)
+{
+	Attributes.Reserve(Attributes.Num() + Layout->Attributes.Num());
+	Algo::Copy(Layout->Attributes, Attributes);
 }
 
 TSharedRef<FSpatialDataBuffer> FSpatialDataBufferBuilder::Build(const FIntVector4& Dimensions) const
@@ -211,4 +233,10 @@ void FSpatialDataBufferBuilder::AddAttribute_Internal(const FName& Name, int32 A
 	Attributes.Add(Descriptor);
 	
 	CurrentStride += AttributeSize; 
+}
+
+FArchive& operator<<(FArchive& Ar, FSpatialDataBufferLayout& Layout)
+{
+	Ar << Layout.Attributes;
+	return Ar;
 }

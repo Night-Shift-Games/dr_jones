@@ -41,15 +41,26 @@ struct FSpatialDataTexelAttributeDescriptor
 	int32 Stride;
 	uint8 Size;
 	ESpatialDataTexelAttributeType Type;
+
+	friend FArchive& operator<<(FArchive& Ar, FSpatialDataTexelAttributeDescriptor& Attribute)
+	{
+		Ar << Attribute.Name;
+		Ar << Attribute.Stride;
+		Ar << Attribute.Size;
+		Ar << Attribute.Type;
+		return Ar;
+	}
 };
 
 class DR_JONES_API FSpatialDataBufferLayout
 {
-	FSpatialDataBufferLayout();
-
 public:
+	FSpatialDataBufferLayout();
+	
 	int32 GetTexelSize() const;
 	const FSpatialDataTexelAttributeDescriptor* FindAttributeByName(const FName& Name) const;
+
+	friend FArchive& operator<<(FArchive& Ar, FSpatialDataBufferLayout& Layout);
 
 private:
 	void CacheTexelSize() const;
@@ -85,6 +96,8 @@ private:
 	FSpatialDataBuffer();
 
 public:
+	static TSharedRef<FSpatialDataBuffer> Default(const FIntVector4& Dimensions);
+
 	FSpatialDataTexelAccessor Sample3D(int32 X, int32 Y, int32 Z) const;
 	FSpatialDataTexelAccessor SampleNormalized3D(float X, float Y, float Z) const;
 	
@@ -94,6 +107,10 @@ public:
 
 	int32 GetBufferSize() const;
 	int32 GetTexelCount() const;
+
+	void SetRawData(const ByteArray& Bytes);
+	const ByteArray& GetRawData() const;
+	TSharedPtr<const FSpatialDataBufferLayout> GetLayout() const;
 
 private:
 	bool IsIndexValid(int32 Index) const;
@@ -115,6 +132,8 @@ public:
 	
 	template<typename T>
 	void AddAttribute(const FName& Name);
+	void AddAttribute(const FSpatialDataTexelAttributeDescriptor& AttributeDescriptor);
+	void AddAttributesFromExistingLayout(TSharedRef<FSpatialDataBufferLayout> Layout);
 
 	TSharedRef<FSpatialDataBuffer> Build(const FIntVector4& Dimensions) const;
 	TSharedRef<FSpatialDataBuffer> Rebuild(const FSpatialDataBuffer& Other) const;
@@ -164,6 +183,16 @@ FORCEINLINE int32 FSpatialDataBuffer::GetTexelCount() const
 {
 	check(TexelCount == Data.Num() / Layout->GetTexelSize());
 	return TexelCount;
+}
+
+FORCEINLINE const FSpatialDataBuffer::ByteArray& FSpatialDataBuffer::GetRawData() const
+{
+	return Data;
+}
+
+FORCEINLINE TSharedPtr<const FSpatialDataBufferLayout> FSpatialDataBuffer::GetLayout() const
+{
+	return Layout;
 }
 
 FORCEINLINE bool FSpatialDataBuffer::IsIndexValid(int32 Index) const

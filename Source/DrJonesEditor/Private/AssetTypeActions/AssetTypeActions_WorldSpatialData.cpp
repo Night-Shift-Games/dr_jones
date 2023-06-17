@@ -30,13 +30,15 @@ void FAssetTypeActions_WorldSpatialData::ExecuteImportSpatialData(TArray<TWeakOb
 
 	FSpatialDataBufferBuilder Builder;
 	Builder.AddAttribute<uint8>("Attribute0");
-	const TSharedRef<FSpatialDataBuffer> Buffer = Builder.Build(FIntVector4(1024, 512, 16, 1));
+	const TSharedRef<FSpatialDataBuffer> Buffer = Builder.Build(UWorldSpatialData::DefaultBufferDimensions);
 
-	for (int32 Index = 0; Index < 1024 * 512 * 16; ++Index)
+	for (int32 Index = 0; Index < UWorldSpatialData::DefaultBufferSize; ++Index)
 	{
 		uint8 Value = 127;
 		Buffer->WriteAttributeRaw(Index, "Attribute0", &Value, sizeof(Value));
 	}
 
 	WorldSpatialData->SetBuffer(Buffer);
+
+	WorldSpatialData->MarkPackageDirty();
 }

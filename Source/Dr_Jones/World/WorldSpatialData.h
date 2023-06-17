@@ -22,6 +22,14 @@ class DR_JONES_API UWorldSpatialData : public UObject
 	GENERATED_BODY()
 
 public:
+	UWorldSpatialData();
+	
+	inline static const FIntVector4 DefaultBufferDimensions = { 1024, 512, 16, 1 };
+	inline static const int32 DefaultBufferSize = DefaultBufferDimensions.X * DefaultBufferDimensions.Y *
+		DefaultBufferDimensions.Z * DefaultBufferDimensions.W; 
+	
+	virtual void Serialize(FArchive& Ar) override;
+	
 	void SetBuffer(const TSharedRef<FSpatialDataBuffer>& Buffer);
 	TSharedPtr<FSpatialDataBuffer> GetBuffer() const;
 
