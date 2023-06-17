@@ -46,7 +46,7 @@ T UWorldSpatialData::SampleAtLocation(const FName& AttributeName, const FGeoLoca
 	checkf(SpatialData, TEXT("Cannot sample Spatial Data. The buffer has not been set."));
 	const FVector2D NormalizedCoords = GeoLocation.ConvertToNormalizedEquirectangular();
 	// TODO: Use a sampler that lerps between all dimensions
-	const T* Data = SpatialData->SampleNormalized3D(NormalizedCoords.X, NormalizedCoords.Y, 0.0f).GetAttributeData<T>(AttributeName);
+	const T* Data = SpatialData->SampleNormalized3D(NormalizedCoords.X, 1.0f - NormalizedCoords.Y, 0.0f).GetAttributeData<T>(AttributeName);
 	if (!Data)
 	{
 		UE_LOG(LogDrJones, Error, TEXT("Data at the specified location is invalid."));
