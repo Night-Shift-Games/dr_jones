@@ -89,9 +89,12 @@ UObject* UWorldSpatialDataFactory::FactoryCreateBinary(UClass* InClass, UObject*
 	{
 		int32 DataSize;
 		GUARDED_READ(DataSize, Cursor.Read<int32>());
+		
+		int32 CompressedDataSize;
+		GUARDED_READ(CompressedDataSize, Cursor.Read<int32>());
 
 		Bytes.AddUninitialized(DataSize);
-		GUARD(Cursor.ReadRaw(DataSize, Bytes));
+		GUARD(Cursor.ReadCompressed(CompressedDataSize, Bytes));
 	}
 	
 	SpatialDataBuffer->SetRawData(Bytes);

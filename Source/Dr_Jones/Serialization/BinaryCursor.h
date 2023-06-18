@@ -57,6 +57,14 @@ struct FBinaryCursor
 		return ReadRaw(ReadSize, Buffer.GetData(), Buffer.Num());
 	}
 
+	DR_JONES_API bool ReadCompressed(size_t ReadSize, void* OutBuffer, size_t BufferSize);
+
+	template <typename T>
+	FORCEINLINE bool ReadCompressed(size_t ReadSize, TArray<T>& Buffer)
+	{
+		return ReadCompressed(ReadSize, Buffer.GetData(), Buffer.Num());
+	}
+
 	FORCEINLINE TOptional<const char*> ReadZeroTerminatedAsciiString()
 	{
 		if (!ensureAlwaysMsgf(GetBytesLeft() > 0,

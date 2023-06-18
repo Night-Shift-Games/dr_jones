@@ -19,7 +19,8 @@ public class Dr_Jones : ModuleRules
 			"Slate", 
 			"SlateCore",
 			"GeometryFramework",
-			"GeometryCore"
+			"GeometryCore",
+			"zlib"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "AnimGraphRuntime" });
