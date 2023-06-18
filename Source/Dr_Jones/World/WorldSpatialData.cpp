@@ -19,15 +19,31 @@ void UWorldSpatialData::Serialize(FArchive& Ar)
 	}
 	else if (Ar.IsSaving())
 	{
-		Bytes = SpatialData->GetRawData();
 		Layout = MakeShared<FSpatialDataBufferLayout>(*SpatialData->GetLayout());
 	}
-
+	
 	Ar << *Layout;
-	Ar << Bytes;
-
-	if (Ar.IsLoading())
+	
+	if (Ar.IsSaving())
 	{
+		Bytes = SpatialData->GetRawData();
+
+		// Save uncompressed size
+		int32 BufferSize = Bytes.Num();
+		Ar << BufferSize;
+
+		Ar.SerializeCompressedNew(Bytes.GetData(), BufferSize);
+	}
+	else if (Ar.IsLoading())
+	{
+		// Load uncompressed size
+		int32 BufferSize;
+		Ar << BufferSize;
+		
+		Bytes.SetNumUninitialized(BufferSize);
+		
+		Ar.SerializeCompressedNew(Bytes.GetData(), BufferSize);
+
 		FSpatialDataBufferBuilder Builder;
 		Builder.AddAttributesFromExistingLayout(Layout.ToSharedRef());
 		const TSharedRef<FSpatialDataBuffer> Buffer = Builder.Build(DefaultBufferDimensions);
