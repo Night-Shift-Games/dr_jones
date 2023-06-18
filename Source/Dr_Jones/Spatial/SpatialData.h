@@ -42,14 +42,7 @@ struct FSpatialDataTexelAttributeDescriptor
 	uint8 Size;
 	ESpatialDataTexelAttributeType Type;
 
-	friend FArchive& operator<<(FArchive& Ar, FSpatialDataTexelAttributeDescriptor& Attribute)
-	{
-		Ar << Attribute.Name;
-		Ar << Attribute.Stride;
-		Ar << Attribute.Size;
-		Ar << Attribute.Type;
-		return Ar;
-	}
+	friend FArchive& operator<<(FArchive& Ar, FSpatialDataTexelAttributeDescriptor& Attribute);
 };
 
 class DR_JONES_API FSpatialDataBufferLayout
@@ -74,13 +67,13 @@ private:
 
 class DR_JONES_API FSpatialDataTexelAccessor
 {
-	FSpatialDataTexelAccessor(const FSpatialDataBufferLayout& Layout, const uint8* Data);
-
 public:
 	template<typename DataT>
 	const DataT* GetAttributeData(const FName& Name) const;
 	
 private:
+	FSpatialDataTexelAccessor(const FSpatialDataBufferLayout& Layout, const uint8* Data);
+
 	const FSpatialDataBufferLayout& Layout;
 	const uint8* Data;
 
@@ -92,10 +85,6 @@ class DR_JONES_API FSpatialDataBuffer
 public:
 	using ByteArray = TArray<uint8>;
 
-private:
-	FSpatialDataBuffer();
-
-public:
 	static TSharedRef<FSpatialDataBuffer> Default(const FIntVector4& Dimensions);
 
 	FSpatialDataTexelAccessor Sample3D(int32 X, int32 Y, int32 Z) const;
@@ -111,8 +100,12 @@ public:
 	void SetRawData(const ByteArray& Bytes);
 	const ByteArray& GetRawData() const;
 	TSharedPtr<const FSpatialDataBufferLayout> GetLayout() const;
+	
+	friend FArchive& operator<<(FArchive& Ar, TSharedPtr<FSpatialDataBuffer>& InOutBufferPtr);
 
 private:
+	FSpatialDataBuffer();
+	
 	bool IsIndexValid(int32 Index) const;
 	int32 GetOffsetForIndex(int32 Index) const;
 

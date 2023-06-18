@@ -235,8 +235,72 @@ void FSpatialDataBufferBuilder::AddAttribute_Internal(const FName& Name, int32 A
 	CurrentStride += AttributeSize; 
 }
 
+FArchive& operator<<(FArchive& Ar, FSpatialDataTexelAttributeDescriptor& Attribute)
+{
+	return Ar << Attribute.Name << Attribute.Stride << Attribute.Size << Attribute.Type;
+}
+
 FArchive& operator<<(FArchive& Ar, FSpatialDataBufferLayout& Layout)
 {
-	Ar << Layout.Attributes;
+	return Ar << Layout.Attributes;
+}
+
+FArchive& operator<<(FArchive& Ar, TSharedPtr<FSpatialDataBuffer>& InOutBufferPtr)
+{
+	FIntVector4 Dimensions;
+	TSharedPtr<FSpatialDataBufferLayout> Layout;
+	FSpatialDataBuffer::ByteArray Bytes;
+	
+	if (Ar.IsLoading())
+	{
+		Layout = MakeShared<FSpatialDataBufferLayout>();
+	}
+	else
+	{
+		check(Ar.IsSaving());
+		checkf(InOutBufferPtr, TEXT("Spatial Data buffer must not be null."));
+		checkf(InOutBufferPtr->Layout, TEXT("Spatial Data layout must not be null."));
+		
+		Dimensions = InOutBufferPtr->Dimensions;
+		Layout = InOutBufferPtr->Layout;
+	}
+
+	Ar << Dimensions;
+	Ar << *Layout;
+	
+	if (Ar.IsLoading())
+	{
+		// Load uncompressed size
+		int32 BufferSize;
+		Ar << BufferSize;
+
+		if (BufferSize > 0)
+		{
+			Bytes.SetNumUninitialized(BufferSize);
+		
+			Ar.SerializeCompressedNew(Bytes.GetData(), BufferSize);
+
+			FSpatialDataBufferBuilder Builder;
+			Builder.AddAttributesFromExistingLayout(Layout.ToSharedRef());
+			InOutBufferPtr = Builder.Build(Dimensions);
+			InOutBufferPtr->SetRawData(Bytes);
+		}
+	}
+	else
+	{
+		check(Ar.IsSaving());
+		
+		Bytes = InOutBufferPtr->GetRawData();
+
+		// Save uncompressed size
+		int32 BufferSize = Bytes.Num();
+		Ar << BufferSize;
+
+		if (BufferSize > 0)
+		{
+			Ar.SerializeCompressedNew(Bytes.GetData(), BufferSize);
+		}
+	}
+
 	return Ar;
 }
