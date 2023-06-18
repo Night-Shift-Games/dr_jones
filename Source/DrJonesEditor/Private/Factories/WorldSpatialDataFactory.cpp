@@ -14,7 +14,7 @@ UWorldSpatialDataFactory::UWorldSpatialDataFactory(const FObjectInitializer& Obj
 	bEditorImport = true;
 	bText = false;
 
-	Formats.Add(TEXT("nsgsd;NSG Spatial Data"));
+	Formats.Add(TEXT("nsd;Night Shift Spatial Data"));
 }
 
 UObject* UWorldSpatialDataFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags,
@@ -46,20 +46,20 @@ UObject* UWorldSpatialDataFactory::FactoryCreateBinary(UClass* InClass, UObject*
 	EObjectFlags Flags, UObject* Context, const TCHAR* Type, const uint8*& Buffer, const uint8* BufferEnd,
 	FFeedbackContext* Warn)
 {
-	static constexpr uint8 NSGSpatialData_Header[16] = {
+	static constexpr uint8 NSD_Header[16] = {
 		0x4E, 0x53, 0x47, 0xFF, 0x53, 0x70, 0x61, 0x74, 0x69, 0x61, 0x6C, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
-	static constexpr uint8 NSGSpatialData_DimHeader[4] = { 0x44, 0x49, 0x4D, 0xFA };
-	static constexpr uint8 NSGSpatialData_AttrHeader[4] = { 0x41, 0x54, 0x52, 0xFA };
-	static constexpr uint8 NSGSpatialData_DataHeader[4] = { 0x44, 0x41, 0x54, 0xFA };
+	static constexpr uint8 NSD_DimHeader[4] = { 0x44, 0x49, 0x4D, 0xFA };
+	static constexpr uint8 NSD_AttrHeader[4] = { 0x41, 0x54, 0x52, 0xFA };
+	static constexpr uint8 NSD_DataHeader[4] = { 0x44, 0x41, 0x54, 0xFA };
 	
 	FBinaryCursor Cursor(Buffer, BufferEnd);
 	
-	GUARD(Cursor.VerifyHeader(NSGSpatialData_Header));
+	GUARD(Cursor.VerifyHeader(NSD_Header));
 
 	// Read dimensions
 	
-	GUARD(Cursor.VerifyHeader(NSGSpatialData_DimHeader));
+	GUARD(Cursor.VerifyHeader(NSD_DimHeader));
 
 	FIntVector4 Dimensions;
 	GUARDED_READ(Dimensions.X, Cursor.Read<int32>());
@@ -70,7 +70,7 @@ UObject* UWorldSpatialDataFactory::FactoryCreateBinary(UClass* InClass, UObject*
 	// Read attributes
 	
 	FSpatialDataBufferBuilder Builder;
-	while (Cursor.VerifyHeader(NSGSpatialData_AttrHeader))
+	while (Cursor.VerifyHeader(NSD_AttrHeader))
 	{
 		FSpatialDataTexelAttributeDescriptor Attribute;
 		GUARDED_READ(Attribute.Name, Cursor.ReadZeroTerminatedAsciiString())
@@ -85,7 +85,7 @@ UObject* UWorldSpatialDataFactory::FactoryCreateBinary(UClass* InClass, UObject*
 	// Read data bytes
 	
 	TArray<uint8> Bytes;
-	while (Cursor.VerifyHeader(NSGSpatialData_DataHeader))
+	while (Cursor.VerifyHeader(NSD_DataHeader))
 	{
 		int32 DataSize;
 		GUARDED_READ(DataSize, Cursor.Read<int32>());
