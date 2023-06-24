@@ -2,6 +2,7 @@
 
 #include "AssetTypeActions/AssetTypeActions_WorldRegionalData.h"
 #include "AssetTypeActions/AssetTypeActions_WorldSpatialData.h"
+#include "DetailCustomizations/WorldSpatialDataDetailCustomization.h"
 
 DEFINE_LOG_CATEGORY(LogDrJonesEditor);
 
@@ -14,6 +15,10 @@ void FDrJonesEditorModule::StartupModule()
 	AssetTypeActionsArray.Add(MakeShared<FAssetTypeActions_WorldRegionalData>());
 	AssetTypeActionsArray.Add(MakeShared<FAssetTypeActions_WorldSpatialData>());
 	RegisterAssetTypeActions();
+
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+
+	PropertyEditorModule.RegisterCustomClassLayout(UWorldSpatialData::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(FWorldSpatialDataDetailCustomization::MakeInstance));
 }
 
 void FDrJonesEditorModule::ShutdownModule()
@@ -21,6 +26,10 @@ void FDrJonesEditorModule::ShutdownModule()
 	UE_LOG(LogDrJonesEditor, Log, TEXT("DrJonesEditor Module shutdown"));
 
 	UnregisterAssetTypeActions();
+
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
+	
+	PropertyEditorModule.UnregisterCustomClassLayout(UWorldSpatialData::StaticClass()->GetFName());
 }
 
 void FDrJonesEditorModule::RegisterAssetTypeActions()

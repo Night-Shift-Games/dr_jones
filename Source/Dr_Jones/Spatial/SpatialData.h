@@ -53,6 +53,8 @@ public:
 	int32 GetTexelSize() const;
 	const FSpatialDataTexelAttributeDescriptor* FindAttributeByName(const FName& Name) const;
 
+	const TArray<FSpatialDataTexelAttributeDescriptor>& GetAttributes() const;
+
 	friend FArchive& operator<<(FArchive& Ar, FSpatialDataBufferLayout& Layout);
 
 private:
@@ -144,6 +146,13 @@ private:
 };
 
 // Inline implementation:
+
+// FSpatialDataBufferLayout impl
+
+FORCEINLINE const TArray<FSpatialDataTexelAttributeDescriptor>& FSpatialDataBufferLayout::GetAttributes() const
+{
+	return Attributes;
+}
 
 // FSpatialDataTexelAccessor impl
 
