@@ -20,6 +20,7 @@ public class DrJonesEditor : ModuleRules
                 "AssetTools",
                 "CoreUObject",
                 "Engine",
+                "InputCore",
                 "Slate",
                 "SlateCore",
                 "ToolMenus",

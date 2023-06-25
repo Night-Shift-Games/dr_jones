@@ -4,6 +4,7 @@
 
 struct FGeoLocation;
 
+UENUM()
 enum class ESpatialDataTexelAttributeType : uint8
 {
 	Raw = 0,

@@ -4,5 +4,4 @@
 
 #include "CoreMinimal.h"
 
-
-DECLARE_LOG_CATEGORY_EXTERN(LogDrJones, Log, All);
+DR_JONES_API DECLARE_LOG_CATEGORY_EXTERN(LogDrJones, Log, All);

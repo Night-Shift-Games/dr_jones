@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "IDetailCustomization.h"
+#include "World/GeoLocation.h"
 
 class UWorldSpatialData;
 
@@ -13,4 +14,9 @@ public:
 
 protected:
 	explicit FWorldSpatialDataDetailCustomization();
+
+private:
+	TWeakObjectPtr<UWorldSpatialData> WorldSpatialDataPtr;
+	FGeoLocation VisualizationGeoLocation;
+	float VisualizationYear;
 };
