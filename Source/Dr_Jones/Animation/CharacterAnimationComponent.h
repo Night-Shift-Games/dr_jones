@@ -59,8 +59,11 @@ protected:
 
 public:
 	void PlayMontage(UAnimMontage* Montage);
+	void PlayItemMontage(UAnimMontage* Montage) const;
 
 	UAnimMontage* FindItemActionMontage(const AItem& Item, const FName& Action);
+
+	void SetActiveItemAnimation(const TSubclassOf<UAnimInstance>& AnimInstanceClass);
 
 	UFUNCTION()
 	void OnMontageCompletedEvent(UAnimMontage* Montage, bool bInterrupted);
@@ -79,6 +82,9 @@ public:
 	FItemIKData ItemIKData;
 
 private:
+	UPROPERTY(Transient)
+	TSubclassOf<UAnimInstance> ActiveItemAnimation;
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = true))
 	TObjectPtr<USkeletalMeshComponent> CharacterMeshComponent;
 

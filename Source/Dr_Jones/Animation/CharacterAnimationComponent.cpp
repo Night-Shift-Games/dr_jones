@@ -49,6 +49,17 @@ void UCharacterAnimationComponent::PlayMontage(UAnimMontage* Montage)
 	const bool bPlayedSuccessfully = (MontageLength > 0.f);
 }
 
+void UCharacterAnimationComponent::PlayItemMontage(UAnimMontage* Montage) const
+{
+	if (!ActiveItemAnimation)
+	{
+		return;
+	}
+
+	UAnimInstance* ItemAnimInstance = CharacterMeshComponent->GetLinkedAnimLayerInstanceByClass(ActiveItemAnimation);
+	const float MontageLength = ItemAnimInstance->Montage_Play(Montage);
+}
+
 UAnimMontage* UCharacterAnimationComponent::FindItemActionMontage(const AItem& Item, const FName& Action)
 {
 	FCharacterToolAnimations* Animations = CharacterToolAnimations.Find(Item.GetClass());
@@ -64,6 +75,22 @@ UAnimMontage* UCharacterAnimationComponent::FindItemActionMontage(const AItem& I
 	}
 
 	return *Montage;
+}
+
+void UCharacterAnimationComponent::SetActiveItemAnimation(const TSubclassOf<UAnimInstance>& AnimInstanceClass)
+{
+	checkf(CharacterMeshComponent, TEXT("Cannot change the active item animation because the mesh component is not set."));
+	
+	if (*ActiveItemAnimation != nullptr)
+	{
+		CharacterMeshComponent->UnlinkAnimClassLayers(ActiveItemAnimation);
+	}
+	if (*AnimInstanceClass != nullptr)
+	{
+		CharacterMeshComponent->LinkAnimClassLayers(AnimInstanceClass);
+	}
+	
+	ActiveItemAnimation = AnimInstanceClass;
 }
 
 void UCharacterAnimationComponent::OnMontageCompletedEvent(UAnimMontage* Montage, bool bInterrupted)

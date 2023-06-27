@@ -74,7 +74,7 @@ void AShovel::PrimaryActionMontageBehavior()
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("PrimaryAction: %s"), *Montage->GetName()));
 	}
 #endif
-	AnimationComponent.PlayMontage(Montage);
+	AnimationComponent.PlayItemMontage(Montage);
 	AnimationComponent.OnMontageCompleted.AddUniqueDynamic(this, &AShovel::MontageCompletedEvent);
 }
 

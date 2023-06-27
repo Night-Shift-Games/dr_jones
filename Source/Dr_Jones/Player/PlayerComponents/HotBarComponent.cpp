@@ -2,6 +2,7 @@
 
 #include "HotBarComponent.h"
 
+#include "Animation/CharacterAnimationComponent.h"
 #include "Items/Tools/Tool.h"
 #include "Player/WidgetManager.h"
 #include "ReactionComponent.h"
@@ -61,6 +62,8 @@ void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
 	ActiveTool = &NewActiveTool;
 	ActiveTool->GetMeshComponent()->SetVisibility(true);
 	Owner->ReactionComponent->SetActiveItem(NewActiveTool);
+
+	Owner->CharacterAnimationComponent->SetActiveItemAnimation(ActiveTool->GetItemAnimation());
 }
 
 ATool* UHotBarComponent::GetActiveTool() const

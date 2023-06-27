@@ -19,6 +19,8 @@ class DR_JONES_API AItem : public AActor
 public:
 	AItem();
 	UMeshComponent* GetMeshComponent() const;
+
+	TSubclassOf<UAnimInstance> GetItemAnimation() const;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
@@ -29,4 +31,12 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Item")
 	FName AttachmentSocket = TEXT("RightHandSocket");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Animation")
+	TSubclassOf<UAnimInstance> ItemAnimation;
 };
+
+FORCEINLINE TSubclassOf<UAnimInstance> AItem::GetItemAnimation() const
+{
+	return ItemAnimation;
+}
