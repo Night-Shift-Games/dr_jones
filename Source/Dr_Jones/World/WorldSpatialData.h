@@ -95,7 +95,7 @@ T UWorldSpatialData::Sample(const FName& AttributeNameNoYear, const FGeoLocation
 	{
 		FString AttributeName;
 		FString AttributeYear;
-		checkf(Attribute.Name.ToString().Split(";", &AttributeName, &AttributeYear), TEXT("Invalid attribute name has been found in WorldSpatialData (%s)"), *Attribute.Name.ToString());
+		verifyf(Attribute.Name.ToString().Split(";", &AttributeName, &AttributeYear), TEXT("Invalid attribute name has been found in WorldSpatialData (%s)"), *Attribute.Name.ToString());
 
 		if (AttributeName != AttributeNameNoYear.ToString())
 		{
