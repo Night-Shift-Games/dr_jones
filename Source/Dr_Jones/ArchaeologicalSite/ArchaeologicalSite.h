@@ -15,10 +15,7 @@ class DR_JONES_API AArchaeologicalSite : public AActor
 	
 public:
 	AArchaeologicalSite();
-	float CalculateAngleBetweenTwoVectors(const FVector& Direction, const FVector& Second) const;
-	float GetChordLength(const float SphereRadius, const FVector& Direction, const FVector& Second) const;
 	FVector CalculateSphereDeform(const FVector& VertexPosition, const FVector& SphereOrigin, const float SphereRadius, const FVector& DigDirection) const;
-	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, float Radius) const;
 
 	UFUNCTION(BlueprintCallable)
 	void TestDig(FVector Direction, FTransform SphereOrigin);
