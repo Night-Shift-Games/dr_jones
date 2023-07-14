@@ -4,11 +4,14 @@
 
 #include "DynamicMesh/MeshNormals.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 #include "Utilities.h"
 
 AArchaeologicalSite::AArchaeologicalSite() 
 {
 	DynamicMeshComponent = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMeshComponent"));
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AArchaeologicalSite::TestDig(FVector Direction, FTransform SphereOrigin)
@@ -65,4 +68,42 @@ FVector AArchaeologicalSite::CalculateSphereDeform(const FVector& VertexPosition
 UDynamicMesh* AArchaeologicalSite::AllocateDynamicMesh()
 {
 	return NewObject<UDynamicMesh>(this);
+}
+
+void AArchaeologicalSite::SampleChunk(FVector Location)
+{
+	FChunk* Chunk = GetChunkAtLocation(Location);
+	Chunk->Color = FColor::MakeRandomColor();
+}
+
+FChunk* AArchaeologicalSite::GetChunkAtLocation(FVector Location)
+{
+	constexpr int ChunkSize = 50.f;
+	FIntVector3 IntVector = FIntVector3(
+		FMath::RoundToInt(Location.X / ChunkSize),
+		FMath::RoundToInt(Location.Y / ChunkSize),
+		FMath::RoundToInt(Location.Z / ChunkSize));
+	
+
+	TSharedPtr<FChunk>* SharedChunk = Chunks.Find(IntVector);
+	if (SharedChunk)
+	{
+		return SharedChunk->Get();
+	}
+	
+	return Chunks.Emplace(IntVector, MakeShared<FChunk>()).Get();
+}
+
+void AArchaeologicalSite::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	for (auto& Chunk : Chunks)
+	{
+		DrawDebugBox(
+			GetWorld(),
+			FVector(Chunk.Key.X * 50, Chunk.Key.Y * 50, Chunk.Key.Z * 50),
+			FVector(25,25,25),
+			Chunk.Value->Color);
+	}
 }
