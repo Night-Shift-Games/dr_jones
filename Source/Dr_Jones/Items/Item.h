@@ -18,7 +18,7 @@ class DR_JONES_API AItem : public AActor
 	
 public:
 	AItem();
-	UMeshComponent* GetMeshComponent() const;
+	virtual UMeshComponent* GetMeshComponent() const;
 
 	TSubclassOf<UAnimInstance> GetItemAnimation() const;
 	
