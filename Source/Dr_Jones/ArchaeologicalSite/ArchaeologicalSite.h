@@ -3,16 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ArchaeologicalSite/Chunk.h"
 #include "Components/DynamicMeshComponent.h"
 #include "GameFramework/Actor.h"
 
 #include "ArchaeologicalSite.generated.h"
-
-struct FChunk
-{
-	int Hash;
-	FColor Color = FColor::Red;
-};
 
 UCLASS()
 class DR_JONES_API AArchaeologicalSite : public AActor
@@ -34,12 +29,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SampleChunk(FVector Location);
 	
-	FChunk* GetChunkAtLocation(FVector Location);
+	FMasterChunk& GetChunkAtLocation(FVector Location);
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 
-	TMap<FIntVector3, TSharedPtr<FChunk>> Chunks;
+	TMap<FIntVector3, TSharedPtr<FMasterChunk>> Chunks;
 
 };

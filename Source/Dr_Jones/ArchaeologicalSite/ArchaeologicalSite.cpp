@@ -72,38 +72,50 @@ UDynamicMesh* AArchaeologicalSite::AllocateDynamicMesh()
 
 void AArchaeologicalSite::SampleChunk(FVector Location)
 {
-	FChunk* Chunk = GetChunkAtLocation(Location);
-	Chunk->Color = FColor::MakeRandomColor();
+	FChunk& Chunk = GetChunkAtLocation(Location);
+	Chunk.Color = FColor::MakeRandomColor();
 }
 
-FChunk* AArchaeologicalSite::GetChunkAtLocation(FVector Location)
+FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(FVector Location)
 {
-	constexpr int ChunkSize = 50.f;
+	constexpr int ChunkSize = 225.f;
 	FIntVector3 IntVector = FIntVector3(
 		FMath::RoundToInt(Location.X / ChunkSize),
 		FMath::RoundToInt(Location.Y / ChunkSize),
 		FMath::RoundToInt(Location.Z / ChunkSize));
 	
 
-	TSharedPtr<FChunk>* SharedChunk = Chunks.Find(IntVector);
+	TSharedPtr<FMasterChunk>* SharedChunk = Chunks.Find(IntVector);
 	if (SharedChunk)
 	{
-		return SharedChunk->Get();
+		return *SharedChunk->Get();
 	}
 	
-	return Chunks.Emplace(IntVector, MakeShared<FChunk>()).Get();
+	return *Chunks.Emplace(IntVector, MakeShared<FMasterChunk>(FVector(IntVector * ChunkSize), ChunkSize));
 }
 
 void AArchaeologicalSite::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	for (auto& Chunk : Chunks)
+	for (const auto& Chunk : Chunks)
 	{
 		DrawDebugBox(
 			GetWorld(),
-			FVector(Chunk.Key.X * 50, Chunk.Key.Y * 50, Chunk.Key.Z * 50),
-			FVector(25,25,25),
+			FVector(Chunk.Key.X * 225, Chunk.Key.Y * 225, Chunk.Key.Z * 225),
+			FVector(112.5,112.5,112.5),
 			Chunk.Value->Color);
+		if (Chunk.Value->SubChunks.IsEmpty())
+		{
+			continue;
+		}
+		for (const auto& SubChunk : Chunk.Value->SubChunks)
+		{
+			DrawDebugBox(
+				GetWorld(),
+				SubChunk.Value->GetWorldLocation(),
+				FVector(SubChunk.Value->Resolution / 2),
+				FColor::Green);
+		}
 	}
 }
