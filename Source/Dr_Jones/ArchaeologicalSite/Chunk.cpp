@@ -25,20 +25,21 @@ FMasterChunk::FMasterChunk(const FVector& NewLocation, int NewResolution) : FChu
 	}
 }
 
-FChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
+FSubChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
 {
+	FVector LocalLocation = WorldLocation - Location;
+
 	FIntVector3 IntVector = FIntVector3(
-		FMath::RoundToInt(Location.X / Resolution),
-		FMath::RoundToInt(Location.Y / Resolution),
-		FMath::RoundToInt(Location.Z / Resolution));
-
-
+		FMath::RoundToInt(LocalLocation.X / Resolution),
+		FMath::RoundToInt(LocalLocation.Y / Resolution),
+		FMath::RoundToInt(LocalLocation.Z / Resolution));
+	
 	if (const TSharedPtr<FSubChunk>* SharedChunk = SubChunks.Find(IntVector))
 	{
 		return *SharedChunk->Get();
 	}
 	
-	return *SubChunks.Emplace(IntVector, MakeShared<FSubChunk>(*this, FVector(IntVector), Resolution));
+	return *SubChunks.FindOrAdd(IntVector, MakeShared<FSubChunk>(*this, FVector(IntVector), Resolution));
 }
 
 FSubChunk::FSubChunk(FMasterChunk& NewOwner, const FVector& NewLocation, int NewResolution) : FChunk(NewLocation, NewResolution), Owner(NewOwner)

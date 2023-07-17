@@ -20,7 +20,7 @@ protected:
 struct FMasterChunk : FChunk
 {
 	FMasterChunk(const FVector& NewLocation, int NewResolution);
-	FChunk& GetSubChunkAtLocation(const FVector& Location);
+	FSubChunk& GetSubChunkAtLocation(const FVector& Location);
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SubChunks;
 };
 
