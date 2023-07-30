@@ -17,14 +17,14 @@ protected:
 	FVector RelativeLocation;
 };
 
-struct FMasterChunk : FChunk
+struct FMasterChunk : public FChunk
 {
 	FMasterChunk(const FVector& NewLocation, int NewResolution);
 	FSubChunk& GetSubChunkAtLocation(const FVector& Location);
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SubChunks;
 };
 
-struct FSubChunk : FChunk
+struct FSubChunk : public FChunk
 {
 	FSubChunk(FMasterChunk& NewOwner, const FVector& NewLocation, int NewResolution);
 	FMasterChunk& Owner;

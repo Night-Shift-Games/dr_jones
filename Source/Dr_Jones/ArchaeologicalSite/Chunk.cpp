@@ -27,12 +27,61 @@ FMasterChunk::FMasterChunk(const FVector& NewLocation, int NewResolution) : FChu
 
 FSubChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
 {
-	FVector LocalLocation = WorldLocation - Location;
+	FVector LocalLocation = FTransform(WorldLocation).InverseTransformPosition(Location);
+#define CHUNK_NORTH 1
+#define CHUNK_CENTER 0
+#define CHUNK_SOUTH -1
 
-	FIntVector3 IntVector = FIntVector3(
-		FMath::RoundToInt(LocalLocation.X / Resolution),
-		FMath::RoundToInt(LocalLocation.Y / Resolution),
-		FMath::RoundToInt(LocalLocation.Z / Resolution));
+#define CHUNK_EAST 1
+#define CHUNK_WEST -1
+
+#define CHUNK_TOP 1
+#define CHUNK_BOTTOM -1
+
+	FIntVector3 IntVector = FIntVector3::ZeroValue;
+	const float SubChunkResolution = Resolution / 3.f;
+	const float SubChunkHalfResolution = SubChunkResolution / 2.f;
+	// CHECK NORTH / SOUTH
+	if (LocalLocation.X < -SubChunkHalfResolution)
+	{
+		IntVector.X = CHUNK_SOUTH;
+	}
+	else if (LocalLocation.X > SubChunkHalfResolution)
+	{
+		IntVector.X = CHUNK_NORTH;
+	}
+	else
+	{
+		IntVector.X = CHUNK_CENTER;
+	}
+	// CHECK WEST / EAST
+	if (LocalLocation.Y < -SubChunkHalfResolution)
+	{
+		IntVector.Y = CHUNK_WEST;
+	}
+	else if (LocalLocation.Y > SubChunkHalfResolution)
+	{
+		IntVector.Y = CHUNK_EAST;
+	}
+	else
+	{
+		IntVector.Y = CHUNK_CENTER;
+	}
+	// CHECK BOTTOM / TOP
+	if (LocalLocation.Z < -SubChunkHalfResolution)
+	{
+		IntVector.Z = CHUNK_BOTTOM;
+	}
+	else if (LocalLocation.Z > SubChunkHalfResolution)
+	{
+		IntVector.Z = CHUNK_TOP;
+	}
+	else
+	{
+		IntVector.Z = CHUNK_CENTER;
+	}
+	
+	IntVector *= SubChunkResolution;
 	
 	if (const TSharedPtr<FSubChunk>* SharedChunk = SubChunks.Find(IntVector))
 	{
@@ -45,5 +94,5 @@ FSubChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
 FSubChunk::FSubChunk(FMasterChunk& NewOwner, const FVector& NewLocation, int NewResolution) : FChunk(NewLocation, NewResolution), Owner(NewOwner)
 {
 	RelativeLocation = NewLocation;
-	WorldLocation = RelativeLocation + Owner.GetWorldLocation();
+	WorldLocation = Owner.GetWorldLocation() + RelativeLocation;
 }

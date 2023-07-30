@@ -30,7 +30,8 @@ public:
 	void SampleChunk(FVector Location);
 	
 	FMasterChunk& GetChunkAtLocation(FVector Location);
-	
+	void DrawChunkDebug();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;

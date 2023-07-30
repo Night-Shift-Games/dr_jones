@@ -74,7 +74,8 @@ void AArchaeologicalSite::SampleChunk(FVector Location)
 {
 	FMasterChunk& Chunk = GetChunkAtLocation(Location);
 	FSubChunk& SubChunk = Chunk.GetSubChunkAtLocation(Location);
-	Chunk.Color = FColor::MakeRandomColor();
+	const FColor SampleColor = FColor::MakeRandomColor();
+	SubChunk.Color = SampleColor;
 }
 
 FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(FVector Location)
@@ -84,9 +85,8 @@ FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(FVector Location)
 		FMath::RoundToInt(Location.X / ChunkSize),
 		FMath::RoundToInt(Location.Y / ChunkSize),
 		FMath::RoundToInt(Location.Z / ChunkSize));
-	
-	TSharedPtr<FMasterChunk>* SharedChunk = Chunks.Find(IntVector);
-	if (SharedChunk)
+
+	if (const TSharedPtr<FMasterChunk>* SharedChunk = Chunks.Find(IntVector))
 	{
 		return *SharedChunk->Get();
 	}
@@ -98,13 +98,18 @@ void AArchaeologicalSite::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	DrawChunkDebug();
+}
+
+void AArchaeologicalSite::DrawChunkDebug()
+{
 	for (const auto& KV : Chunks)
 	{
 		FMasterChunk& Chunk = *KV.Value.Get();
 		DrawDebugBox(
 			GetWorld(),
 			Chunk.GetWorldLocation(),
-			FVector(Chunk.Resolution / 2),
+			FVector(Chunk.Resolution / 2.f),
 			Chunk.Color);
 		if (Chunk.SubChunks.IsEmpty())
 		{
@@ -115,7 +120,7 @@ void AArchaeologicalSite::Tick(float DeltaSeconds)
 			DrawDebugBox(
 				GetWorld(),
 				SubChunk.Value->GetWorldLocation(),
-				FVector(SubChunk.Value->Resolution / 2),
+				FVector(SubChunk.Value->Resolution / 2.f),
 				SubChunk.Value->Color);
 		}
 	}
