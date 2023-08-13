@@ -94,6 +94,21 @@ struct FWorldCity
 	bool bHasHarbour = false;
 };
 
+/** Culture's global data */
+USTRUCT(BlueprintType)
+struct FWorldCulture
+{
+	GENERATED_BODY()
+
+	/** The name displayed in the menus and texts */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText DisplayName;
+
+	/** Artifacts that are part of this culture and will spawn in places that are influenced by it */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSet<FName> AvailableArtifacts;
+};
+
 /**
  * All the info about all the world the game takes place in.
  * This includes information about regions, cultures, missions/quests, etc.
@@ -108,7 +123,8 @@ public:
 
 	const TMap<FName, FWorldLocation>& GetStaticLocations() const;
 	const TMap<FName, FWorldCity>& GetCities() const;
-	
+	const TMap<FName, FWorldCulture>& GetCultures() const;
+
 	const UWorldSpatialData* GetCulturalInfluenceData() const;
 	const UWorldSpatialData* GetGroundTypeData() const;
 	
@@ -119,6 +135,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Travel", meta = (AllowPrivateAccess = true))
 	TMap<FName, FWorldCity> Cities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Culture", meta = (AllowPrivateAccess = true))
+	TMap<FName, FWorldCulture> Cultures;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spatial", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UWorldSpatialData> CulturalInfluence;

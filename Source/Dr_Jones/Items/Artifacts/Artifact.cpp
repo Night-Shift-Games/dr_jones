@@ -2,10 +2,6 @@
 
 #include "Artifact.h"
 
-#include "Player/DrJonesCharacter.h"
-#include "Items/Item.h"
-
-
 AArtifact::AArtifact()
 {
 	ArtifactMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArtifactMesh"));
@@ -15,6 +11,17 @@ AArtifact::AArtifact()
 	{
 		UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent);
 		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
+	}
+}
+
+void AArtifact::OnConstruction(const FTransform& Transform)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Construction"));
+
+	if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent))
+	{
+		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
+		ArtifactDynamicMaterial = StaticMeshComponent->CreateDynamicMaterialInstance(0);
 	}
 }
 
@@ -36,12 +43,11 @@ UMeshComponent* AArtifact::GetMeshComponent() const
 #if WITH_EDITOR
 void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent);
-	if (StaticMeshComponent)
+	if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent))
 	{
 		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
 	}
-	
+
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif

@@ -8,6 +8,7 @@
 
 #include "Dr_JonesGameModeBase.generated.h"
 
+class UWorldData;
 class UQuestSystemLogic;
 
 DECLARE_DYNAMIC_DELEGATE(FQuestSystemInitializedDynamicDelegate);
@@ -18,6 +19,7 @@ class DR_JONES_API ADr_JonesGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
 	ADr_JonesGameModeBase();
 
 	virtual void BeginPlay() override;
@@ -27,6 +29,13 @@ class DR_JONES_API ADr_JonesGameModeBase : public AGameModeBase
 	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
 	UFUNCTION(BlueprintCallable, Category = "Quest System")
 	void ExecutePostQuestSystemLoad(UPARAM(DisplayName="Event") const FQuestSystemInitializedDynamicDelegate& Delegate);
+
+	UFUNCTION(BlueprintPure)
+	UWorldData* GetGlobalWorldData() const;
+
+protected:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UWorldData> GlobalWorldData;
 
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
@@ -39,4 +48,9 @@ private:
 FORCEINLINE UQuestSystemLogic* ADr_JonesGameModeBase::GetQuestSystem() const
 {
 	return QuestSystem;
+}
+
+FORCEINLINE UWorldData* ADr_JonesGameModeBase::GetGlobalWorldData() const
+{
+	return GlobalWorldData;
 }

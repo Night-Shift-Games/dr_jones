@@ -48,7 +48,9 @@ class DR_JONES_API AArtifact : public AItem
 
 public:
 	AArtifact();
-	
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 	virtual void Interact(APawn* Indicator);
 
 	void Take(APawn* Taker);
@@ -61,13 +63,16 @@ public:
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+	
 public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = 4))
 	EArtifactRarity Rarity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = 5))
 	EArtifactSize Size;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
+	FName ArtifactID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Artifact")
 	FProceduralArtifactData ProceduralData;
@@ -77,5 +82,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Artifact")
 	TObjectPtr<UStaticMesh> ArtifactStaticMesh;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
+	TObjectPtr<UMaterialInstanceDynamic> ArtifactDynamicMaterial;
 };
 
