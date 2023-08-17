@@ -7,6 +7,7 @@ FChunk::FChunk(const FVector& NewLocation, int NewResolution) : WorldLocation(Ne
 
 FMasterChunk::FMasterChunk(const FVector& NewLocation, int NewResolution) : FChunk(NewLocation, NewResolution)
 {
+	DynamicMeshComponent.Reset(NewObject<UDynamicMeshComponent>());
 	double SubChunkResolution = Resolution / 3;
 	const double CenterOffset = SubChunkResolution;
 	for (int x = 0; x < 3; x++)

@@ -1,4 +1,5 @@
 #pragma once
+#include "Components/DynamicMeshComponent.h"
 
 struct FSubChunk;
 
@@ -22,6 +23,9 @@ struct FMasterChunk : public FChunk
 	FMasterChunk(const FVector& NewLocation, int NewResolution);
 	FSubChunk& GetSubChunkAtLocation(const FVector& Location);
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SubChunks;
+	
+protected:
+	TStrongObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 };
 
 struct FSubChunk : public FChunk
