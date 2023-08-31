@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "ArchaeologicalSite/Chunk.h"
-#include "Components/DynamicMeshComponent.h"
 #include "GameFramework/Actor.h"
 
 #include "ArchaeologicalSite.generated.h"
@@ -17,25 +16,18 @@ class DR_JONES_API AArchaeologicalSite : public AActor
 public:
 	AArchaeologicalSite();
 	virtual void Tick(float DeltaSeconds) override;
-	
-	FVector CalculateSphereDeform(const FVector& VertexPosition, const FVector& SphereOrigin, const float SphereRadius, const FVector& DigDirection) const;
 
 	UFUNCTION(BlueprintCallable)
 	void TestDig(FVector Direction, FTransform SphereOrigin);
 
 	UFUNCTION(BlueprintCallable)
-	UDynamicMesh* AllocateDynamicMesh();
-
-	UFUNCTION(BlueprintCallable)
 	void SampleChunk(FVector Location);
 	
-	FMasterChunk& GetChunkAtLocation(FVector Location);
+	FVector CalculateSphereDeform(const FVector& VertexPosition, const FVector& SphereOrigin, const float SphereRadius, const FVector& DigDirection) const;
+	FMasterChunk& GetChunkAtLocation(const FVector& Location);
 	void DrawChunkDebug();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
-
 	TMap<FIntVector3, TSharedPtr<FMasterChunk>> Chunks;
 
 };

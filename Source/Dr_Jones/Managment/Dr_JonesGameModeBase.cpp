@@ -1,11 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Dr_JonesGameModeBase.h"
 #include "Quest/QuestSystemLogic.h"
 
 ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 {
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 	DefaultPawnClass = ADrJonesCharacter::StaticClass();
 	QuestSystem = CreateDefaultSubobject<UQuestSystemLogic>(TEXT("QuestSystemLogic"));
 }
@@ -14,7 +15,6 @@ void ADr_JonesGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//QuestSystem = NewObject<UQuestSystemLogic>();
 	OnQuestSystemInitializedDelegate.Broadcast();
 }
 

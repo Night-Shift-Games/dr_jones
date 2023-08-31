@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "GameFramework/GameModeBase.h"
 #include "Player/DrJonesCharacter.h"
 
@@ -21,11 +22,14 @@ class DR_JONES_API ADr_JonesGameModeBase : public AGameModeBase
 
 public:
 	ADr_JonesGameModeBase();
-
+	
 	virtual void BeginPlay() override;
 
 	UQuestSystemLogic* GetQuestSystem() const;
 
+	UFUNCTION(BlueprintCallable)
+	AArchaeologicalSite* FindOrCreateArchaeologicalSite();
+	
 	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
 	UFUNCTION(BlueprintCallable, Category = "Quest System")
 	void ExecutePostQuestSystemLoad(UPARAM(DisplayName="Event") const FQuestSystemInitializedDynamicDelegate& Delegate);
@@ -37,6 +41,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWorldData> GlobalWorldData;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<AArchaeologicalSite> ArchaeologicalSite;
+
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
 
@@ -44,6 +51,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta=(AllowPrivateAccess=true))
 	TObjectPtr<UQuestSystemLogic> QuestSystem;
 };
+
+FORCEINLINE AArchaeologicalSite* ADr_JonesGameModeBase::FindOrCreateArchaeologicalSite()
+{
+	if (!ArchaeologicalSite)
+	{
+		ArchaeologicalSite = GetWorld()->SpawnActor<AArchaeologicalSite>();
+	}
+	return ArchaeologicalSite;
+}
 
 FORCEINLINE UQuestSystemLogic* ADr_JonesGameModeBase::GetQuestSystem() const
 {
