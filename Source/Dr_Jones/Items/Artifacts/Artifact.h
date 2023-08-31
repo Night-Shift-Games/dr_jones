@@ -7,26 +7,6 @@
 
 #include "Artifact.generated.h"
 
-UENUM()
-enum class EArtifactRarity
-{
-	Common,
-	Uncommon,
-	Lore,
-	Legendary,
-	Quest
-};
-
-UENUM()
-enum class EArtifactSize
-{
-	Tiny,
-	Small,
-	Medium,
-	Large,
-	Huge
-};
-
 USTRUCT(BlueprintType)
 struct FProceduralArtifactData
 {
@@ -65,12 +45,6 @@ public:
 #endif
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = 4))
-	EArtifactRarity Rarity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = 5))
-	EArtifactSize Size;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactID;
 

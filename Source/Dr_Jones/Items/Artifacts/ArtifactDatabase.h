@@ -8,6 +8,34 @@
 
 class AArtifact;
 
+UENUM(BlueprintType)
+enum class EArtifactRarity : uint8
+{
+	Common,
+	Uncommon,
+	Rare,
+	Legendary,
+	Story,
+};
+
+UENUM(BlueprintType)
+enum class EArtifactWear : uint8
+{
+	FactoryNew,
+	MinimalWear,
+	FieldTested,
+	WellWorn,
+	BattleScarred,
+};
+
+UENUM(BlueprintType)
+enum class EArtifactSize : uint8
+{
+	Small,
+	Normal,
+	Large,
+};
+
 USTRUCT(BlueprintType)
 struct FArtifactData
 {
@@ -18,6 +46,24 @@ struct FArtifactData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AArtifact> CustomClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EArtifactRarity Rarity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Usage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EArtifactWear Wear;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0))
+	int32 Age;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Culture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EArtifactSize Size;
 };
 
 UCLASS(Blueprintable)
