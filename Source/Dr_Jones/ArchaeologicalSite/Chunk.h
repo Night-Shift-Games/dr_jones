@@ -21,8 +21,14 @@ protected:
 struct FMasterChunk : public FChunk
 {
 	FMasterChunk(const FVector& NewLocation, int NewResolution);
-	FSubChunk& GetSubChunkAtLocation(const FVector& Location);
+	FSubChunk* GetSubChunkAtLocation(const FVector& Location);
+	void RefreshMesh();
+	bool IsSurface(FSubChunk* Chunk);
+
+	void CreateSurface();
+	
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SubChunks;
+	TMap<FIntVector3, TSharedPtr<FSubChunk>> SurfaceChunks;
 	
 protected:
 	TStrongObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
@@ -32,4 +38,9 @@ struct FSubChunk : public FChunk
 {
 	FSubChunk(FMasterChunk& NewOwner, const FVector& NewLocation, int NewResolution);
 	FMasterChunk& Owner;
+
+	FSubChunk* FindNeighbor(const FIntVector& NeighborOrientation) const;
+	
+	bool bSolid = true;
+	bool bSurface = false;
 };

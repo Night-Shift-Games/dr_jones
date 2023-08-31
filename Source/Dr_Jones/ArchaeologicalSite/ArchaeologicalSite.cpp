@@ -1,51 +1,54 @@
 // Property of Night Shift Games, all rights reserved.
 
 #include "ArchaeologicalSite.h"
-
-#include "DynamicMesh/MeshNormals.h"
-#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Utilities.h"
 
-AArchaeologicalSite::AArchaeologicalSite() 
+AArchaeologicalSite::AArchaeologicalSite()
 {
-	DynamicMeshComponent = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMeshComponent"));
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AArchaeologicalSite::TestDig(FVector Direction, FTransform SphereOrigin)
+void AArchaeologicalSite::Tick(float DeltaSeconds)
 {
-	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
-	SphereOrigin.SetToRelativeTransform(GetTransform());
-	
-	int32 ViewportX, ViewportY;
-	Controller->GetViewportSize(ViewportX, ViewportY);
-	const FVector2D ScreenCenter = FVector2D(ViewportX / 2, ViewportY / 2);
+	Super::Tick(DeltaSeconds);
 
-	FVector WorldLocation, WorldDirection;
-	if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
-	{
-		return;
-	}
-	WorldDirection.Normalize();
-	
-	const float Radius = 100.f;
-	const FVector DigPoint = WorldDirection * -Radius + SphereOrigin.GetLocation();
+	DrawChunkDebug();
+}
 
-	DynamicMeshComponent->GetDynamicMesh()->EditMesh([&](FDynamicMesh3& EditMesh)
-	{
-		for (const int32 VertexID : EditMesh.VertexIndicesItr())
-		{
-			const FVector3d Pos = EditMesh.GetVertex(VertexID);
-			if (Utilities::IsPointInSphere(Pos, SphereOrigin.GetLocation(), Radius))
-			{
-				const FVector NewPos = CalculateSphereDeform(Pos, SphereOrigin.GetLocation(), Radius, DigPoint);
-				EditMesh.SetVertex(VertexID, NewPos, false);
-				DynamicMeshComponent->NotifyMeshUpdated();
-			}
-		}
-	});
+ void AArchaeologicalSite::TestDig(FVector Direction, FTransform SphereOrigin)
+{
+// 	const APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
+// 	SphereOrigin.SetToRelativeTransform(GetTransform());
+// 	
+// 	int32 ViewportX, ViewportY;
+// 	Controller->GetViewportSize(ViewportX, ViewportY);
+// 	const FVector2D ScreenCenter = FVector2D(ViewportX / 2, ViewportY / 2);
+//
+// 	FVector WorldLocation, WorldDirection;
+// 	if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
+// 	{
+// 		return;
+// 	}
+// 	WorldDirection.Normalize();
+// 	
+// 	const float Radius = 100.f;
+// 	const FVector DigPoint = WorldDirection * -Radius + SphereOrigin.GetLocation();
+//
+// 	DynamicMeshComponent->GetDynamicMesh()->EditMesh([&](FDynamicMesh3& EditMesh)
+// 	{
+// 		for (const int32 VertexID : EditMesh.VertexIndicesItr())
+// 		{
+// 			const FVector3d Pos = EditMesh.GetVertex(VertexID);
+// 			if (Utilities::IsPointInSphere(Pos, SphereOrigin.GetLocation(), Radius))
+// 			{
+// 				const FVector NewPos = CalculateSphereDeform(Pos, SphereOrigin.GetLocation(), Radius, DigPoint);
+// 				EditMesh.SetVertex(VertexID, NewPos, false);
+// 				DynamicMeshComponent->NotifyMeshUpdated();
+// 			}
+// 		}
+// 	});
 }
 
 FVector AArchaeologicalSite::CalculateSphereDeform(const FVector& VertexPosition, const FVector& SphereOrigin, const float SphereRadius, const FVector& DigDirection) const
@@ -65,20 +68,15 @@ FVector AArchaeologicalSite::CalculateSphereDeform(const FVector& VertexPosition
 	return VertexPosition + VertexDirection * DeformLenght;
 }
 
-UDynamicMesh* AArchaeologicalSite::AllocateDynamicMesh()
-{
-	return NewObject<UDynamicMesh>(this);
-}
-
 void AArchaeologicalSite::SampleChunk(FVector Location)
 {
 	FMasterChunk& Chunk = GetChunkAtLocation(Location);
-	FSubChunk& SubChunk = Chunk.GetSubChunkAtLocation(Location);
+	FSubChunk* SubChunk = Chunk.GetSubChunkAtLocation(Location);
 	const FColor SampleColor = FColor::MakeRandomColor();
-	SubChunk.Color = SampleColor;
+	SubChunk->Color = SampleColor;
 }
 
-FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(FVector Location)
+FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(const FVector& Location)
 {
 	constexpr int ChunkSize = 225.f;
 	FIntVector3 IntVector = FIntVector3(
@@ -92,13 +90,6 @@ FMasterChunk& AArchaeologicalSite::GetChunkAtLocation(FVector Location)
 	}
 	
 	return *Chunks.Emplace(IntVector, MakeShared<FMasterChunk>(FVector(IntVector * ChunkSize), ChunkSize));
-}
-
-void AArchaeologicalSite::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	DrawChunkDebug();
 }
 
 void AArchaeologicalSite::DrawChunkDebug()
@@ -122,6 +113,16 @@ void AArchaeologicalSite::DrawChunkDebug()
 				SubChunk.Value->GetWorldLocation(),
 				FVector(SubChunk.Value->Resolution / 2.f),
 				SubChunk.Value->Color);
+			if (SubChunk.Value->bSurface)
+			{
+				DrawDebugSphere(GetWorld(),
+					SubChunk.Value->GetWorldLocation(),
+					SubChunk.Value->Resolution / 2,
+					32,
+					FColor::Green,
+					false,
+					10);
+			}
 		}
 	}
 }

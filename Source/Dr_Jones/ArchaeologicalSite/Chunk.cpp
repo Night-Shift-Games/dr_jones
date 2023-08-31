@@ -20,15 +20,37 @@ FMasterChunk::FMasterChunk(const FVector& NewLocation, int NewResolution) : FChu
 					FMath::RoundToInt(SubChunkResolution * x) - CenterOffset,
 					FMath::RoundToInt(SubChunkResolution * y) - CenterOffset,
 					FMath::RoundToInt(SubChunkResolution * z) - CenterOffset);
-				SubChunks.Add(IntVector, MakeShared<FSubChunk>(*this, FVector(IntVector), SubChunkResolution));
+				TSharedPtr<FSubChunk> NewChunk = SubChunks.Add(IntVector, MakeShared<FSubChunk>(*this, FVector(IntVector), SubChunkResolution));
+				FHitResult OutHit;
+				GWorld->LineTraceSingleByChannel(OutHit,
+					NewChunk->GetWorldLocation(),
+					NewChunk->GetWorldLocation() - FVector (0,0,SubChunkResolution / 2),
+					ECollisionChannel::ECC_Visibility);
+				if (OutHit.bBlockingHit)
+				{
+					NewChunk->bSurface = true;
+				}
+				else
+				{
+					GWorld->LineTraceSingleByChannel(OutHit,
+					NewChunk->GetWorldLocation(),
+					NewChunk->GetWorldLocation() + FVector (0,0,SubChunkResolution / 2),
+					ECollisionChannel::ECC_Visibility);
+					if (OutHit.bBlockingHit)
+					{
+						NewChunk->bSurface = true;
+					}
+				}
+				
 			}
 		}
 	}
+	CreateSurface();
 }
 
-FSubChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
+FSubChunk* FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
 {
-	FVector LocalLocation = FTransform(WorldLocation).InverseTransformPosition(Location);
+	const FVector LocalLocation = FTransform(WorldLocation).InverseTransformPosition(Location);
 #define CHUNK_NORTH 1
 #define CHUNK_CENTER 0
 #define CHUNK_SOUTH -1
@@ -86,14 +108,74 @@ FSubChunk& FMasterChunk::GetSubChunkAtLocation(const FVector& Location)
 	
 	if (const TSharedPtr<FSubChunk>* SharedChunk = SubChunks.Find(IntVector))
 	{
-		return *SharedChunk->Get();
+		return SharedChunk->Get();
+	}
+	//MakeShared<FSubChunk>(*this, FVector(IntVector), Resolution)
+	return nullptr;
+}
+
+void FMasterChunk::RefreshMesh()
+{
+	TArray<FVector> MeshDesc;
+	MeshDesc.Reserve(SubChunks.Num());
+	for (auto& Chunk : SubChunks)
+	{
+		// if (Chunk.Value->bSolid && DiffersFromNeighbours(*Chunk.Value))
+		// {
+		// 	MeshDesc.Add(FVector(Chunk.Key));
+		// 	UE::Geometry::FVertexInfo VertexInfo;
+		// 	VertexInfo.Position = FVector(Chunk.Value->GetWorldLocation());
+		// 	DynamicMeshComponent->GetMesh()->AppendVertex(VertexInfo);
+		// }
 	}
 	
-	return *SubChunks.FindOrAdd(IntVector, MakeShared<FSubChunk>(*this, FVector(IntVector), Resolution));
+}
+
+bool FMasterChunk::IsSurface(FSubChunk* Chunk)
+{
+	TArray<FSubChunk*> Chunks;
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(0, 0, 1)));		// UP
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(0, 0, -1)));	// DOWN
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(0, 1, 0)));		// LEFT
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(0, -1, 0)));	// RIGHT 
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(1, 0, 0)));		// FRONT
+	Chunks.Add(Chunk->FindNeighbor(FIntVector(-1, 0, 0)));	// BACK
+
+	for (auto* Neighbor : Chunks)
+	{
+		if (!Neighbor || !Neighbor->bSolid)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void FMasterChunk::CreateSurface()
+{
+	// Iterate over all chunks.
+	for (auto& KV : SubChunks)
+	{
+		FSubChunk* Chunk = KV.Value.Get();
+		// Check if it is filled or not. If air skip. 	// Get Neighboring chunks. 	// Check if all neighbours are same as this chunk is.
+		if (!Chunk->bSolid || !IsSurface(Chunk))
+		{
+			continue;
+		}
+		// If there is difference add it to surface net. (As it must see air).
+		SurfaceChunks.Add(KV.Key, KV.Value);
+		Chunk->bSurface = true;
+	}
 }
 
 FSubChunk::FSubChunk(FMasterChunk& NewOwner, const FVector& NewLocation, int NewResolution) : FChunk(NewLocation, NewResolution), Owner(NewOwner)
 {
 	RelativeLocation = NewLocation;
 	WorldLocation = Owner.GetWorldLocation() + RelativeLocation;
+}
+
+FSubChunk* FSubChunk::FindNeighbor(const FIntVector& NeighborOrientation) const
+{
+	const FVector NeighborLocation = WorldLocation + FVector(NeighborOrientation) * Resolution;
+	return Owner.GetSubChunkAtLocation(NeighborLocation);
 }
