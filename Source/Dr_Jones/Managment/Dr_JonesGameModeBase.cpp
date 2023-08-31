@@ -3,6 +3,7 @@
 
 #include "Dr_JonesGameModeBase.h"
 #include "Quest/QuestSystemLogic.h"
+#include "World/Illuminati.h"
 
 ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 {
@@ -16,6 +17,11 @@ void ADr_JonesGameModeBase::BeginPlay()
 	
 	//QuestSystem = NewObject<UQuestSystemLogic>();
 	OnQuestSystemInitializedDelegate.Broadcast();
+
+	if (Illuminati)
+	{
+		Illuminati->Initialize(*GetWorld());
+	}
 }
 
 void ADr_JonesGameModeBase::ExecutePostQuestSystemLoad(const FQuestSystemInitializedDynamicDelegate& Delegate)

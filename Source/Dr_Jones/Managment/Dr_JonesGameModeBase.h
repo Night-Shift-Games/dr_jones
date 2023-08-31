@@ -8,6 +8,7 @@
 
 #include "Dr_JonesGameModeBase.generated.h"
 
+class UIlluminati;
 class UWorldData;
 class UQuestSystemLogic;
 
@@ -36,6 +37,10 @@ public:
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWorldData> GlobalWorldData;
+
+	// X-Files theme starts playing
+	UPROPERTY(SaveGame, Instanced, EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UIlluminati> Illuminati;
 
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
