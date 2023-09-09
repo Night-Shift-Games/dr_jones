@@ -119,8 +119,6 @@ class DR_JONES_API UWorldData : public UObject
 	GENERATED_BODY()
 
 public:
-	// UWorldRegionalData();
-
 	const TMap<FName, FWorldLocation>& GetStaticLocations() const;
 	const TMap<FName, FWorldCity>& GetCities() const;
 	const TMap<FName, FWorldCulture>& GetCultures() const;
