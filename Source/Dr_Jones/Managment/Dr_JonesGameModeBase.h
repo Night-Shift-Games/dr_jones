@@ -53,7 +53,7 @@ private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta=(AllowPrivateAccess=true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UQuestSystemLogic> QuestSystem;
 };
 
