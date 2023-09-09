@@ -27,6 +27,10 @@ struct FMasterChunk : public FChunk
 
 	void CreateSurface();
 	
+protected:
+	int8 FindDirectionSign(float Lenght);
+	
+public:
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SubChunks;
 	TMap<FIntVector3, TSharedPtr<FSubChunk>> SurfaceChunks;
 	

@@ -72,6 +72,10 @@ void AArchaeologicalSite::SampleChunk(FVector Location)
 {
 	FMasterChunk& Chunk = GetChunkAtLocation(Location);
 	FSubChunk* SubChunk = Chunk.GetSubChunkAtLocation(Location);
+	if (!SubChunk)
+	{
+		return;
+	}
 	const FColor SampleColor = FColor::MakeRandomColor();
 	SubChunk->Color = SampleColor;
 }
@@ -117,11 +121,10 @@ void AArchaeologicalSite::DrawChunkDebug()
 			{
 				DrawDebugSphere(GetWorld(),
 					SubChunk.Value->GetWorldLocation(),
-					SubChunk.Value->Resolution / 2,
-					32,
+					SubChunk.Value->Resolution / 4,
+					16,
 					FColor::Green,
-					false,
-					10);
+					false);
 			}
 		}
 	}
