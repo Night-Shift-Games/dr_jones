@@ -128,7 +128,7 @@ void FClock::SetTime(FClockTime Time)
 	CurrentTime = Time;
 }
 
-FClockTaskHandle FClock::ScheduleTask(FClockTime Time, const FClockTaskDelegate& TaskDelegate)
+FClockTaskHandle FClock::ScheduleTask(FClockTime Time, const FClockTickDelegate& TaskDelegate)
 {
 	FClockScheduledTask Task;
 	Task.TimeToExecuteAt = Time;
@@ -140,7 +140,7 @@ FClockTaskHandle FClock::ScheduleTask(FClockTime Time, const FClockTaskDelegate&
 	return Handle;
 }
 
-FClockTaskHandle FClock::ScheduleTaskOnce(FClockTime Time, const FClockTaskDelegate& TaskDelegate)
+FClockTaskHandle FClock::ScheduleTaskOnce(FClockTime Time, const FClockTickDelegate& TaskDelegate)
 {
 	FClockScheduledTask Task;
 	Task.TimeToExecuteAt = Time;
@@ -174,5 +174,8 @@ void FClock::Update()
 			}
 		}
 	}
+
+	(void)ClockTickDelegate.ExecuteIfBound(CurrentTime);
+
 	CurrentTime += ClockSecondsPerRealSecond;
 }

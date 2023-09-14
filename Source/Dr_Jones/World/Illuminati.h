@@ -51,6 +51,7 @@ public:
 };
 
 DECLARE_DYNAMIC_DELEGATE(FWorldEventDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWorldClockTickDelegate, FWorldClockTime, ClockTime);
 
 USTRUCT(BlueprintType)
 struct FWorldEventHandle
@@ -81,6 +82,12 @@ public:
 
 	FClock& GetClock() { return Clock; }
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Clock")
+	void OnClockTickEvent(const FWorldClockTime& ClockTime);
+
+	UFUNCTION(BlueprintPure, Category = "Clock")
+	static float GetClockSecondsPerRealSecond();
+
 	UFUNCTION(BlueprintPure, Category = "Clock")
 	FWorldClockTime GetCurrentClockTime() const;
 
@@ -92,6 +99,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "World Event", meta = (AutoCreateRefTerm = "Schedule, Event"))
 	FWorldEventHandle ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event);
+
+	UPROPERTY(BlueprintAssignable, Category = "Clock")
+	FWorldClockTickDelegate ClockTickDelegate;
 
 private:
 	FClock Clock = FClock(*this);

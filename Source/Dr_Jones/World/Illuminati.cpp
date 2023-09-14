@@ -33,6 +33,12 @@ void AIlluminati::BeginPlay()
 	Super::BeginPlay();
 
 	Clock.SetWorldContext(*GetWorld());
+	Clock.ClockTickDelegate.BindWeakLambda(this, [this](const FClockTime& ClockTime)
+	{
+		const FWorldClockTime WorldClockTime = FWorldClockTime::MakeFromClockTime(ClockTime);
+		ClockTickDelegate.Broadcast(WorldClockTime);
+		OnClockTickEvent(WorldClockTime);
+	});
 	Clock.Start();
 }
 
@@ -41,12 +47,17 @@ void AIlluminati::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 }
 
+float AIlluminati::GetClockSecondsPerRealSecond()
+{
+	return FClock::ClockSecondsPerRealSecond;
+}
+
 FWorldEventHandle AIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
 	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
 	const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTaskOnce(Time.ToClockTime(),
-		FClockTaskDelegate::CreateWeakLambda(this, [Event](FClockTime& ClockTime)
+		FClockTickDelegate::CreateWeakLambda(this, [Event](const FClockTime& ClockTime)
 		{
 			(void)Event.ExecuteIfBound();
 		}));
@@ -64,7 +75,7 @@ FWorldEventHandle AIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule
 		FClockTime ClockTime = Time.ToClockTime();
 		ClockTime += (FMath::RandRange(0.0f, Schedule.DeviationMinutes) - Schedule.DeviationMinutes / 2.0f) * 60;
 		const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTask(ClockTime,
-			FClockTaskDelegate::CreateWeakLambda(this, [Event](FClockTime& ClockTime)
+			FClockTickDelegate::CreateWeakLambda(this, [Event](const FClockTime& ClockTime)
 			{
 				(void)Event.ExecuteIfBound();
 			}));
@@ -83,7 +94,7 @@ FWorldEventHandle AIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& 
 		FClockTime ClockTime = Time.ToClockTime();
 		ClockTime += (FMath::RandRange(0.0f, Schedule.DeviationMinutes) - Schedule.DeviationMinutes / 2.0f) * 60;
 		const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTask(ClockTime,
-			FClockTaskDelegate::CreateWeakLambda(this, [Event, EventRule](FClockTime& ClockTime)
+			FClockTickDelegate::CreateWeakLambda(this, [Event, EventRule](const FClockTime& ClockTime)
 			{
 				if (EventRule->CanEventExecute())
 				{

@@ -79,12 +79,12 @@ private:
 	uint64 TimeSeconds;
 };
 
-DECLARE_DELEGATE_OneParam(FClockTaskDelegate, FClockTime&)
+DECLARE_DELEGATE_OneParam(FClockTickDelegate, const FClockTime&)
 
 struct FClockScheduledTask
 {
 	FClockTime TimeToExecuteAt;
-	FClockTaskDelegate TaskDelegate;
+	FClockTickDelegate TaskDelegate;
 	bool bRemoveAfterExecute = false;
 };
 
@@ -106,12 +106,15 @@ public:
 	void SetTime(FClockTime Time);
 	FClockTime GetTime() const;
 
-	FClockTaskHandle ScheduleTask(FClockTime Time, const FClockTaskDelegate& TaskDelegate);
-	FClockTaskHandle ScheduleTaskOnce(FClockTime Time, const FClockTaskDelegate& TaskDelegate);
+	FClockTaskHandle ScheduleTask(FClockTime Time, const FClockTickDelegate& TaskDelegate);
+	FClockTaskHandle ScheduleTaskOnce(FClockTime Time, const FClockTickDelegate& TaskDelegate);
 	void RemoveTask(const FClockTaskHandle& Handle);
 
 protected:
 	void Update();
+
+public:
+	FClockTickDelegate ClockTickDelegate;
 
 private:
 	TMap<FClockTaskHandle::KeyType, FClockScheduledTask> ScheduledTasks;
