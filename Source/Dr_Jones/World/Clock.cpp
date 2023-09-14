@@ -68,7 +68,7 @@ void FClock::SetWorldContext(UWorld& World)
 	WorldContext = &World;
 }
 
-void FClock::Start()
+void FClock::Start(bool bWithFirstTickDisabled)
 {
 	check(WorldContext.IsValid());
 
@@ -77,10 +77,13 @@ void FClock::Start()
 		return;
 	}
 
-	WorldContext->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(Outer.Get(), [this]
+	if (!bWithFirstTickDisabled)
 	{
-		Update();
-	}));
+		WorldContext->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(Outer.Get(), [this]
+		{
+			Update();
+		}));
+	}
 	WorldContext->GetTimerManager().SetTimer(ClockTimerHandle, FTimerDelegate::CreateWeakLambda(Outer.Get(), [this]
 	{
 		Update();

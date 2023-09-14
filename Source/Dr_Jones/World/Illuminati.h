@@ -88,6 +88,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Clock")
 	static float GetClockSecondsPerRealSecond();
 
+	UFUNCTION(BlueprintCallable, Category = "Clock", meta = (AutoCreateRefTerm = "WorldClockTime"))
+	void SetCurrentClockTime(const FWorldClockTime& WorldClockTime);
+
 	UFUNCTION(BlueprintPure, Category = "Clock")
 	FWorldClockTime GetCurrentClockTime() const;
 
@@ -103,12 +106,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
+	uint8 bDisableFirstClockTick : 1;
+
 private:
 	FClock Clock = FClock(*this);
 	TMap<FWorldEventHandle, TArray<FClockTaskHandle>> WorldEventCollection;
 };
-
-FORCEINLINE FWorldClockTime AIlluminati::GetCurrentClockTime() const
-{
-	return FWorldClockTime::MakeFromClockTime(Clock.GetTime());
-}

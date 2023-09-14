@@ -98,7 +98,7 @@ public:
 
 	void SetWorldContext(UWorld& World);
 
-	void Start();
+	void Start(bool bWithFirstTickDisabled = false);
 	void Stop();
 	void Pause() const;
 	void UnPause() const;

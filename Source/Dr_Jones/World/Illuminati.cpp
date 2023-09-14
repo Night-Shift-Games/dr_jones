@@ -39,7 +39,7 @@ void AIlluminati::BeginPlay()
 		ClockTickDelegate.Broadcast(WorldClockTime);
 		OnClockTickEvent(WorldClockTime);
 	});
-	Clock.Start();
+	Clock.Start(bDisableFirstClockTick);
 }
 
 void AIlluminati::Tick(float DeltaSeconds)
@@ -50,6 +50,16 @@ void AIlluminati::Tick(float DeltaSeconds)
 float AIlluminati::GetClockSecondsPerRealSecond()
 {
 	return FClock::ClockSecondsPerRealSecond;
+}
+
+void AIlluminati::SetCurrentClockTime(const FWorldClockTime& WorldClockTime)
+{
+	Clock.SetTime(WorldClockTime.ToClockTime());
+}
+
+FWorldClockTime AIlluminati::GetCurrentClockTime() const
+{
+	return FWorldClockTime::MakeFromClockTime(Clock.GetTime());
 }
 
 FWorldEventHandle AIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, const FWorldEventDelegate& Event)
