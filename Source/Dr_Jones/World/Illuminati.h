@@ -70,18 +70,16 @@ inline int32 GetTypeHash(const FWorldEventHandle& WorldEventHandle)
 	return GetTypeHash(WorldEventHandle.Key);
 }
 
-UCLASS(Blueprintable, EditInlineNew)
-class DR_JONES_API UIlluminati : public UObject
+UCLASS(Blueprintable, ClassGroup = "DrJones")
+class DR_JONES_API AIlluminati : public AInfo
 {
 	GENERATED_BODY()
 
 public:
-	void Initialize(UWorld& World);
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	FClock& GetClock() { return Clock; }
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void BeginPlay();
 
 	UFUNCTION(BlueprintPure, Category = "Clock")
 	FWorldClockTime GetCurrentClockTime() const;
@@ -97,14 +95,10 @@ public:
 
 private:
 	FClock Clock = FClock(*this);
-
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	UWorld* WorldContext;
-
 	TMap<FWorldEventHandle, TArray<FClockTaskHandle>> WorldEventCollection;
 };
 
-FORCEINLINE FWorldClockTime UIlluminati::GetCurrentClockTime() const
+FORCEINLINE FWorldClockTime AIlluminati::GetCurrentClockTime() const
 {
 	return FWorldClockTime::MakeFromClockTime(Clock.GetTime());
 }

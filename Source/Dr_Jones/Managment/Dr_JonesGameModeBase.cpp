@@ -10,18 +10,22 @@ ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 	PrimaryActorTick.bCanEverTick = true;
 	DefaultPawnClass = ADrJonesCharacter::StaticClass();
 	QuestSystem = CreateDefaultSubobject<UQuestSystemLogic>(TEXT("QuestSystemLogic"));
+
+	IlluminatiClass = AIlluminati::StaticClass();
 }
 
 void ADr_JonesGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	OnQuestSystemInitializedDelegate.Broadcast();
 
-	if (Illuminati)
-	{
-		Illuminati->Initialize(*GetWorld());
-	}
+	Illuminati = CastChecked<AIlluminati>(GetWorld()->SpawnActor(IlluminatiClass));
+}
+
+void ADr_JonesGameModeBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
 }
 
 void ADr_JonesGameModeBase::ExecutePostQuestSystemLoad(const FQuestSystemInitializedDynamicDelegate& Delegate)

@@ -28,17 +28,20 @@ bool UWorldEventRule::CanEventExecute_Implementation() const
 	return true;
 }
 
-void UIlluminati::Initialize(UWorld& World)
+void AIlluminati::BeginPlay()
 {
-	WorldContext = &World;
+	Super::BeginPlay();
 
-	Clock.SetWorldContext(World);
+	Clock.SetWorldContext(*GetWorld());
 	Clock.Start();
-
-	BeginPlay();
 }
 
-FWorldEventHandle UIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, const FWorldEventDelegate& Event)
+void AIlluminati::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+
+FWorldEventHandle AIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
 	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
@@ -51,7 +54,7 @@ FWorldEventHandle UIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, co
 	return Handle;
 }
 
-FWorldEventHandle UIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule, const FWorldEventDelegate& Event)
+FWorldEventHandle AIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
 	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
@@ -70,7 +73,7 @@ FWorldEventHandle UIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule
 	return Handle;
 }
 
-FWorldEventHandle UIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event)
+FWorldEventHandle AIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
 	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);

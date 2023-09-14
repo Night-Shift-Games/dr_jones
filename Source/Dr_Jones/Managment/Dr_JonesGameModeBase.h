@@ -9,9 +9,9 @@
 
 #include "Dr_JonesGameModeBase.generated.h"
 
-class UIlluminati;
-class UWorldData;
+class AIlluminati;
 class UQuestSystemLogic;
+class UWorldData;
 
 DECLARE_DYNAMIC_DELEGATE(FQuestSystemInitializedDynamicDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuestSystemInitializedMCDelegate);
@@ -25,6 +25,7 @@ public:
 	ADr_JonesGameModeBase();
 	
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UQuestSystemLogic* GetQuestSystem() const;
 
@@ -46,8 +47,11 @@ protected:
 	TObjectPtr<AArchaeologicalSite> ArchaeologicalSite;
 
 	// X-Files theme starts playing
-	UPROPERTY(SaveGame, Instanced, EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UIlluminati> Illuminati;
+	UPROPERTY(SaveGame, Instanced, BlueprintReadOnly)
+	TObjectPtr<AIlluminati> Illuminati;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AIlluminati> IlluminatiClass;
 
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
