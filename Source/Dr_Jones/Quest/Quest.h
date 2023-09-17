@@ -8,23 +8,23 @@
 #include "Quest.generated.h"
 
 class UQuestData;
-class UQuest;
+class UQuest_OLD;
 
 /**
  * 
  */
 UCLASS(BlueprintType, Blueprintable, Category = "Quest System")
-class DR_JONES_API UQuest : public UObject
+class DR_JONES_API UQuest_OLD : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	DECLARE_DELEGATE_OneParam(FCompletedSignature, UQuest*);
+	DECLARE_DELEGATE_OneParam(FCompletedSignature, UQuest_OLD*);
 
-	static UQuest* Construct(const UQuestData& QuestAsset);
-	static UQuest* Construct(const FDataTableRowHandle& QuestRow);
+	static UQuest_OLD* Construct(const UQuestData& QuestAsset);
+	static UQuest_OLD* Construct(const FDataTableRowHandle& QuestRow);
 
-	UQuest();
+	UQuest_OLD();
 
 protected:
 	virtual void OnAdded();
@@ -75,31 +75,31 @@ private:
 	friend class UQuestSystemLogic;
 };
 
-FORCEINLINE bool UQuest::IsCompleted() const
+FORCEINLINE bool UQuest_OLD::IsCompleted() const
 {
 	return bIsCompleted;
 }
 
-FORCEINLINE const UQuestData& UQuest::GetQuestData() const
+FORCEINLINE const UQuestData& UQuest_OLD::GetQuestData() const
 {
 	check(QuestData);
 
 	return *QuestData;
 }
 
-FORCEINLINE const FName& UQuest::GetQuestName() const
+FORCEINLINE const FName& UQuest_OLD::GetQuestName() const
 {
 	check(QuestData);
 
 	return QuestTableRow.RowName;
 }
 
-FORCEINLINE const FDataTableRowHandle& UQuest::GetQuestTableRow() const
+FORCEINLINE const FDataTableRowHandle& UQuest_OLD::GetQuestTableRow() const
 {
 	return QuestTableRow;
 }
 
-FORCEINLINE const FQuestTableRow& UQuest::GetQuestTableRowData() const
+FORCEINLINE const FQuestTableRow& UQuest_OLD::GetQuestTableRowData() const
 {
 	return FQuestTableRow::GetQuestTableRow(QuestTableRow);
 }

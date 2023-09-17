@@ -5,42 +5,42 @@
 #include "Dr_Jones.h"
 
 
-UQuest* UQuest::Construct(const UQuestData& QuestAsset)
+UQuest_OLD* UQuest_OLD::Construct(const UQuestData& QuestAsset)
 {
-	UQuest* Quest = NewObject<UQuest>();
+	UQuest_OLD* Quest = NewObject<UQuest_OLD>();
 	Quest->QuestData = &QuestAsset;
 	return Quest;
 }
 
-UQuest* UQuest::Construct(const FDataTableRowHandle& QuestRow)
+UQuest_OLD* UQuest_OLD::Construct(const FDataTableRowHandle& QuestRow)
 {
-	UQuest* Quest = NewObject<UQuest>();
+	UQuest_OLD* Quest = NewObject<UQuest_OLD>();
 	Quest->QuestTableRow = QuestRow;
 	return Quest;
 }
 
-UQuest::UQuest() :
+UQuest_OLD::UQuest_OLD() :
 	bIsCompleted(false)
 {
 }
 
-void UQuest::OnAdded()
+void UQuest_OLD::OnAdded()
 {
 	K2_OnAdded();
 }
 
-void UQuest::OnRemoved()
+void UQuest_OLD::OnRemoved()
 {
 	K2_OnRemoved();
 }
 
-void UQuest::OnCompleted()
+void UQuest_OLD::OnCompleted()
 {
 	K2_OnCompleted();
 	CompletedDelegate.ExecuteIfBound(this);
 }
 
-void UQuest::MarkAsCompleted()
+void UQuest_OLD::MarkAsCompleted()
 {
 	// Notify if calling the 
 	if (bIsCompleted)

@@ -2,6 +2,8 @@
 
 #include "Illuminati.h"
 
+#include "Quest/QuestSystem.h"
+
 FClockTime FWorldClockTime::ToClockTime() const
 {
 	return FClockTime(Hours, Minutes, Seconds);
@@ -26,6 +28,11 @@ bool UWorldEventRule::CanEventExecute_Implementation() const
 {
 	// If not specified, the event can always execute
 	return true;
+}
+
+AIlluminati::AIlluminati()
+{
+	QuestSystemComponent = CreateDefaultSubobject<UQuestSystemComponent>(TEXT("QuestSystem"));
 }
 
 void AIlluminati::BeginPlay()

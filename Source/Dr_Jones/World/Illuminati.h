@@ -9,6 +9,8 @@
 
 #include "Illuminati.generated.h"
 
+class UQuestSystemComponent;
+
 USTRUCT(BlueprintType)
 struct FWorldClockTime
 {
@@ -77,6 +79,8 @@ class DR_JONES_API AIlluminati : public AInfo
 	GENERATED_BODY()
 
 public:
+	AIlluminati();
+
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -103,10 +107,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "World Event", meta = (AutoCreateRefTerm = "Schedule, Event"))
 	FWorldEventHandle ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event);
 
+public:
 	UPROPERTY(BlueprintAssignable, Category = "Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
 
 protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Quest")
+	TObjectPtr<UQuestSystemComponent> QuestSystemComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
 	uint8 bDisableFirstClockTick : 1;
 

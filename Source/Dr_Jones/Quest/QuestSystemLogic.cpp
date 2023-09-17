@@ -6,7 +6,7 @@
 #include "QuestData.h"
 
 
-void UQuestSystemLogic::AddQuest(UQuest* NewQuest)
+void UQuestSystemLogic::AddQuest(UQuest_OLD* NewQuest)
 {
 	check(NewQuest);
 
@@ -34,11 +34,11 @@ void UQuestSystemLogic::RemoveQuest(const FName& QuestName)
 	RemoveAndRetrieveQuest(QuestName);
 }
 
-UQuest* UQuestSystemLogic::RemoveAndRetrieveQuest(const FName& QuestName)
+UQuest_OLD* UQuestSystemLogic::RemoveAndRetrieveQuest(const FName& QuestName)
 {
 	ensureAlwaysMsgf(!QuestName.IsNone(), TEXT("Don't use 'None' as a quest name."));
 
-	TObjectPtr<UQuest> Quest = nullptr;
+	TObjectPtr<UQuest_OLD> Quest = nullptr;
 	if (Quests.RemoveAndCopyValue(QuestName, Quest))
 	{
 		Quest->OnRemoved();
@@ -48,38 +48,38 @@ UQuest* UQuestSystemLogic::RemoveAndRetrieveQuest(const FName& QuestName)
 	return Quest;
 }
 
-UQuest* UQuestSystemLogic::FindQuest(const FName& QuestName)
+UQuest_OLD* UQuestSystemLogic::FindQuest(const FName& QuestName)
 {
 	ensureAlwaysMsgf(!QuestName.IsNone(), TEXT("Don't use 'None' as a quest name."));
 
-	if (TObjectPtr<UQuest>* FoundQuest = Quests.Find(QuestName))
+	if (TObjectPtr<UQuest_OLD>* FoundQuest = Quests.Find(QuestName))
 	{
 		return *FoundQuest;
 	}
 	return nullptr;
 }
 
-void UQuestSystemLogic::K2_FindQuest(const FName& QuestName, bool& bOutFound, UQuest*& OutQuest)
+void UQuestSystemLogic::K2_FindQuest(const FName& QuestName, bool& bOutFound, UQuest_OLD*& OutQuest)
 {
 	OutQuest = FindQuest(QuestName);
 	bOutFound = (bool)OutQuest;
 }
 
-void UQuestSystemLogic::OnQuestReceived(UQuest* Quest)
+void UQuestSystemLogic::OnQuestReceived(UQuest_OLD* Quest)
 {
 	check(Quest);
 
 	QuestReceivedDelegate.Broadcast(Quest);
 }
 
-void UQuestSystemLogic::OnQuestRemoved(UQuest* Quest)
+void UQuestSystemLogic::OnQuestRemoved(UQuest_OLD* Quest)
 {
 	check(Quest);
 
 	QuestRemovedDelegate.Broadcast(Quest);
 }
 
-void UQuestSystemLogic::OnQuestCompleted(UQuest* Quest)
+void UQuestSystemLogic::OnQuestCompleted(UQuest_OLD* Quest)
 {
 	check(Quest);
 	
