@@ -11,6 +11,8 @@
 class ADrJonesCharacter;
 class ATool;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolPickedUpDelegate, ATool*, Tool);
+
 UCLASS(Blueprintable, ClassGroup = "Player Components",
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UHotBarComponent : public UActorComponent
@@ -29,7 +31,10 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	TArray<ATool*> GetTools() const;
-	
+
+	UPROPERTY(BlueprintAssignable, Category = "Tools")
+	FOnToolPickedUpDelegate OnToolPickedUp;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "UI");
 	TSubclassOf<UDrJonesWidgetBase> HotBarUI;

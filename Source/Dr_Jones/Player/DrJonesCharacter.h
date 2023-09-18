@@ -38,25 +38,25 @@ private:
 	void LookUp(float AxisValue);
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReactionComponent> ReactionComponent;
 	
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetManager> WidgetManager;
 	
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHotBarComponent> HotBarComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 
 	// TODO: AnimationComponent
-	UPROPERTY(EditAnywhere, Category = "FX|Sound")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FX|Sound")
 	TObjectPtr<USoundBase> DigSound;
 	
-	UPROPERTY(EditAnywhere, Category = "FX|Anim")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FX|Anim")
 	TObjectPtr<UAnimMontage> DigAnim;
 };
