@@ -42,16 +42,16 @@ struct FClockTimeComponents
 class FClockTimeZone
 {
 public:
-	explicit FClockTimeZone(uint64 TimeZoneHourOffset)
+	explicit FClockTimeZone(int64 TimeZoneHourOffset)
 		: HourOffset(TimeZoneHourOffset)
 	{
 		checkf(HourOffset >= -11 && HourOffset <= 14, TEXT("Non-existing time zone."));
 	}
 
-	uint64 GetHourOffset() const { return HourOffset; }
+	int64 GetHourOffset() const { return HourOffset; }
 
 private:
-	uint64 HourOffset;
+	int64 HourOffset;
 };
 
 class DR_JONES_API FClockTime
