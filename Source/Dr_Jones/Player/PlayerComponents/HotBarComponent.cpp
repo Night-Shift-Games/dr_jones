@@ -45,7 +45,7 @@ void UHotBarComponent::AddTool(ATool& ToolToAdd)
 	const TOptional<float> None;
 	Owner->WidgetManager->RequestWidgetUpdate(HotBarUI, None);
 
-	OnToolPickedUp.Broadcast(&ToolToAdd);
+	OnToolAdded.Broadcast(&ToolToAdd);
 }
 
 void UHotBarComponent::RemoveTool(ATool& ToolToRemove)

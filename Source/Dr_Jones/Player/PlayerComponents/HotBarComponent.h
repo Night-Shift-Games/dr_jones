@@ -11,7 +11,7 @@
 class ADrJonesCharacter;
 class ATool;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolPickedUpDelegate, ATool*, Tool);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolAddedDelegate, ATool*, Tool);
 
 UCLASS(Blueprintable, ClassGroup = "Player Components",
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
@@ -33,7 +33,7 @@ public:
 	TArray<ATool*> GetTools() const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
-	FOnToolPickedUpDelegate OnToolPickedUp;
+	FOnToolAddedDelegate OnToolAdded;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "UI");
