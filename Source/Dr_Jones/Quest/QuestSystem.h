@@ -87,6 +87,8 @@ struct FQuestDescription
 	TSubclassOf<UQuest> QuestClass;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuestCompletedDelegate);
+
 UCLASS(Blueprintable, Abstract)
 class DR_JONES_API UQuest : public UObject
 {
@@ -99,14 +101,17 @@ public:
 
 	void InitializePending();
 
-	const FQuestDescription& GetDescription() const;
-	bool IsCompleted() const;
-
 	// Handle can be invalid if the quest has not been registered yet.
 	TOptional<FQuestHandle> GetHandle() const;
 
 	UFUNCTION(BlueprintPure, Category = "Quest")
+	const FQuestDescription& GetDescription() const;
+
+	UFUNCTION(BlueprintPure, Category = "Quest")
 	bool IsRegistered() const;
+
+	UFUNCTION(BlueprintPure, Category = "Quest")
+	bool IsCompleted() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	void MarkAsCompleted();
@@ -116,6 +121,10 @@ protected:
 	// When a new quest is added or, for an existing quest, when the level is started.
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest")
 	void OnInitializePending();
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Quest")
+	FOnQuestCompletedDelegate OnQuestCompleted;
 
 private:
 	TOptional<FQuestHandle> HandleInRegistry;
@@ -130,6 +139,39 @@ private:
 	friend class UQuestSystemComponent;
 };
 
+UCLASS(Blueprintable)
+class UQuestChain : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_DELEGATE(FNotifyCompletedDelegate);
+
+	bool HasAnyQuest() const { return !Quests.IsEmpty(); }
+
+	void InitializeChain(UQuestSystemComponent* QuestSystemComponent);
+
+	UFUNCTION()
+	void OnQuestCompleted();
+
+protected:
+	const FQuestDescription* GetNextQuest() const;
+	void SetupNextQuest();
+
+private:
+	FNotifyCompletedDelegate NotifyCompletedDelegate;
+
+	UPROPERTY(EditAnywhere, Category = "Quest")
+	TArray<FQuestDescription> Quests;
+
+	UPROPERTY()
+	TObjectPtr<UQuestSystemComponent> OwningQuestSystem;
+
+	mutable int32 InternalQuestIndex = 0;
+
+	friend class UQuestSystemComponent;
+};
+
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UQuestSystemComponent : public UActorComponent
 {
@@ -139,6 +181,12 @@ public:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Quest")
+	void AddQuestChainByObject(UQuestChain* QuestChain);
+
+	UFUNCTION(BlueprintCallable, Category = "Quest", meta = (AutoCreateRefTerm = "QuestChainClass"))
+	void AddQuestChain(const TSubclassOf<UQuestChain>& QuestChainClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Quest")
 	UPARAM(DisplayName = "Quest Object") UQuest* AddQuest(const FQuestDescription& QuestDescription);
 
 protected:
@@ -146,10 +194,13 @@ protected:
 	void InitializePendingQuest(UQuest& Quest);
 
 private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Quest", meta = (AllowPrivateAccess = true))
 	TArray<FQuestHandle> PendingQuests;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Quest", meta = (AllowPrivateAccess = true))
+	TArray<TObjectPtr<UQuestChain>> PendingQuestChains;
+
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Quest", meta = (AllowPrivateAccess = true))
 	TMap<FQuestHandle, UQuest*> QuestRegistry;
 };
 

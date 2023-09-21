@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	UWorldData* GetGlobalWorldData() const;
 
+	UFUNCTION(BlueprintPure)
+	AIlluminati* GetIlluminati() const;
+
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWorldData> GlobalWorldData;
@@ -78,4 +81,9 @@ FORCEINLINE UQuestSystemLogic* ADr_JonesGameModeBase::GetQuestSystem() const
 FORCEINLINE UWorldData* ADr_JonesGameModeBase::GetGlobalWorldData() const
 {
 	return GlobalWorldData;
+}
+
+FORCEINLINE AIlluminati* ADr_JonesGameModeBase::GetIlluminati() const
+{
+	return Illuminati;
 }

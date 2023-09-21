@@ -59,8 +59,51 @@ void UQuest::MarkAsCompleted()
 	bCompleted = true;
 	(void)NotifyCompletedDelegate.ExecuteIfBound();
 
+	OnQuestCompleted.Broadcast();
+
 	QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest \"%s\" (%s) has been marked as complete."),
 		*QuestDescription.DisplayName.ToString(), *GetName());
+}
+
+const FQuestDescription* UQuestChain::GetNextQuest() const
+{
+	++InternalQuestIndex;
+	if (InternalQuestIndex >= Quests.Num())
+	{
+		return nullptr;
+	}
+
+	return &Quests[InternalQuestIndex];
+}
+
+void UQuestChain::SetupNextQuest()
+{
+	const FQuestDescription* QuestDescription = GetNextQuest();
+	if (!QuestDescription)
+	{
+		return;
+	}
+
+	UQuest* Quest = OwningQuestSystem->AddQuest(*QuestDescription);
+	if (!Quest)
+	{
+		return;
+	}
+
+	Quest->OnQuestCompleted.AddDynamic(this, &UQuestChain::OnQuestCompleted);
+}
+
+void UQuestChain::InitializeChain(UQuestSystemComponent* QuestSystemComponent)
+{
+	checkf(!OwningQuestSystem, TEXT("Quest Chain has already been initialized."));
+	OwningQuestSystem = QuestSystemComponent;
+
+	SetupNextQuest();
+}
+
+void UQuestChain::OnQuestCompleted()
+{
+	SetupNextQuest();
 }
 
 void UQuestSystemComponent::BeginPlay()
@@ -74,6 +117,39 @@ void UQuestSystemComponent::BeginPlay()
 
 		InitializePendingQuest(*Quest);
 	}
+}
+
+void UQuestSystemComponent::AddQuestChainByObject(UQuestChain* QuestChain)
+{
+	if (!QuestChain->HasAnyQuest())
+	{
+		QuestSystemUtils::LogDebug(TEXT("Tried to add an empty Quest Chain %s"), *QuestChain->GetName());
+		return;
+	}
+
+	PendingQuestChains.AddUnique(QuestChain);
+	QuestChain->InitializeChain(this);
+	QuestChain->NotifyCompletedDelegate.BindLambda([this, QuestChain]
+	{
+		PendingQuestChains.Remove(QuestChain);
+
+		if (QuestSystemUtils::IsDebugEnabled())
+		{
+			QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest Chain \"%s\" has been removed from pending quest chains array."),
+				*QuestChain->GetName());
+		}
+	});
+}
+
+void UQuestSystemComponent::AddQuestChain(const TSubclassOf<UQuestChain>& QuestChainClass)
+{
+	if (!QuestChainClass)
+	{
+		UE_LOG(LogDrJones, Error, TEXT("Cannot add quest chain of a null class."));
+		return;
+	}
+
+	AddQuestChainByObject(NewObject<UQuestChain>(QuestChainClass));
 }
 
 UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescription)
@@ -133,6 +209,7 @@ void UQuestSystemComponent::InitializePendingQuest(UQuest& Quest)
 		{
 			const UQuest* FoundQuest = QuestRegistry.FindChecked(Handle);
 			check(FoundQuest);
+
 			QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest \"%s\" (%s) has been removed from pending quests array."),
 				*FoundQuest->QuestDescription.DisplayName.ToString(), *FoundQuest->GetName());
 		}

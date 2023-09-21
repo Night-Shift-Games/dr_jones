@@ -2,6 +2,7 @@
 
 #include "Illuminati.h"
 
+#include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestSystem.h"
 
 FClockTime FWorldClockTime::ToClockTime() const
@@ -122,4 +123,32 @@ FWorldEventHandle AIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& 
 		ClockTaskHandles.Add(ClockTaskHandle);
 	}
 	return Handle;
+}
+
+AIlluminati* AIlluminati::GetIlluminatiInstance(const UObject* WorldContextObject)
+{
+	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	const ADr_JonesGameModeBase* GameMode = World->GetAuthGameMode<ADr_JonesGameModeBase>();
+	if (!ensureAlwaysMsgf(GameMode, TEXT("Tried to get Illuminati instance, but an incorrect game mode is active.")))
+	{
+		return nullptr;
+	}
+
+	return GameMode->GetIlluminati();
+}
+
+UQuestSystemComponent* AIlluminati::GetQuestSystemInstance(const UObject* WorldContextObject)
+{
+	const AIlluminati* Illuminati = GetIlluminatiInstance(WorldContextObject);
+	if (!Illuminati)
+	{
+		return nullptr;
+	}
+
+	return Illuminati->QuestSystemComponent;
 }

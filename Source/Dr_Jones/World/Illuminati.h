@@ -107,6 +107,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "World Event", meta = (AutoCreateRefTerm = "Schedule, Event"))
 	FWorldEventHandle ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event);
 
+	UFUNCTION(BlueprintPure, Category = "Illuminati", meta = (WorldContext = "WorldContextObject"))
+	static AIlluminati* GetIlluminatiInstance(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category = "Illuminati", meta = (WorldContext = "WorldContextObject"))
+	static UQuestSystemComponent* GetQuestSystemInstance(const UObject* WorldContextObject);
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
