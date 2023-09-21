@@ -54,11 +54,13 @@ bool FClockTime::operator==(const FClockTime& ClockTime) const
 }
 
 FClock::FClock()
+	: bInitializeTick(true)
 {
 }
 
 FClock::FClock(UObject& OuterObject)
 	: Outer(&OuterObject)
+	, bInitializeTick(true)
 {
 }
 
@@ -86,6 +88,7 @@ void FClock::Start(bool bWithFirstTickDisabled)
 	}
 	WorldContext->GetTimerManager().SetTimer(ClockTimerHandle, FTimerDelegate::CreateWeakLambda(Outer.Get(), [this]
 	{
+		bInitializeTick = false;
 		Update();
 	}), 1.0f, true);
 }

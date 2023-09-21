@@ -43,9 +43,10 @@ void AIlluminati::BeginPlay()
 	Clock.ClockTickDelegate.BindWeakLambda(this, [this](const FClockTime& ClockTime)
 	{
 		const FWorldClockTime WorldClockTime = FWorldClockTime::MakeFromClockTime(ClockTime);
-		ClockTickDelegate.Broadcast(WorldClockTime);
-		OnClockTickEvent(WorldClockTime);
+		ClockTickDelegate.Broadcast(WorldClockTime, Clock.IsInitializeTick());
+		OnClockTickEvent(WorldClockTime, Clock.IsInitializeTick());
 	});
+	Clock.SetTime(FClockTime(InitialTime.GetHour(), InitialTime.GetMinute(), InitialTime.GetSecond()));
 	Clock.Start(bDisableFirstClockTick);
 }
 

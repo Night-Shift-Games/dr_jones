@@ -110,6 +110,8 @@ public:
 	FClockTaskHandle ScheduleTaskOnce(FClockTime Time, const FClockTickDelegate& TaskDelegate);
 	void RemoveTask(const FClockTaskHandle& Handle);
 
+	bool IsInitializeTick() const { return bInitializeTick; }
+
 protected:
 	void Update();
 
@@ -122,6 +124,7 @@ private:
 	TWeakObjectPtr<> Outer;
 	FTimerHandle ClockTimerHandle;
 	FClockTime CurrentTime;
+	bool bInitializeTick;
 };
 
 FORCEINLINE FClockTime FClock::GetTime() const

@@ -53,7 +53,7 @@ public:
 };
 
 DECLARE_DYNAMIC_DELEGATE(FWorldEventDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWorldClockTickDelegate, FWorldClockTime, ClockTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWorldClockTickDelegate, FWorldClockTime, ClockTime, bool, bInitialTick);
 
 USTRUCT(BlueprintType)
 struct FWorldEventHandle
@@ -87,7 +87,7 @@ public:
 	FClock& GetClock() { return Clock; }
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Clock")
-	void OnClockTickEvent(const FWorldClockTime& ClockTime);
+	void OnClockTickEvent(const FWorldClockTime& ClockTime, bool bInitialTick);
 
 	UFUNCTION(BlueprintPure, Category = "Clock")
 	static float GetClockSecondsPerRealSecond();
@@ -114,6 +114,9 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Quest")
 	TObjectPtr<UQuestSystemComponent> QuestSystemComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
+	FDateTime InitialTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
 	uint8 bDisableFirstClockTick : 1;
