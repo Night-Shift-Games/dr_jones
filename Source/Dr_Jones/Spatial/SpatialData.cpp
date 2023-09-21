@@ -255,9 +255,8 @@ FArchive& operator<<(FArchive& Ar, TSharedPtr<FSpatialDataBuffer>& InOutBufferPt
 	{
 		Layout = MakeShared<FSpatialDataBufferLayout>();
 	}
-	else
+	else if (Ar.IsSaving())
 	{
-		check(Ar.IsSaving());
 		checkf(InOutBufferPtr, TEXT("Spatial Data buffer must not be null."));
 		checkf(InOutBufferPtr->Layout, TEXT("Spatial Data layout must not be null."));
 		
@@ -265,9 +264,12 @@ FArchive& operator<<(FArchive& Ar, TSharedPtr<FSpatialDataBuffer>& InOutBufferPt
 		Layout = InOutBufferPtr->Layout;
 	}
 
-	Ar << Dimensions;
-	Ar << *Layout;
-	
+	if (Layout)
+	{
+		Ar << Dimensions;
+		Ar << *Layout;
+	}
+
 	if (Ar.IsLoading())
 	{
 		// Load uncompressed size
@@ -286,10 +288,8 @@ FArchive& operator<<(FArchive& Ar, TSharedPtr<FSpatialDataBuffer>& InOutBufferPt
 			InOutBufferPtr->SetRawData(Bytes);
 		}
 	}
-	else
+	else if (Ar.IsSaving())
 	{
-		check(Ar.IsSaving());
-		
 		Bytes = InOutBufferPtr->GetRawData();
 
 		// Save uncompressed size
