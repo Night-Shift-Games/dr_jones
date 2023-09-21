@@ -73,7 +73,7 @@ inline int32 GetTypeHash(const FWorldEventHandle& WorldEventHandle)
 	return GetTypeHash(WorldEventHandle.Key);
 }
 
-UCLASS(Blueprintable, ClassGroup = "DrJones")
+UCLASS(Blueprintable, ClassGroup = "DrJones", HideCategories = (Replication, Actor, Physics, Cooking))
 class DR_JONES_API AIlluminati : public AInfo
 {
 	GENERATED_BODY()
