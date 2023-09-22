@@ -30,6 +30,11 @@ void UQuest::InitializePending()
 	OnInitializePending();
 }
 
+void UQuest::SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage)
+{
+	OnQuestMessageReceived(QuestMessage);
+}
+
 bool UQuest::IsCompleted() const
 {
 	return bCompleted;
@@ -149,7 +154,7 @@ void UQuestSystemComponent::AddQuestChain(const TSubclassOf<UQuestChain>& QuestC
 		return;
 	}
 
-	AddQuestChainByObject(NewObject<UQuestChain>(QuestChainClass));
+	AddQuestChainByObject(NewObject<UQuestChain>(this, QuestChainClass));
 }
 
 UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescription)
@@ -176,6 +181,17 @@ UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescriptio
 	return QuestObject;
 }
 
+void UQuestSystemComponent::SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage)
+{
+	for (const FQuestHandle& QuestHandle : PendingQuests)
+	{
+		if (UQuest* Quest = FindQuest(QuestHandle))
+		{
+			Quest->SendQuestMessage(QuestMessage);
+		}
+	}
+}
+
 FQuestHandle UQuestSystemComponent::RegisterQuest(UQuest& Quest)
 {
 	check(Quest.GetWorld());
@@ -189,8 +205,7 @@ FQuestHandle UQuestSystemComponent::RegisterQuest(UQuest& Quest)
 	FQuestHandle QuestHandle = FQuestHandle::New();
 	QuestRegistry.Emplace(QuestHandle, &Quest);
 
-	QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest \"%s\" (%s) has been registered."),
-		*Quest.QuestDescription.DisplayName.ToString(), *Quest.GetName());
+	QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest %s has been registered."), *Quest.GetName());
 
 	return QuestHandle;
 }
@@ -218,4 +233,15 @@ void UQuestSystemComponent::InitializePendingQuest(UQuest& Quest)
 
 	QuestSystemUtils::LogDebugIfEnabled(TEXT("Pending Quest \"%s\" (%s) has been initialized."),
 		*Quest.QuestDescription.DisplayName.ToString(), *Quest.GetName());
+}
+
+UQuest* UQuestSystemComponent::FindQuest(const FQuestHandle& Handle) const
+{
+	UQuest* const* FoundQuest = QuestRegistry.Find(Handle);
+	if (!FoundQuest)
+	{
+		return nullptr;
+	}
+
+	return *FoundQuest;
 }

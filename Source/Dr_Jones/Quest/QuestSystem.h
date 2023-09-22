@@ -100,6 +100,7 @@ public:
 	virtual UWorld* GetWorld() const override;
 
 	void InitializePending();
+	void SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage);
 
 	// Handle can be invalid if the quest has not been registered yet.
 	TOptional<FQuestHandle> GetHandle() const;
@@ -121,6 +122,9 @@ protected:
 	// When a new quest is added or, for an existing quest, when the level is started.
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest")
 	void OnInitializePending();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Quest")
+	void OnQuestMessageReceived(const TScriptInterface<IQuestMessageInterface>& QuestMessage);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Quest")
@@ -172,6 +176,20 @@ private:
 	friend class UQuestSystemComponent;
 };
 
+UINTERFACE()
+class UQuestMessageInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class IQuestMessageInterface
+{
+	GENERATED_BODY()
+
+public:
+	
+};
+
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UQuestSystemComponent : public UActorComponent
 {
@@ -189,9 +207,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	UPARAM(DisplayName = "Quest Object") UQuest* AddQuest(const FQuestDescription& QuestDescription);
 
+	UFUNCTION(BlueprintCallable, Category = "Quest")
+	void SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage);
+
 protected:
 	FQuestHandle RegisterQuest(UQuest& Quest);
 	void InitializePendingQuest(UQuest& Quest);
+	UQuest* FindQuest(const FQuestHandle& Handle) const;
 
 private:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Quest", meta = (AllowPrivateAccess = true))
