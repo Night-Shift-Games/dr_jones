@@ -7,6 +7,7 @@
 
 #include "DrJonesCharacter.generated.h"
 
+class UReputationComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 class AItem;
@@ -49,6 +50,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHotBarComponent> HotBarComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UReputationComponent> ReputationComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
