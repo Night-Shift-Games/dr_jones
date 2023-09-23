@@ -183,12 +183,20 @@ UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescriptio
 
 void UQuestSystemComponent::SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage)
 {
+	TArray<UQuest*> FoundQuests;
+	FoundQuests.Reserve(PendingQuests.Num());
+
 	for (const FQuestHandle& QuestHandle : PendingQuests)
 	{
 		if (UQuest* Quest = FindQuest(QuestHandle))
 		{
-			Quest->SendQuestMessage(QuestMessage);
+			FoundQuests.Add(Quest);
 		}
+	}
+
+	for (UQuest* Quest : FoundQuests)
+	{
+		Quest->SendQuestMessage(QuestMessage);
 	}
 }
 
