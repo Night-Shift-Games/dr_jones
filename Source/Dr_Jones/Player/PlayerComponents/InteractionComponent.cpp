@@ -18,14 +18,36 @@ void UInteractionComponent::BeginPlay()
 	WidgetManager = Owner->GetWidgetManager();
 }
 
-bool UInteractionComponent::IsInteractable() const
+void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	return ActorToInteract->FindComponentByClass<UInteractableComponent>() != nullptr;
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	check(Owner.IsValid());
+	
+	FindActorToInteract();
+
+	if (ActorToInteract == PreviousActorToInteract)
+	{
+		return;
+	}
+	PreviousActorToInteract = ActorToInteract;
+	UpdateInteractionWidget();
+}
+
+void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
+{
+	InputComponent->BindAction("Interact", IE_Pressed, this, &UInteractionComponent::Interact);
+}
+
+void UInteractionComponent::FindActorToInteract()
+{
+	AActor* Candidate = Owner->GetPlayerLookingAt(InteractionRange).GetActor();
+	ActorToInteract = Candidate && IsInteractable(*Candidate) ? Candidate : nullptr;
 }
 
 void UInteractionComponent::UpdateInteractionWidget()
 {
-	if (!ActorToInteract || !IsInteractable())
+	if (!ActorToInteract || !IsInteractable(*ActorToInteract))
 	{
 		WidgetManager->HideWidget(InteractionUI);
 		return;
@@ -37,22 +59,6 @@ void UInteractionComponent::UpdateInteractionWidget()
 	WidgetManager->ShowWidget(InteractionUI);
 }
 
-void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	check(Owner.IsValid());
-	
-	ActorToInteract = Owner->GetPlayerLookingAt(InteractionRange).GetActor();
-
-	if (ActorToInteract == PreviousActorToInteract)
-	{
-		return;
-	}
-	PreviousActorToInteract = ActorToInteract;
-	UpdateInteractionWidget();
-}
-
 void UInteractionComponent::Interact()
 {
 	if (!ActorToInteract)
@@ -61,16 +67,15 @@ void UInteractionComponent::Interact()
 	}
 
 	UInteractableComponent* Interactable = ActorToInteract->FindComponentByClass<UInteractableComponent>();
-	if (!Interactable)
+	if (!Interactable || !Interactable->IsInteractionEnabled())
 	{
 		return;
 	}
 	Interactable->Interact(Owner.Get());
 }
 
-void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
+/*static*/ bool UInteractionComponent::IsInteractable(const AActor& ActorToCheck)
 {
-	InputComponent->BindAction("Interact", IE_Pressed, this, &UInteractionComponent::Interact);
+	const UInteractableComponent* InteractableComponent = ActorToCheck.FindComponentByClass<UInteractableComponent>();
+	return IsValid(InteractableComponent) && InteractableComponent->IsInteractionEnabled();
 }
-
-

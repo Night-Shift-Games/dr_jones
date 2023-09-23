@@ -32,9 +32,11 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void Interact();
-	bool IsInteractable() const;
+	void FindActorToInteract();
 	void UpdateInteractionWidget();
+	
+	void Interact();
+	static bool IsInteractable(const AActor& ActorToCheck);
 
 protected:
 	TWeakObjectPtr<ADrJonesCharacter> Owner;

@@ -4,7 +4,7 @@
 
 UInteractableComponent::UInteractableComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UInteractableComponent::Interact(ADrJonesCharacter* Player)
@@ -13,15 +13,3 @@ void UInteractableComponent::Interact(ADrJonesCharacter* Player)
 	
 	InteractDelegate.Broadcast(Player);
 }
-
-void UInteractableComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UInteractableComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-}
-
