@@ -160,6 +160,7 @@ public:
 
 protected:
 	const FQuestDescription* GetNextQuest() const;
+	bool HasNextQuest() const;
 	void SetupNextQuest();
 
 private:
