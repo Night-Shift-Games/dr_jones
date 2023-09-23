@@ -81,6 +81,11 @@ const FQuestDescription* UQuestChain::GetNextQuest() const
 	return &Quests[InternalQuestIndex];
 }
 
+bool UQuestChain::HasNextQuest() const
+{
+	return InternalQuestIndex < Quests.Num() - 1;
+}
+
 void UQuestChain::SetupNextQuest()
 {
 	const FQuestDescription* QuestDescription = GetNextQuest();
@@ -101,6 +106,8 @@ void UQuestChain::SetupNextQuest()
 void UQuestChain::InitializeChain(UQuestSystemComponent* QuestSystemComponent)
 {
 	checkf(!OwningQuestSystem, TEXT("Quest Chain has already been initialized."));
+	checkf(HasAnyQuest(), TEXT("Quest Chain has no quests."));
+
 	OwningQuestSystem = QuestSystemComponent;
 
 	SetupNextQuest();
@@ -108,7 +115,14 @@ void UQuestChain::InitializeChain(UQuestSystemComponent* QuestSystemComponent)
 
 void UQuestChain::OnQuestCompleted()
 {
-	SetupNextQuest();
+	if (HasNextQuest())
+	{
+		SetupNextQuest();
+		return;
+	}
+
+	QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest Chain %s has been completed."), *GetName());
+	(void)NotifyCompletedDelegate.ExecuteIfBound();
 }
 
 void UQuestSystemComponent::BeginPlay()
@@ -128,7 +142,7 @@ void UQuestSystemComponent::AddQuestChainByObject(UQuestChain* QuestChain)
 {
 	if (!QuestChain->HasAnyQuest())
 	{
-		QuestSystemUtils::LogDebug(TEXT("Tried to add an empty Quest Chain %s"), *QuestChain->GetName());
+		QuestSystemUtils::LogDebugIfEnabled(TEXT("Tried to add an empty Quest Chain %s"), *QuestChain->GetName());
 		return;
 	}
 
@@ -138,11 +152,8 @@ void UQuestSystemComponent::AddQuestChainByObject(UQuestChain* QuestChain)
 	{
 		PendingQuestChains.Remove(QuestChain);
 
-		if (QuestSystemUtils::IsDebugEnabled())
-		{
-			QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest Chain \"%s\" has been removed from pending quest chains array."),
-				*QuestChain->GetName());
-		}
+		QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest Chain \"%s\" has been removed from pending quest chains array."),
+			*QuestChain->GetName());
 	});
 }
 
@@ -183,12 +194,20 @@ UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescriptio
 
 void UQuestSystemComponent::SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage)
 {
+	TArray<UQuest*> FoundQuests;
+	FoundQuests.Reserve(PendingQuests.Num());
+
 	for (const FQuestHandle& QuestHandle : PendingQuests)
 	{
 		if (UQuest* Quest = FindQuest(QuestHandle))
 		{
-			Quest->SendQuestMessage(QuestMessage);
+			FoundQuests.Add(Quest);
 		}
+	}
+
+	for (UQuest* Quest : FoundQuests)
+	{
+		Quest->SendQuestMessage(QuestMessage);
 	}
 }
 
@@ -225,7 +244,7 @@ void UQuestSystemComponent::InitializePendingQuest(UQuest& Quest)
 			const UQuest* FoundQuest = QuestRegistry.FindChecked(Handle);
 			check(FoundQuest);
 
-			QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest \"%s\" (%s) has been removed from pending quests array."),
+			QuestSystemUtils::LogDebug(TEXT("Quest \"%s\" (%s) has been removed from pending quests array."),
 				*FoundQuest->QuestDescription.DisplayName.ToString(), *FoundQuest->GetName());
 		}
 	});

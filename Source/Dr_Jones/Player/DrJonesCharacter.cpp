@@ -7,6 +7,7 @@
 #include "PlayerComponents/HotBarComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
+#include "PlayerComponents/ReputationComponent.h"
 #include "WidgetManager.h"
 
 ADrJonesCharacter::ADrJonesCharacter()
@@ -16,6 +17,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
 	HotBarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
+	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 }
 
