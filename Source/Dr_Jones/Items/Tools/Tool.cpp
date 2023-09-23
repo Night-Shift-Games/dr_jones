@@ -40,6 +40,7 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 	Player->HotBarComponent->AddTool(*this);
 	// TODO: Attaching & reattaching should be inside Hotbar.
 	Player->HotBarComponent->SetActiveItem(*this);
+	InteractableComponent->SetInteractionEnabled(false);
 	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
 }
 

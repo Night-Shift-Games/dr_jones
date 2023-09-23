@@ -56,7 +56,8 @@ enum class EReputationType : uint8
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReputationChange, const FReputationChangeData&, ShiftData);
 
-UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent),
+	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UReputationComponent : public UActorComponent
 {
 	GENERATED_BODY()
