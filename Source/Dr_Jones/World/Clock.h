@@ -57,7 +57,7 @@ private:
 class DR_JONES_API FClockTime
 {
 public:
-	static constexpr inline uint64 MaxTime = 60 * 60 * 60;
+	static constexpr inline uint64 MaxTime = 60 * 60 * 24;
 
 	FClockTime()
 		: TimeSeconds(0)
@@ -105,6 +105,7 @@ public:
 
 	void SetTime(FClockTime Time);
 	FClockTime GetTime() const;
+	void SkipTime(int32 SecondsToSkip);
 
 	FClockTaskHandle ScheduleTask(FClockTime Time, const FClockTickDelegate& TaskDelegate);
 	FClockTaskHandle ScheduleTaskOnce(FClockTime Time, const FClockTickDelegate& TaskDelegate);

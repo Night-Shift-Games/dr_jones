@@ -5,6 +5,11 @@
 #include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestSystem.h"
 
+int32 FWorldClockTimeOffset::ToSeconds() const
+{
+	return Hours * 3600 + Minutes * 60 + Seconds;
+}
+
 FClockTime FWorldClockTime::ToClockTime() const
 {
 	return FClockTime(Hours, Minutes, Seconds);

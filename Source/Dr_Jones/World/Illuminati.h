@@ -12,7 +12,24 @@
 class UQuestSystemComponent;
 
 USTRUCT(BlueprintType)
-struct FWorldClockTime
+struct DR_JONES_API FWorldClockTimeOffset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Hours = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Minutes = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Seconds = 0;
+
+	int32 ToSeconds() const;
+};
+
+USTRUCT(BlueprintType)
+struct DR_JONES_API FWorldClockTime
 {
 	GENERATED_BODY()
 

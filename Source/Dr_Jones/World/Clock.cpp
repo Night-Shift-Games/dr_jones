@@ -134,6 +134,13 @@ void FClock::SetTime(FClockTime Time)
 	CurrentTime = Time;
 }
 
+void FClock::SkipTime(int32 SecondsToSkip)
+{
+	FClockTime Time = GetTime();
+	Time += SecondsToSkip;
+	SetTime(Time);
+}
+
 FClockTaskHandle FClock::ScheduleTask(FClockTime Time, const FClockTickDelegate& TaskDelegate)
 {
 	FClockScheduledTask Task;
