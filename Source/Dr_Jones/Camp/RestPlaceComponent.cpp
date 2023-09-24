@@ -18,8 +18,7 @@ void URestPlaceComponent::Rest(const FWorldClockTimeOffset& TimeOffset, ADrJones
 		return;
 	}
 
-	const int32 RestingSeconds = TimeOffset.ToSeconds();
-	if (RestingSeconds <= 0)
+	if (TimeOffset.Timespan <= 0)
 	{
 		UE_LOG(LogDrJones, Error, TEXT("Cannot rest for 0 or less seconds."));
 		return;
@@ -53,10 +52,10 @@ void URestPlaceComponent::Rest(const FWorldClockTimeOffset& TimeOffset, ADrJones
 	}), RestFadeTime * 2.0f + 2.0f, false);
 
 	// Fade to black before skipping time
-	TimerManager.SetTimer(RestTimerHandle, FTimerDelegate::CreateLambda([Illuminati, RestingSeconds]
+	TimerManager.SetTimer(RestTimerHandle, FTimerDelegate::CreateLambda([Illuminati, TimeOffset]
 	{
 		check(Illuminati->IsValidLowLevel());
-		Illuminati->GetClock().SkipTime(RestingSeconds);
+		Illuminati->GetClock().SkipTime(TimeOffset.Timespan);
 	}), RestFadeTime, false);
 
 	check(PlayerController->PlayerCameraManager);

@@ -17,13 +17,7 @@ struct DR_JONES_API FWorldClockTimeOffset
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Hours = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Minutes = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Seconds = 0;
+	FTimespan Timespan;
 
 	int32 ToSeconds() const;
 };
@@ -33,20 +27,15 @@ struct DR_JONES_API FWorldClockTime
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 23, UIMax = 23))
-	int32 Hours = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 59, UIMax = 59))
-	int32 Minutes = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 59, UIMax = 59))
-	int32 Seconds = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime DateTime;
 
 	FClockTime ToClockTime() const;
 	void InitFromClockTime(const FClockTime& ClockTime);
 	static FWorldClockTime MakeFromClockTime(const FClockTime& ClockTime);
 };
 
+// TODO: Refactor this so it is possible to specify if the events are reoccurring every day / hour etc.
 USTRUCT(BlueprintType)
 struct FWorldEventSchedule
 {

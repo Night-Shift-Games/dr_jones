@@ -7,20 +7,17 @@
 
 int32 FWorldClockTimeOffset::ToSeconds() const
 {
-	return Hours * 3600 + Minutes * 60 + Seconds;
+	return Timespan.GetTicks() / ETimespan::TicksPerSecond;
 }
 
 FClockTime FWorldClockTime::ToClockTime() const
 {
-	return FClockTime(Hours, Minutes, Seconds);
+	return FClockTime(DateTime);
 }
 
 void FWorldClockTime::InitFromClockTime(const FClockTime& ClockTime)
 {
-	const FClockTimeComponents Components = ClockTime.GetComponents();
-	Hours = Components.Hours;
-	Minutes = Components.Minutes;
-	Seconds = Components.Seconds;
+	DateTime = ClockTime.GetDateTime();
 }
 
 FWorldClockTime FWorldClockTime::MakeFromClockTime(const FClockTime& ClockTime)
@@ -52,7 +49,7 @@ void AIlluminati::BeginPlay()
 		ClockTickDelegate.Broadcast(WorldClockTime, Clock.IsInitializeTick());
 		OnClockTickEvent(WorldClockTime, Clock.IsInitializeTick());
 	});
-	Clock.SetTime(FClockTime(InitialTime.GetHour(), InitialTime.GetMinute(), InitialTime.GetSecond()));
+	Clock.SetTime(FClockTime(InitialTime));
 	Clock.Start(bDisableFirstClockTick);
 }
 

@@ -59,24 +59,22 @@ class DR_JONES_API FClockTime
 public:
 	static constexpr inline uint64 MaxTime = 60 * 60 * 24;
 
-	FClockTime()
-		: TimeSeconds(0)
-	{}
-
-	FClockTime(uint64 Seconds);
-	FClockTime(uint64 Hours, uint64 Minutes, uint64 Seconds);
-	FClockTime(const FClockTimeComponents& Components);
+	FClockTime() { }
+	explicit FClockTime(const FDateTime& InDateTime);
 	FClockTimeComponents GetComponents() const;
+	const FDateTime& GetDateTime() const { return DateTime; }
 
 	FClockTime ConvertToTimeZoneFromUTC(FClockTimeZone TimeZone) const;
 
-	bool IsConsideredEqualDuringClockUpdate(const FClockTime& Other, uint64 UpdateInterval) const;
+	bool IsConsideredEqualDuringClockUpdate(const FClockTime& Other, uint64 UpdateIntervalSeconds) const;
 
 	FClockTime& operator+=(uint64 Seconds);
+	FClockTime& operator+=(FTimespan Timespan);
 	bool operator==(const FClockTime& Other) const;
 
 private:
-	uint64 TimeSeconds;
+	FDateTime DateTime;
+	bool bIsUtc = true;
 };
 
 DECLARE_DELEGATE_OneParam(FClockTickDelegate, const FClockTime&)
@@ -105,7 +103,7 @@ public:
 
 	void SetTime(FClockTime Time);
 	FClockTime GetTime() const;
-	void SkipTime(int32 SecondsToSkip);
+	void SkipTime(FTimespan TimeToSkip);
 
 	FClockTaskHandle ScheduleTask(FClockTime Time, const FClockTickDelegate& TaskDelegate);
 	FClockTaskHandle ScheduleTaskOnce(FClockTime Time, const FClockTickDelegate& TaskDelegate);

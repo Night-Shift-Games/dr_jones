@@ -3,54 +3,46 @@
 #include "Clock.h"
 #include "Engine/World.h"
 
-FClockTime::FClockTime(uint64 Seconds)
-	: TimeSeconds(Seconds)
-{
-}
-
-FClockTime::FClockTime(uint64 Hours, uint64 Minutes, uint64 Seconds)
-{
-	check(Hours < 24);
-	check(Minutes < 60);
-	check(Seconds < 60);
-
-	TimeSeconds = Hours * 3600 + Minutes * 60 + Seconds;
-}
-
-FClockTime::FClockTime(const FClockTimeComponents& Components)
-	: FClockTime(Components.Hours, Components.Minutes, Components.Seconds)
+FClockTime::FClockTime(const FDateTime& InDateTime)
+	: DateTime(InDateTime)
 {
 }
 
 FClockTimeComponents FClockTime::GetComponents() const
 {
 	FClockTimeComponents Components;
-	Components.Hours = TimeSeconds / 3600;
-	Components.Minutes = (TimeSeconds / 60) % 60;
-	Components.Seconds = TimeSeconds % 60;
+	Components.Hours = DateTime.GetHour();
+	Components.Minutes = DateTime.GetMinute();
+	Components.Seconds = DateTime.GetSecond();
 	return Components;
 }
 
 FClockTime FClockTime::ConvertToTimeZoneFromUTC(FClockTimeZone TimeZone) const
 {
-	return FClockTime(TimeSeconds + TimeZone.GetHourOffset() * 3600);
+	return FClockTime(DateTime + FTimespan(TimeZone.GetHourOffset(), 0, 0));
 }
 
-bool FClockTime::IsConsideredEqualDuringClockUpdate(const FClockTime& Other, uint64 UpdateInterval) const
+bool FClockTime::IsConsideredEqualDuringClockUpdate(const FClockTime& Other, uint64 UpdateIntervalSeconds) const
 {
-	const int64 MinimumTimeToConsiderSameExclusive = TimeSeconds - UpdateInterval;
-	return static_cast<int64>(Other.TimeSeconds) > MinimumTimeToConsiderSameExclusive && Other.TimeSeconds <= TimeSeconds;
+	const FDateTime MinimumDateTimeToConsiderSameExclusive = DateTime - FTimespan(UpdateIntervalSeconds * ETimespan::TicksPerSecond);
+	return Other.DateTime > MinimumDateTimeToConsiderSameExclusive && Other.DateTime <= DateTime;
 }
 
 FClockTime& FClockTime::operator+=(uint64 Seconds)
 {
-	TimeSeconds = (TimeSeconds + Seconds) % MaxTime;
+	DateTime += FTimespan(Seconds * ETimespan::TicksPerSecond);
+	return *this;
+}
+
+FClockTime& FClockTime::operator+=(FTimespan Timespan)
+{
+	DateTime += Timespan;
 	return *this;
 }
 
 bool FClockTime::operator==(const FClockTime& ClockTime) const
 {
-	return TimeSeconds == ClockTime.TimeSeconds;
+	return DateTime == ClockTime.DateTime;
 }
 
 FClock::FClock()
@@ -134,10 +126,10 @@ void FClock::SetTime(FClockTime Time)
 	CurrentTime = Time;
 }
 
-void FClock::SkipTime(int32 SecondsToSkip)
+void FClock::SkipTime(FTimespan TimeToSkip)
 {
 	FClockTime Time = GetTime();
-	Time += SecondsToSkip;
+	Time += TimeToSkip;
 	SetTime(Time);
 }
 
