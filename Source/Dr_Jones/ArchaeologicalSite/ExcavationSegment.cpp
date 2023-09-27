@@ -61,9 +61,11 @@ void UExcavationSegment::Dig(FTransform CollisionPoint, FVector Dig)
 		bFullResolution = true;
 		GenerateMesh(FullResolution, FullSize);
 	}
+	FTransform Collision = CollisionPoint;
+	Collision.SetLocation( GetComponentToWorld().GetLocation() - CollisionPoint.GetLocation());
 	for (size_t i = 0; i < vertices.Num(); i++)
 	{
-		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], CollisionPoint, FVector(30, 30, 30)))
+		if (UKismetMathLibrary::IsPointInBoxWithTransform(vertices[i], Collision, FVector(30, 30, 30)))
 		{
 			bool bIsBottomEdge = i > vertices.Num() - FullResolution - 2;
 			bool bIsTopEdge = i < FullResolution;
