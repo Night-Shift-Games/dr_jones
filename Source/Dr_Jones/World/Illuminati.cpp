@@ -46,6 +46,7 @@ void AIlluminati::BeginPlay()
 	Clock.ClockTickDelegate.BindWeakLambda(this, [this](const FClockTime& ClockTime)
 	{
 		const FWorldClockTime WorldClockTime = FWorldClockTime::MakeFromClockTime(ClockTime);
+		FIlluminatiDelegates::OnWorldClockTick.Broadcast(WorldClockTime, Clock.IsInitializeTick());
 		ClockTickDelegate.Broadcast(WorldClockTime, Clock.IsInitializeTick());
 		OnClockTickEvent(WorldClockTime, Clock.IsInitializeTick());
 	});
@@ -125,6 +126,17 @@ FWorldEventHandle AIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& 
 		ClockTaskHandles.Add(ClockTaskHandle);
 	}
 	return Handle;
+}
+
+void AIlluminati::PostGlobalEvent(const FIlluminatiGlobalEvent& GlobalEvent) const
+{
+	if (CVarIlluminatiDebug.GetValueOnGameThread())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Orange, FString::Printf(TEXT("Illuminati Global Event has been posted.")));
+	}
+
+	FIlluminatiDelegates::OnGlobalEventReceived.Broadcast(GlobalEvent);
+	OnGlobalEventReceived.Broadcast(GlobalEvent);
 }
 
 AIlluminati* AIlluminati::GetIlluminatiInstance(const UObject* WorldContextObject)

@@ -9,7 +9,15 @@
 
 #include "Illuminati.generated.h"
 
+class USoundCue;
 class UQuestSystemComponent;
+
+static TAutoConsoleVariable CVarIlluminatiDebug(
+	TEXT("NS.Illuminati.Debug"),
+	false,
+	TEXT("Enable Illuminati debug logging."),
+	ECVF_Cheat
+);
 
 USTRUCT(BlueprintType)
 struct DR_JONES_API FWorldClockTimeOffset
@@ -58,9 +66,6 @@ public:
 	bool CanEventExecute() const;
 };
 
-DECLARE_DYNAMIC_DELEGATE(FWorldEventDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWorldClockTickDelegate, FWorldClockTime, ClockTime, bool, bInitialTick);
-
 USTRUCT(BlueprintType)
 struct FWorldEventHandle
 {
@@ -78,6 +83,30 @@ inline int32 GetTypeHash(const FWorldEventHandle& WorldEventHandle)
 {
 	return GetTypeHash(WorldEventHandle.Key);
 }
+
+USTRUCT(BlueprintType, Category = "Illuminati")
+struct FIlluminatiGlobalEvent
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Global Event")
+	TObjectPtr<USoundBase> RadioSound;
+};
+
+DECLARE_DYNAMIC_DELEGATE(FWorldEventDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWorldClockTickDelegate, FWorldClockTime, ClockTime, bool, bInitialTick);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGlobalEventReceivedDelegate, const FIlluminatiGlobalEvent&, GlobalEvent);
+
+class FIlluminatiDelegates
+{
+public:
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWorldClockTickDelegate, FWorldClockTime, bool /*bInitialTick*/);
+	static inline FOnWorldClockTickDelegate OnWorldClockTick;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnGlobalEventReceivedDelegate, const FIlluminatiGlobalEvent&);
+	static inline FOnGlobalEventReceivedDelegate OnGlobalEventReceived;
+};
 
 UCLASS(Blueprintable, ClassGroup = "DrJones", HideCategories = (Replication, Actor, Physics, Cooking))
 class DR_JONES_API AIlluminati : public AInfo
@@ -113,6 +142,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "World Event", meta = (AutoCreateRefTerm = "Schedule, Event"))
 	FWorldEventHandle ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "World Event", meta = (AutoCreateRefTerm = "GlobalEvent"))
+	void PostGlobalEvent(const FIlluminatiGlobalEvent& GlobalEvent) const;
+
 	UFUNCTION(BlueprintPure, Category = "Illuminati", meta = (WorldContext = "WorldContextObject"))
 	static AIlluminati* GetIlluminatiInstance(const UObject* WorldContextObject);
 
@@ -122,6 +154,9 @@ public:
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Global Event")
+	FOnGlobalEventReceivedDelegate OnGlobalEventReceived;
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Quest")
