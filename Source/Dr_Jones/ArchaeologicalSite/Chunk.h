@@ -16,7 +16,7 @@ struct FChunk
 	FVector WorldLocation;
 	TMap<FIntVector3, TSharedPtr<FVoxel>> Voxels;
 	TStrongObjectPtr<UDynamicMeshComponent> Mesh;
-	TStrongObjectPtr<AArchaeologicalSite> OwningArchaeologicalSite;
+	TStrongObjectPtr<ADigSite> OwningDigSite;
 };
 
 struct FVoxel

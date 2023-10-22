@@ -3,42 +3,44 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ExcavationSegment.h"
 #include "GameFramework/Actor.h"
 
 #include "ArchaeologicalSite.generated.h"
 
 struct FChunk;
+class AIlluminati;
+class ATerrain;
+class ADigSite;
+
+USTRUCT()
+struct FGeoData
+{
+	GENERATED_BODY()
+	
+};
 
 UCLASS()
-class DR_JONES_API AArchaeologicalSite : public AActor
+class DR_JONES_API UArchaeologicalSite : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	AArchaeologicalSite();
-	virtual void Tick(float DeltaSeconds) override;
+	UArchaeologicalSite() = default;
 
-	UFUNCTION(BlueprintCallable)
-	void ModifyTerrainAt(FTransform ModifyLocation);
+	FGeoData GeoData;
 	
 protected:
-	TObjectPtr<UTerrain> Terrain;
-	// TObjectPtr<UArtifactSpawner> ArtifactSpawner;
-	// TObjectPtr<AIlluminati> Illuminati;
+	TObjectPtr<AIlluminati> OwningIlluminati;
+
+	TObjectPtr<ATerrain> Terrain;
+	TObjectPtr<ADigSite> DigSite;
+	// TObjectPtr<ACamp> Camp;
 };
 
 UCLASS()
-class UTerrain : public UObject
+class ATerrain : public AActor
 {
 	GENERATED_BODY()
-public:
-	UTerrain() = default;
-	void ModifyAt(const FTransform& Location, const FTransform& Shape);
-	void CreateSectionAt(const FVector& Location);
-
-	TObjectPtr<AArchaeologicalSite> OwningArchaeologicalSite;
-protected:
-	TMap<FVector, TObjectPtr<UExcavationSegment>> Segments;
-
+	
 };
+

@@ -28,9 +28,6 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	UQuestSystemLogic* GetQuestSystem() const;
-
-	UFUNCTION(BlueprintCallable)
-	AArchaeologicalSite* FindOrCreateArchaeologicalSite();
 	
 	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
 	UFUNCTION(BlueprintCallable, Category = "Quest System")
@@ -47,7 +44,7 @@ protected:
 	TObjectPtr<UWorldData> GlobalWorldData;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<AArchaeologicalSite> ArchaeologicalSite;
+	TObjectPtr<UArchaeologicalSite> ArchaeologicalSite;
 
 	// X-Files theme starts playing
 	UPROPERTY(SaveGame, Instanced, BlueprintReadOnly)
@@ -63,15 +60,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UQuestSystemLogic> QuestSystem;
 };
-
-FORCEINLINE AArchaeologicalSite* ADr_JonesGameModeBase::FindOrCreateArchaeologicalSite()
-{
-	if (!ArchaeologicalSite)
-	{
-		ArchaeologicalSite = GetWorld()->SpawnActor<AArchaeologicalSite>();
-	}
-	return ArchaeologicalSite;
-}
 
 FORCEINLINE UQuestSystemLogic* ADr_JonesGameModeBase::GetQuestSystem() const
 {
