@@ -27,6 +27,8 @@ public:
 	void AddTool(ATool& ToolToAdd);
 	void RemoveTool(ATool& ToolToRemove);
 	void SetActiveItem(ATool& NewActiveTool);
+
+	UFUNCTION(BlueprintPure)
 	ATool* GetActiveTool() const;
 
 	UFUNCTION(BlueprintPure)

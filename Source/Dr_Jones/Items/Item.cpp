@@ -15,3 +15,8 @@ UMeshComponent* AItem::GetMeshComponent() const
 {
 	return FindComponentByClass<UMeshComponent>();
 }
+
+UTexture2D* AItem::GetItemIcon() const
+{
+	return ItemIcon;
+}

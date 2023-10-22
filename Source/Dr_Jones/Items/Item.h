@@ -20,6 +20,8 @@ public:
 	virtual UMeshComponent* GetMeshComponent() const;
 
 	TSubclassOf<UAnimInstance> GetItemAnimation() const;
+
+	UTexture2D* GetItemIcon() const;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
@@ -33,6 +35,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Animation")
 	TSubclassOf<UAnimInstance> ItemAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|UI")
+	TObjectPtr<UTexture2D> ItemIcon;
 };
 
 FORCEINLINE TSubclassOf<UAnimInstance> AItem::GetItemAnimation() const

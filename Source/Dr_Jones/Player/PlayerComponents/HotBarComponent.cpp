@@ -16,7 +16,7 @@ void UHotBarComponent::BeginPlay()
 
 void UHotBarComponent::SetupPlayerInput(UInputComponent* InputComponent)
 {
-	InputComponent->BindAxis("Scroll", this, &UHotBarComponent::ChangeActiveItem);
+	InputComponent->BindAxis(TEXT("Scroll"), this, &UHotBarComponent::ChangeActiveItem);
 }
 
 void UHotBarComponent::ChangeActiveItem(float Value)
@@ -25,8 +25,6 @@ void UHotBarComponent::ChangeActiveItem(float Value)
 	{
 		return;
 	}
-	
-	Owner->GetWidgetManager()->RequestWidgetUpdate(HotBarUI, Value);
 	
 	int32 ActiveItemID;
 	if (Tools.Find(ActiveTool, ActiveItemID))
@@ -63,9 +61,10 @@ void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
 	
 	ActiveTool = &NewActiveTool;
 	ActiveTool->GetMeshComponent()->SetVisibility(true);
+	
 	Owner->ReactionComponent->SetActiveItem(NewActiveTool);
-
 	Owner->CharacterAnimationComponent->SetActiveItemAnimation(ActiveTool->GetItemAnimation());
+	Owner->GetWidgetManager()->RequestWidgetUpdate(HotBarUI, NullOpt);
 }
 
 ATool* UHotBarComponent::GetActiveTool() const
