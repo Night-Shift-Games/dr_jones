@@ -11,7 +11,7 @@ class AArtifact;
 UENUM(BlueprintType)
 enum class EArtifactRarity : uint8
 {
-	Common,
+	Common = 0,
 	Uncommon,
 	Rare,
 	Legendary,
@@ -21,7 +21,7 @@ enum class EArtifactRarity : uint8
 UENUM(BlueprintType)
 enum class EArtifactWear : uint8
 {
-	FactoryNew,
+	FactoryNew = 0,
 	MinimalWear,
 	FieldTested,
 	WellWorn,
@@ -41,29 +41,29 @@ struct FArtifactData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	TObjectPtr<UStaticMesh> ArtifactMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AArtifact> CustomClass = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	TSubclassOf<AArtifact> CustomClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EArtifactRarity Rarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	EArtifactRarity Rarity = EArtifactRarity::Common;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Usage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	FName Usage = NAME_None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EArtifactWear Wear;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	EArtifactWear Wear = EArtifactWear::FactoryNew;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0))
-	int32 Age;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data", meta = (ClampMin = 0, UIMin = 0))
+	int32 Age = 3000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName Culture;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	FName Culture = NAME_None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EArtifactSize Size;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	EArtifactSize Size = EArtifactSize::Normal;
 };
 
 UCLASS(Blueprintable)
@@ -81,6 +81,6 @@ struct FArtifactDatabaseRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Arifact Data")
 	FArtifactData ArtifactData;
 };
