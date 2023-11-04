@@ -2,6 +2,9 @@
 
 #include "Artifact.h"
 
+#include "ArtifactDatabase.h"
+#include "SharedComponents/InteractableComponent.h"
+
 AArtifact::AArtifact()
 {
 	ArtifactMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArtifactMesh"));
@@ -12,6 +15,13 @@ AArtifact::AArtifact()
 		UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent);
 		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
 	}
+}
+
+void AArtifact::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InteractableComponent->InteractDelegate.AddDynamic(this, &AArtifact::Take);
 }
 
 void AArtifact::OnConstruction(const FTransform& Transform)
@@ -25,19 +35,20 @@ void AArtifact::OnConstruction(const FTransform& Transform)
 	}
 }
 
-void AArtifact::Interact(APawn* Indicator)
+void AArtifact::Take(ADrJonesCharacter* Taker)
 {
-	Take(Indicator);
-}
-
-void AArtifact::Take(APawn* Indicator)
-{
-	OnArtifactTake(Indicator);
+	OnArtifactTake(Taker);
 }
 
 UMeshComponent* AArtifact::GetMeshComponent() const
 {
 	return ArtifactMeshComponent;
+}
+
+void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
+{
+	ArtifactStaticMesh = ArtifactData.ArtifactMesh;
+	
 }
 
 #if WITH_EDITOR

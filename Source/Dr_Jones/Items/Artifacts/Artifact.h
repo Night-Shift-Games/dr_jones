@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ArtifactDatabase.h"
 #include "Items/Item.h"
 
 #include "Artifact.generated.h"
+
+class ADrJonesCharacter;
 
 USTRUCT(BlueprintType)
 struct FProceduralArtifactData
@@ -29,17 +32,19 @@ class DR_JONES_API AArtifact : public AItem
 public:
 	AArtifact();
 
+	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	virtual void Interact(APawn* Indicator);
-
-	void Take(APawn* Taker);
+	UFUNCTION()
+	void Take(ADrJonesCharacter* Taker);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnArtifactTake(APawn* Taker);
 
 	virtual UMeshComponent* GetMeshComponent() const override;
 
+	void SetupArtifact(const FArtifactData& ArtifactData);
+	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -47,17 +52,34 @@ public:
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactID;
+	
+	int ArtifactAge = 2500.f;
 
+	FName ArtifactUsage = NAME_None;
+	
+	FName ArtifactCulture = NAME_None;
+
+	EArtifactRarity ArtifactRarity;
+
+	EArtifactSize ArtifactSize;
+
+	EArtifactWear ArtifactWear;
+	
+	FText ArtifactDescription = FText::AsCultureInvariant(TEXT(""));
+
+	FText ArtifactName = FText::AsCultureInvariant(TEXT(""));
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Artifact")
 	FProceduralArtifactData ProceduralData;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
-	TObjectPtr<UMeshComponent> ArtifactMeshComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Artifact")
 	TObjectPtr<UStaticMesh> ArtifactStaticMesh;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMaterialInstanceDynamic> ArtifactDynamicMaterial;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
+	TObjectPtr<UMeshComponent> ArtifactMeshComponent;
 };
 
