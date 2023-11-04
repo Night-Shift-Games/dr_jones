@@ -57,8 +57,11 @@ struct FArtifactData
 	EArtifactWear Wear = EArtifactWear::FactoryNew;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data", meta = (ClampMin = 0, UIMin = 0))
-	int32 Age = 3000;
-
+	int32 AgeMax = 3000;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data", meta = (ClampMin = 0, UIMin = 0))
+	int32 AgeMin = 2000;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	FName Culture = NAME_None;
 
