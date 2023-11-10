@@ -62,3 +62,54 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
+
+
+AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, FName& ArtifactID)
+{
+	const FArtifactData* ArtifactData = PullArtifactDataFromDatabase(ArtifactID);
+	return ConstructArtifact(WorldContextObject, *ArtifactData);
+}
+
+FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(FName& ArtifactID)
+{
+	// Get a database
+	UArtifactDatabase* ArtifactDatabase = nullptr;
+	if (!ArtifactDatabase)
+	{
+		return nullptr;
+	}
+	// Find object in database
+	FArtifactData* ArtifactData = ArtifactDatabase->ArtifactDataEntries.Find(ArtifactID);
+	if (!ArtifactData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Artifact named %s not found in the Database!"), *ArtifactID.ToString());
+		return nullptr;
+	}
+	return ArtifactData;
+}
+
+AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, TSubclassOf<AArtifact> ArtifactClass)
+{
+	// Get world
+	UWorld* World = WorldContextObject.GetWorld();
+	check(World);
+	
+	return World->SpawnActor<AArtifact>(ArtifactClass);
+}
+
+AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData)
+{
+	if (ArtifactData.CustomClass)
+	{
+		return ConstructArtifact(WorldContextObject, ArtifactData.CustomClass);
+	}
+
+	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>();
+
+	if (NewArtifact)
+	{
+		NewArtifact->SetupArtifact(ArtifactData);
+	}
+	
+	return NewArtifact;
+}
