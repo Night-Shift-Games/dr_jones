@@ -2,11 +2,16 @@
 
 #include "DigSite.h"
 
+#include "Voxel/VoxelEngineUObjectInterface.h"
+
 ADigSite::ADigSite()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
 	DynamicMeshComponent = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMesh"));
 	DynamicMeshComponent->SetupAttachment(RootComponent);
+
+	VoxelGrid = CreateDefaultSubobject<UVoxelGrid>(TEXT("VoxelGrid"));
 }
 
 void ADigSite::BeginPlay()

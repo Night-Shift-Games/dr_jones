@@ -9,6 +9,8 @@
 
 #include "DigSite.generated.h"
 
+class UVoxelGrid;
+
 UCLASS()
 class DR_JONES_API ADigSite : public AActor
 {
@@ -23,8 +25,11 @@ protected:
 	void SetupDigSite(const FVector& DigSiteLocation);
 	
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DigSite")
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
+	TObjectPtr<UVoxelGrid> VoxelGrid;
 
 	double Width = 1500.0;
 	double Height = 1500.0; 
