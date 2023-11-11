@@ -72,17 +72,6 @@ namespace VoxelEngine
 		};
 	};
 
-	// Gently instructs the compiler to use SIMD in loops.
-	// Copying this struct will always be cheaper than iterating through a chunk without vectorization.
-	struct alignas(std::hardware_constructive_interference_size) FAlignedVoxel : FVoxel { };
-
-	FORCEINLINE FAlignedVoxel ToAligned(FVoxel Voxel)
-	{
-		FAlignedVoxel AlignedVoxel;
-		AlignedVoxel.Data = Voxel.Data;
-		return AlignedVoxel;
-	}
-
 	// Global compile-time data used by the voxel engine
 	struct FVoxelEngineConfig
 	{
@@ -112,7 +101,6 @@ namespace VoxelEngine
 
 		void Clear();
 		void Fill(FVoxel Voxel);
-		void Fill(FAlignedVoxel Voxel);
 
 		void FillTestCube(const FIntVector& Offset = {});
 
@@ -332,11 +320,6 @@ namespace VoxelEngine
 namespace VoxelEngine
 {
 	// -------------------------- FVoxelArray ----------------------------------------------------------------------
-
-	FORCEINLINE void FVoxelArray::Fill(FVoxel Voxel)
-	{
-		return Fill(ToAligned(Voxel));
-	}
 
 	FORCEINLINE void FVoxelArray::FillTestCube(const FIntVector& Offset)
 	{

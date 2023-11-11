@@ -17,7 +17,7 @@ namespace VoxelEngine
 		}
 	}
 
-	FORCENOINLINE void FVoxelArray::Fill(FAlignedVoxel Voxel)
+	FORCENOINLINE void FVoxelArray::Fill(FVoxel Voxel)
 	{
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_Fill, FColorList::LightBlue)
 		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::Fill"), STAT_VoxelEngine_FVoxelArray_Fill, STATGROUP_VoxelEngine)
