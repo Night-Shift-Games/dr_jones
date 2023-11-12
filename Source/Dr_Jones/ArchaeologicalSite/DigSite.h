@@ -25,7 +25,7 @@ protected:
 	void SetupDigSite(const FVector& DigSiteLocation);
 	
 protected:
-	UPROPERTY(EditAnywhere, Category = "DigSite")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")

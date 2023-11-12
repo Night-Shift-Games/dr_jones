@@ -2,6 +2,8 @@
 
 #include "VoxelEngineUObjectInterface.h"
 
+#include "Triangulation.h"
+#include "UDynamicMesh.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -73,6 +75,8 @@ FPrimitiveViewRelevance FVoxelGridVisualizerSceneProxy::GetViewRelevance(const F
 
 UVoxelGridVisualizer::UVoxelGridVisualizer()
 {
+	SetIsVisualizationComponent(true);
+
 	bAutoActivate = true;
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
@@ -150,6 +154,48 @@ UVoxelGrid::UVoxelGrid()
 #if WITH_EDITORONLY_DATA
 	GridVisualizer = CreateEditorOnlyDefaultSubobject<UVoxelGridVisualizer>(TEXT("VoxelGridVisualizer"));
 #endif
+}
+
+void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
+{
+	using namespace VoxelEngine;
+
+	// InternalVoxelGrid->IterateChunksParallel([DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
+	auto EditDynamicMesh = [DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
+	{
+		auto InsertVertexFunc = [DynamicMesh](const FVector3f& Vertex)
+		{
+			if (!IsValid(DynamicMesh))
+			{
+				return;
+			}
+
+			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
+			{
+				int32 NewVertexIndex = EditMesh.AppendVertex(FVector(Vertex));
+			}, EDynamicMeshChangeType::GeneralEdit);
+		};
+
+		auto InsertTriangleFunc = [DynamicMesh](const MarchingCubes::FTriangle& Triangle)
+		{
+			if (!IsValid(DynamicMesh))
+			{
+				return;
+			}
+
+			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
+			{
+				int32 NewTriangleID = EditMesh.AppendTriangle(Triangle.Indices[0], Triangle.Indices[1], Triangle.Indices[2]);
+			}, EDynamicMeshChangeType::GeneralEdit);
+		};
+
+		Triangulation::TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFunc, InsertTriangleFunc);
+	};
+
+	const int32 Index = InternalVoxelGrid->CoordsToIndex({5, 3, 4});
+	const FVoxelChunk* Chunk = InternalVoxelGrid->GetChunkByIndex(Index);
+	check(Chunk);
+	EditDynamicMesh(*Chunk, Index);
 }
 
 void UVoxelGrid::BeginPlay()

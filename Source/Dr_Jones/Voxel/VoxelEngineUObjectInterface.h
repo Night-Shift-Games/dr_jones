@@ -8,6 +8,7 @@
 
 #include "VoxelEngineUObjectInterface.generated.h"
 
+class UDynamicMesh;
 class UVoxelGrid;
 class UVoxelGridVisualizer;
 
@@ -64,16 +65,19 @@ public:
 
 	VoxelEngine::FVoxelGrid* GetInternal() const { return InternalVoxelGrid.Get(); }
 
+	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
+	void GenerateMesh(UDynamicMesh* DynamicMesh);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Voxel Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "VoxelGrid")
 	FVector Extents = FVector(400.0, 400.0, 400.0);
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Voxel Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VoxelGrid")
 	bool bDrawDebug = false;
 
 	UPROPERTY()

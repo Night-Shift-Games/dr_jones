@@ -89,8 +89,10 @@ namespace VoxelEngine
 		static constexpr int32 ChunkMaxSizeInBytes = ChunkMaxVoxelCount * sizeof(FVoxel);
 	};
 
+	inline constexpr size_t Alignment = std::hardware_constructive_interference_size;
+
 	// Inline array of voxels with utility operations
-	class DR_JONES_API alignas(std::hardware_constructive_interference_size) FVoxelArray
+	class DR_JONES_API alignas(Alignment) FVoxelArray
 	{
 	public:
 		using FElement = FVoxel;
@@ -103,6 +105,12 @@ namespace VoxelEngine
 		void Fill(FVoxel Voxel);
 
 		void FillTestCube(const FIntVector& Offset = {});
+
+		FVoxel& Get(int32 Index);
+		FVoxel& GetAtCoords(const FIntVector3& Coords);
+
+		const FVoxel& Get(int32 Index) const;
+		const FVoxel& GetAtCoords(const FIntVector3& Coords) const;
 
 		// Iterate through all voxels using a function with signature void(FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		template <typename Func>
@@ -191,6 +199,8 @@ namespace VoxelEngine
 		FVoxelArray& Difference(const FVoxelArray& OtherArray);
 		FVoxelArray& Intersect(const FVoxelArray& OtherArray);
 
+		static FIntVector3 GetDimensions() { return FIntVector3(FVoxelEngineConfig::ChunkResolution); }
+
 		static constexpr bool IsValidIndex(int32 Index);
 
 		static constexpr FIntVector IndexToCoords(int32 Index);
@@ -208,6 +218,14 @@ namespace VoxelEngine
 
 		FBox GetBox() const;
 	};
+
+	namespace Utils
+	{
+		[[nodiscard]] FORCEINLINE FVector3f TransformVoxelToWorld(const FIntVector3& Coords, const FVoxelChunkBounds& ChunkBounds)
+		{
+			
+		}
+	}
 
 	// Voxel reference for storing in an octree
 	struct FVoxelRef
@@ -232,7 +250,7 @@ namespace VoxelEngine
 
 	// Single voxel chunk that exists in a voxel grid
 	// Used to store data in segments that can be loaded/unloaded on demand only when needed
-	class DR_JONES_API alignas(std::hardware_constructive_interference_size) FVoxelChunk
+	class DR_JONES_API alignas(Alignment) FVoxelChunk
 	{
 	public:
 		TOctree2<FVoxelRef, FVoxelSemantics> VoxelOctree;
@@ -273,6 +291,23 @@ namespace VoxelEngine
 	public:
 		FVoxelGrid();
 		void Initialize(const FVoxelGridInitializer& Initializer);
+
+		template <typename FFunc>
+		void IterateChunksParallel(FFunc ForEachChunk)
+		{
+			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
+			ParallelFor(ChunkCount, [this, ForEachChunk](int32 Index)
+			{
+				FVoxelChunk* Chunk;
+				{
+					FScopeLock Lock(&ChunksGuard);
+					check(Chunks.IsValidIndex(Index));
+					Chunk = &Chunks[Index];
+				}
+
+				ForEachChunk(*Chunk, Index);
+			});
+		}
 
 		FVoxelChunkBounds CalcChunkWorldBoundsFromIndex(int32 Index) const;
 		FVoxelChunkBounds CalcChunkWorldBoundsFromGridPosition(const FIntVector& GridPosition) const;
@@ -335,6 +370,27 @@ namespace VoxelEngine
 				Coords.Y - Offset.Y > LowBound && Coords.Y - Offset.Y < HighBound &&
 				Coords.Z - Offset.Z > LowBound && Coords.Z - Offset.Z < HighBound;
 		});
+	}
+
+	FORCEINLINE FVoxel& FVoxelArray::Get(int32 Index)
+	{
+		check(IsValidIndex(Index));
+		return Voxels[Index];
+	}
+
+	FORCEINLINE FVoxel& FVoxelArray::GetAtCoords(const FIntVector3& Coords)
+	{
+		return Get(CoordsToIndex(Coords));
+	}
+
+	FORCEINLINE const FVoxel& FVoxelArray::Get(int32 Index) const
+	{
+		return const_cast<FVoxelArray*>(this)->Get(Index);
+	}
+
+	FORCEINLINE const FVoxel& FVoxelArray::GetAtCoords(const FIntVector3& Coords) const
+	{
+		return const_cast<FVoxelArray*>(this)->GetAtCoords(Coords);
 	}
 
 	FORCEINLINE FVoxelArray& FVoxelArray::Union(const FVoxelArray& OtherArray)
