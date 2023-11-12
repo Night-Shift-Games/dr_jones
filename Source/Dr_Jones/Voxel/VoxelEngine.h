@@ -219,14 +219,6 @@ namespace VoxelEngine
 		FBox GetBox() const;
 	};
 
-	namespace Utils
-	{
-		[[nodiscard]] FORCEINLINE FVector3f TransformVoxelToWorld(const FIntVector3& Coords, const FVoxelChunkBounds& ChunkBounds)
-		{
-			
-		}
-	}
-
 	// Voxel reference for storing in an octree
 	struct FVoxelRef
 	{
@@ -260,7 +252,8 @@ namespace VoxelEngine
 	public:
 		explicit FVoxelChunk(const FVoxelChunkBounds& Bounds);
 
-		void FillUniform();
+		void Clear();
+		void FillTest();
 
 		struct FLocalToWorldTransformData
 		{
@@ -293,10 +286,21 @@ namespace VoxelEngine
 		void Initialize(const FVoxelGridInitializer& Initializer);
 
 		template <typename FFunc>
-		void IterateChunksParallel(FFunc ForEachChunk)
+		void IterateChunks(FFunc ForEachChunk)
 		{
 			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-			ParallelFor(ChunkCount, [this, ForEachChunk](int32 Index)
+			for (int32 Index = 0; Index < ChunkCount; ++Index)
+			{
+				check(Chunks.IsValidIndex(Index));
+				ForEachChunk(Chunks[Index], Index);
+			}
+		}
+
+		template <typename FFunc>
+		void IterateChunks_Parallel(FFunc ForEachChunk)
+		{
+			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
+			ParallelForTemplate(ChunkCount, [this, ForEachChunk](int32 Index)
 			{
 				FVoxelChunk* Chunk;
 				{

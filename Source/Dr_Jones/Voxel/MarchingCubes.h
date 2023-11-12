@@ -3,10 +3,15 @@
 #pragma once
 #include "Dr_Jones.h"
 
+inline TAutoConsoleVariable<bool> CVarMarchingCubesDebug(
+	TEXT("NS.VoxelEngine.MarchingCubes.Debug"),
+	false,
+	TEXT("Show marching cubes debug information in logs."),
+	ECVF_Cheat
+);
+
 namespace MarchingCubes
 {
-	inline bool GEnableMCLog = false;
-
 	inline constexpr int32 EdgeTable[256] = {
 		0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
 		0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -312,30 +317,30 @@ namespace MarchingCubes
 		int32 Indices[3];
 	};
 
-	inline void TriangulateGridCell(const FGridCell& Cell, FVector3f(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
+	inline uint32 CalculateCubeIndex(const float(& Values)[8])
 	{
-		OutVertexCount = 0;
-		OutTriangleCount = 0;
+		uint32 CubeIndex = 0;
+		CubeIndex |= Values[0] < 0.0f ? 1 << 0 : 0;
+		CubeIndex |= Values[1] < 0.0f ? 1 << 1 : 0;
+		CubeIndex |= Values[2] < 0.0f ? 1 << 2 : 0;
+		CubeIndex |= Values[3] < 0.0f ? 1 << 3 : 0;
+		CubeIndex |= Values[4] < 0.0f ? 1 << 4 : 0;
+		CubeIndex |= Values[5] < 0.0f ? 1 << 5 : 0;
+		CubeIndex |= Values[6] < 0.0f ? 1 << 6 : 0;
+		CubeIndex |= Values[7] < 0.0f ? 1 << 7 : 0;
+		return CubeIndex;
+	}
 
-		int32 CubeIndex = 0;
-		CubeIndex |= Cell.Values[0] < 0.0f ? 1 << 0 : 0;
-		CubeIndex |= Cell.Values[1] < 0.0f ? 1 << 1 : 0;
-		CubeIndex |= Cell.Values[2] < 0.0f ? 1 << 2 : 0;
-		CubeIndex |= Cell.Values[3] < 0.0f ? 1 << 3 : 0;
-		CubeIndex |= Cell.Values[4] < 0.0f ? 1 << 4 : 0;
-		CubeIndex |= Cell.Values[5] < 0.0f ? 1 << 5 : 0;
-		CubeIndex |= Cell.Values[6] < 0.0f ? 1 << 6 : 0;
-		CubeIndex |= Cell.Values[7] < 0.0f ? 1 << 7 : 0;
+	inline bool IsEmptyCube(uint32 CubeIndex)
+	{
+		return EdgeTable[CubeIndex] == 0;
+	}
 
-		if (EdgeTable[CubeIndex] == 0)
-		{
-			if (GEnableMCLog)
-			{
-				// UE_LOG(LogDrJones, Log, TEXT("CELL - EMPTY"));
-			}
+	inline void TriangulateNonEmptyGridCell(uint32 CubeIndex, const FGridCell& Cell, FVector3f(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
+	{
+		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateNonEmptyGridCell, FColorList::DarkOrchid)
 
-			return;
-		}
+		check(!IsEmptyCube(CubeIndex));
 
 		static constexpr int32 EdgeAsCornerIndices[12][2] = {
 			{ 0, 1 },
@@ -383,7 +388,7 @@ namespace MarchingCubes
 			++OutTriangleCount;
 		}
 
-		if (GEnableMCLog)
+		if (CVarMarchingCubesDebug.GetValueOnGameThread())
 		{
 			TArray<FString> VerticesStrArr;
 			for (int I = 0; I < OutVertexCount; ++I)
@@ -401,5 +406,22 @@ namespace MarchingCubes
 
 			UE_LOG(LogDrJones, Log, TEXT("CELL - V: %i ( %s ), T: %i ( %s )"), OutVertexCount, *VerticesStr, OutTriangleCount, *TrianglesStr);
 		}
+	}
+
+	inline bool TriangulateGridCell(const FGridCell& Cell, FVector3f(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
+	{
+		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateGridCell, FColorList::MediumOrchid)
+
+		OutVertexCount = 0;
+		OutTriangleCount = 0;
+
+		const uint32 CubeIndex = CalculateCubeIndex(Cell.Values);
+		if (IsEmptyCube(CubeIndex))
+		{
+			return false;
+		}
+
+		TriangulateNonEmptyGridCell(CubeIndex, Cell, OutVertices, OutTriangles, OutVertexCount, OutTriangleCount);
+		return true;
 	}
 }

@@ -4,6 +4,7 @@
 
 #include "Triangulation.h"
 #include "UDynamicMesh.h"
+#include "Components/DynamicMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -166,6 +167,12 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 {
 	using namespace VoxelEngine;
 
+	if (!DynamicMesh)
+	{
+		UE_LOG(LogDrJones, Error, TEXT("Called UVoxelGrid::GenerateMesh on a null DynamicMesh."));
+		return;
+	}
+
 	// InternalVoxelGrid->IterateChunksParallel([DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
 	auto EditDynamicMesh = [DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
 	{
@@ -179,7 +186,7 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
 			{
 				int32 NewVertexIndex = EditMesh.AppendVertex(FVector(Vertex));
-			}, EDynamicMeshChangeType::GeneralEdit);
+			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology, true);
 		};
 
 		auto InsertTriangleFunc = [DynamicMesh](const MarchingCubes::FTriangle& Triangle)
@@ -192,16 +199,32 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
 			{
 				int32 NewTriangleID = EditMesh.AppendTriangle(Triangle.Indices[0], Triangle.Indices[1], Triangle.Indices[2]);
-			}, EDynamicMeshChangeType::GeneralEdit);
+			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology, true);
 		};
 
 		Triangulation::TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFunc, InsertTriangleFunc);
+
+		// Just post an update, can't find a better way to do this
+		DynamicMesh->EditMesh([&](FDynamicMesh3&) { });
 	};
 
 	const int32 Index = InternalVoxelGrid->CoordsToIndex({5, 3, 4});
 	const FVoxelChunk* Chunk = InternalVoxelGrid->GetChunkByIndex(Index);
 	check(Chunk);
 	EditDynamicMesh(*Chunk, Index);
+}
+
+void UVoxelGrid::GenerateMeshForComponent(UDynamicMeshComponent* DynamicMeshComponent)
+{
+	if (!DynamicMeshComponent)
+	{
+		UE_LOG(LogDrJones, Error, TEXT("Called UVoxelGrid::GenerateMeshForComponent on a null DynamicMeshComponent."));
+		return;
+	}
+
+	GenerateMesh(DynamicMeshComponent->GetDynamicMesh());
+	DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
+	DynamicMeshComponent->UpdateCollision();
 }
 
 void UVoxelGrid::BeginPlay()

@@ -8,6 +8,7 @@
 
 #include "VoxelEngineUObjectInterface.generated.h"
 
+class UDynamicMeshComponent;
 class UDynamicMesh;
 class UVoxelGrid;
 class UVoxelGridVisualizer;
@@ -75,6 +76,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
 	void GenerateMesh(UDynamicMesh* DynamicMesh);
+
+	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
+	void GenerateMeshForComponent(UDynamicMeshComponent* DynamicMeshComponent);
 
 protected:
 	virtual void BeginPlay() override;

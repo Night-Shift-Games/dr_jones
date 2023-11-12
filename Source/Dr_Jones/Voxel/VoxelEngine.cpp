@@ -36,10 +36,18 @@ namespace VoxelEngine
 	{
 	}
 
-	void FVoxelChunk::FillUniform()
+	void FVoxelChunk::Clear()
 	{
-		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillUniform, FColorList::BlueViolet)
-		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelChunk::FillUniform"), STAT_VoxelEngine_FVoxelChunk_FillUniform, STATGROUP_VoxelEngine)
+		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_Clear, FColorList::BlueViolet)
+		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelChunk::Clear"), STAT_VoxelEngine_FVoxelChunk_Clear, STATGROUP_VoxelEngine)
+
+		VoxelOctree.Destroy();
+		Voxels.Clear();
+	}
+
+	void FVoxelChunk::FillTest()
+	{
+		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillTest, FColorList::BlueViolet)
 
 		VoxelOctree.Destroy();
 
@@ -126,15 +134,10 @@ namespace VoxelEngine
 		}
 
 		const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-		ParallelFor(ChunkCount, [this](int32 Index)
+		ParallelForTemplate(ChunkCount, [this](int32 Index)
 		{
-			FVoxelChunk* Chunk;
-			{
-				FScopeLock Lock(&ChunksGuard);
-				Chunk = &Chunks[Index];
-			}
-
-			Chunk->FillUniform();
+			check(Chunks.IsValidIndex(Index));
+			Chunks[Index].FillTest();
 		});
 	}
 

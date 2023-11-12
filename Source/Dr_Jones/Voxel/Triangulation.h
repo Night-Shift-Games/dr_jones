@@ -10,6 +10,10 @@ namespace VoxelEngine::Triangulation
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
 	void TriangulateVoxelArray_MarchingCubes(const FVoxelArray& VoxelArray, const FVoxelChunk::FLocalToWorldTransformData& TransformData, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
 	{
+		using namespace MarchingCubes;
+
+		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes, FColorList::Feldspar)
+
 		const FIntVector3 Dimensions = VoxelArray.GetDimensions();
 
 		int32 LastIndex = 0;
@@ -19,7 +23,7 @@ namespace VoxelEngine::Triangulation
 			{
 				for (int32 X = 0; X < Dimensions.X - 1; ++X)
 				{
-					using namespace MarchingCubes;
+					SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_TriangulateCell, FColorList::Bronze)
 
 					const FIntVector3 GridCellCornerCoords[8] = {
 						FIntVector3{ X,     Y,     Z     },
@@ -40,27 +44,34 @@ namespace VoxelEngine::Triangulation
 						GridCell.Positions[Corner] = FVector3f(FVoxelChunk::LocalPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData));
 					}
 
-					GEnableMCLog = true;
-
 					// Data local to the current cell
 					FVector3f Vertices[12];
 					FTriangle Triangles[5];
 					int32 VertexCount;
 					int32 TriangleCount;
-					TriangulateGridCell(GridCell, Vertices, Triangles, VertexCount, TriangleCount);
-
-					for (int32 I = 0; I < VertexCount; ++I)
+					if (!TriangulateGridCell(GridCell, Vertices, Triangles, VertexCount, TriangleCount))
 					{
-						InsertVertexFunc(Vertices[I]);
+						continue;
 					}
 
-					for (int32 I = 0; I < TriangleCount; ++I)
 					{
-						// The triangles' indices need to be offset from the local cell's space.
-						Triangles[I].Indices[0] += LastIndex;
-						Triangles[I].Indices[1] += LastIndex;
-						Triangles[I].Indices[2] += LastIndex;
-						InsertTriangleFunc(Triangles[I]);
+						SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertVertices, FColorList::IndianRed)
+						for (int32 I = 0; I < VertexCount; ++I)
+						{
+							InsertVertexFunc(Vertices[I]);
+						}
+					}
+
+					{
+						SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertTriangles, FColorList::MediumBlue)
+						for (int32 I = 0; I < TriangleCount; ++I)
+						{
+							// The triangles' indices need to be offset from the local cell's space.
+							Triangles[I].Indices[0] += LastIndex;
+							Triangles[I].Indices[1] += LastIndex;
+							Triangles[I].Indices[2] += LastIndex;
+							InsertTriangleFunc(Triangles[I]);
+						}
 					}
 
 					LastIndex += VertexCount;
