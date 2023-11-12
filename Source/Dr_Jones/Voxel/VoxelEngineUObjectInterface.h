@@ -12,6 +12,13 @@ class UDynamicMesh;
 class UVoxelGrid;
 class UVoxelGridVisualizer;
 
+inline TAutoConsoleVariable<bool> CVarVisualizeVoxelGrid(
+	TEXT("NS.VoxelEngine.Visualize"),
+	false,
+	TEXT("Show Voxel Grid vizualization in game."),
+	ECVF_Cheat
+);
+
 class DR_JONES_API FVoxelGridVisualizerSceneProxy final : public FPrimitiveSceneProxy
 {
 public:
@@ -34,6 +41,7 @@ public:
 private:
 	TArray<FVoxelSceneData> Voxels;
 	VoxelEngine::FVoxelChunk::FLocalToWorldTransformData LocalToWorldTransformData;
+	bool bDrawDebug;
 };
 
 UCLASS()

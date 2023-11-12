@@ -7,13 +7,19 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
-FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridVisualizer* InComponent)
-	: FPrimitiveSceneProxy(InComponent)
+FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridVisualizer* InComponent) :
+	FPrimitiveSceneProxy(InComponent),
+	bDrawDebug(InComponent->GetVoxelGrid()->bDrawDebug)
 {
 	using namespace VoxelEngine;
 
 	FVoxelChunk* Chunk = InComponent->GetCurrentChunk();
 	if (!Chunk)
+	{
+		return;
+	}
+
+	if (!bDrawDebug || !CVarVisualizeVoxelGrid.GetValueOnGameThread())
 	{
 		return;
 	}
@@ -223,7 +229,7 @@ void UVoxelGrid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 #if ENABLE_VOXEL_ENGINE_DEBUG && WITH_EDITORONLY_DATA
-	if (bDrawDebug)
+	if (bDrawDebug && CVarVisualizeVoxelGrid.GetValueOnGameThread())
 	{
 		check(InternalVoxelGrid);
 
