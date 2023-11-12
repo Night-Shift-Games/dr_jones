@@ -4,7 +4,7 @@
 #include "Dr_Jones.h"
 
 inline TAutoConsoleVariable<bool> CVarMarchingCubesDebug(
-	TEXT("NS.VoxelEngine.MarchingCubes.Debug"),
+	TEXT("NS.VE.MarchingCubes.Debug"),
 	false,
 	TEXT("Show marching cubes debug information in logs."),
 	ECVF_Cheat

@@ -12,7 +12,7 @@ FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridV
 	FPrimitiveSceneProxy(InComponent),
 	bDrawDebug(InComponent->GetVoxelGrid()->bDrawDebug)
 {
-	using namespace VoxelEngine;
+	using namespace NSVE;
 
 	FVoxelChunk* Chunk = InComponent->GetCurrentChunk();
 	if (!Chunk)
@@ -99,9 +99,9 @@ UVoxelGrid* UVoxelGridVisualizer::GetVoxelGrid() const
 	return Cast<UVoxelGrid>(GetOuter());
 }
 
-VoxelEngine::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
+NSVE::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 {
-	using namespace VoxelEngine;
+	using namespace NSVE;
 
 	FVoxelGrid* VoxelGrid = GetVoxelGrid()->GetInternal();
 	const UWorld* World = GetWorld();
@@ -129,7 +129,7 @@ VoxelEngine::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 
 FBoxSphereBounds UVoxelGridVisualizer::CalcBounds(const FTransform& LocalToWorld) const
 {
-	const VoxelEngine::FVoxelGrid* VoxelGrid = GetVoxelGrid()->GetInternal();
+	const NSVE::FVoxelGrid* VoxelGrid = GetVoxelGrid()->GetInternal();
 	FBoxSphereBounds GridBounds;
 	GridBounds.Origin = VoxelGrid->GetTransform().GetLocation();
 	GridBounds.BoxExtent = VoxelGrid->GetExtent();
@@ -156,7 +156,7 @@ UVoxelGrid::UVoxelGrid()
 	PrimaryComponentTick.bCanEverTick = false;
 #endif
 
-	InternalVoxelGrid = MakeUnique<VoxelEngine::FVoxelGrid>();
+	InternalVoxelGrid = MakeUnique<NSVE::FVoxelGrid>();
 
 #if WITH_EDITORONLY_DATA
 	GridVisualizer = CreateEditorOnlyDefaultSubobject<UVoxelGridVisualizer>(TEXT("VoxelGridVisualizer"));
@@ -165,7 +165,7 @@ UVoxelGrid::UVoxelGrid()
 
 void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 {
-	using namespace VoxelEngine;
+	using namespace NSVE;
 
 	if (!DynamicMesh)
 	{
@@ -229,7 +229,7 @@ void UVoxelGrid::GenerateMeshForComponent(UDynamicMeshComponent* DynamicMeshComp
 
 void UVoxelGrid::BeginPlay()
 {
-	using namespace VoxelEngine;
+	using namespace NSVE;
 
 	Super::BeginPlay();
 

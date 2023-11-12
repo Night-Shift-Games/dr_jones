@@ -14,7 +14,7 @@ class UVoxelGrid;
 class UVoxelGridVisualizer;
 
 inline TAutoConsoleVariable<bool> CVarVisualizeVoxelGrid(
-	TEXT("NS.VoxelEngine.Visualize"),
+	TEXT("NS.VE.VisualizeGrid"),
 	false,
 	TEXT("Show Voxel Grid vizualization in game."),
 	ECVF_Cheat
@@ -41,7 +41,7 @@ public:
 
 private:
 	TArray<FVoxelSceneData> Voxels;
-	VoxelEngine::FVoxelChunk::FLocalToWorldTransformData LocalToWorldTransformData;
+	NSVE::FVoxelChunk::FLocalToWorldTransformData LocalToWorldTransformData;
 	bool bDrawDebug;
 };
 
@@ -54,7 +54,7 @@ public:
 	UVoxelGridVisualizer();
 
 	UVoxelGrid* GetVoxelGrid() const;
-	VoxelEngine::FVoxelChunk* GetCurrentChunk() const;
+	NSVE::FVoxelChunk* GetCurrentChunk() const;
 
 	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
 
@@ -72,7 +72,7 @@ class DR_JONES_API UVoxelGrid : public UActorComponent
 public:
 	UVoxelGrid();
 
-	VoxelEngine::FVoxelGrid* GetInternal() const { return InternalVoxelGrid.Get(); }
+	NSVE::FVoxelGrid* GetInternal() const { return InternalVoxelGrid.Get(); }
 
 	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
 	void GenerateMesh(UDynamicMesh* DynamicMesh);
@@ -97,5 +97,5 @@ public:
 #endif
 
 private:
-	TUniquePtr<VoxelEngine::FVoxelGrid> InternalVoxelGrid;
+	TUniquePtr<NSVE::FVoxelGrid> InternalVoxelGrid;
 };

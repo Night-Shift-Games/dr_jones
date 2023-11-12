@@ -5,7 +5,7 @@
 #include "MarchingCubes.h"
 #include "VoxelEngine.h"
 
-namespace VoxelEngine::Triangulation
+namespace NSVE::Triangulation
 {
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
 	void TriangulateVoxelArray_MarchingCubes(const FVoxelArray& VoxelArray, const FVoxelChunk::FLocalToWorldTransformData& TransformData, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)

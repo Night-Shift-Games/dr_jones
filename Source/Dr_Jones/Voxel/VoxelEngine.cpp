@@ -2,7 +2,7 @@
 
 #include "VoxelEngine.h"
 
-namespace VoxelEngine
+namespace NSVE
 {
 	// -------------------------- FVoxelArray ----------------------------------------------------------------------
 

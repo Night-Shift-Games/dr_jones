@@ -6,7 +6,7 @@
 
 DECLARE_STATS_GROUP(TEXT("VoxelEngine"), STATGROUP_VoxelEngine, STATCAT_Advanced);
 
-namespace VoxelEngine
+namespace NSVE
 {
 	// Utility functions used in the voxel engine
 	namespace Utils
@@ -356,7 +356,7 @@ namespace VoxelEngine
 //                                          Inline function definitions
 // =============================================================================================================== //
 
-namespace VoxelEngine
+namespace NSVE
 {
 	// -------------------------- FVoxelArray ----------------------------------------------------------------------
 
