@@ -341,6 +341,7 @@ namespace NSVE
 		const TArray<FVoxelChunk>& GetChunks() const { return Chunks; }
 		const FIntVector& GetDimensionsInChunks() const { return DimensionsInChunks; }
 		const FVector& GetExtent() const { return Extent; }
+		int32 GetChunkCount() const { return Chunks.Num(); }
 
 	private:
 		FTransform Transform;

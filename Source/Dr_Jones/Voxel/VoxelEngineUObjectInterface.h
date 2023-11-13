@@ -72,12 +72,12 @@ class DR_JONES_API UVoxelGrid : public UActorComponent
 public:
 	UVoxelGrid();
 
-	NSVE::FVoxelGrid* GetInternal() const { return InternalVoxelGrid.Get(); }
+	NSVE::FVoxelGrid& GetInternal() const { check(InternalVoxelGrid.IsValid()); return *InternalVoxelGrid.Get(); }
 
-	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
+	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
 	void GenerateMesh(UDynamicMesh* DynamicMesh);
 
-	UFUNCTION(BlueprintCallable, Category = "VoxelGrid")
+	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
 	void GenerateMeshForComponent(UDynamicMeshComponent* DynamicMeshComponent);
 
 protected:
@@ -85,11 +85,11 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
 	FVector Extents = FVector(400.0, 400.0, 400.0);
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NightShift|VoxelEngine")
 	bool bDrawDebug = false;
 
 	UPROPERTY()
@@ -98,4 +98,14 @@ public:
 
 private:
 	TUniquePtr<NSVE::FVoxelGrid> InternalVoxelGrid;
+};
+
+UCLASS()
+class DR_JONES_API UVoxelEngineUtilities : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
+	static void TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount);
 };

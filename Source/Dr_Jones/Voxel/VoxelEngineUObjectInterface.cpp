@@ -103,14 +103,14 @@ NSVE::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 {
 	using namespace NSVE;
 
-	FVoxelGrid* VoxelGrid = GetVoxelGrid()->GetInternal();
+	FVoxelGrid& VoxelGrid = GetVoxelGrid()->GetInternal();
 	const UWorld* World = GetWorld();
 	const ACharacter* Character = UGameplayStatics::GetPlayerCharacter(World, 0);
 
-	for (auto It = VoxelGrid->GetChunks().CreateConstIterator(); It; ++It)
+	for (auto It = VoxelGrid.GetChunks().CreateConstIterator(); It; ++It)
 	{
 		const int32 ChunkIndex = It.GetIndex();
-		FVoxelChunkBounds WorldBounds = VoxelGrid->CalcChunkWorldBoundsFromIndex(ChunkIndex);
+		FVoxelChunkBounds WorldBounds = VoxelGrid.CalcChunkWorldBoundsFromIndex(ChunkIndex);
 
 		FVector Location;
 		FRotator Rotation;
@@ -119,7 +119,7 @@ NSVE::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 		const bool bIsInside = WorldBounds.GetBox().IsInside(Location + Rotation.Vector() * 300.0f);
 		if (bIsInside)
 		{
-			FVoxelChunk* Chunk = VoxelGrid->GetChunkByIndex(ChunkIndex);
+			FVoxelChunk* Chunk = VoxelGrid.GetChunkByIndex(ChunkIndex);
 			return Chunk;
 		}
 	}
@@ -129,10 +129,10 @@ NSVE::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 
 FBoxSphereBounds UVoxelGridVisualizer::CalcBounds(const FTransform& LocalToWorld) const
 {
-	const NSVE::FVoxelGrid* VoxelGrid = GetVoxelGrid()->GetInternal();
+	const NSVE::FVoxelGrid& VoxelGrid = GetVoxelGrid()->GetInternal();
 	FBoxSphereBounds GridBounds;
-	GridBounds.Origin = VoxelGrid->GetTransform().GetLocation();
-	GridBounds.BoxExtent = VoxelGrid->GetExtent();
+	GridBounds.Origin = VoxelGrid.GetTransform().GetLocation();
+	GridBounds.BoxExtent = VoxelGrid.GetExtent();
 	GridBounds.SphereRadius = GridBounds.BoxExtent.Size();
 	return GridBounds;
 }
@@ -167,6 +167,8 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 {
 	using namespace NSVE;
 
+	FCriticalSection DynamicMeshGuard;
+
 	if (!DynamicMesh)
 	{
 		UE_LOG(LogDrJones, Error, TEXT("Called UVoxelGrid::GenerateMesh on a null DynamicMesh."));
@@ -174,28 +176,30 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 	}
 
 	// InternalVoxelGrid->IterateChunksParallel([DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
-	auto EditDynamicMesh = [DynamicMesh](const FVoxelChunk& Chunk, int32 Index)
+	auto EditDynamicMesh = [DynamicMesh, &DynamicMeshGuard](const FVoxelChunk& Chunk, int32 Index)
 	{
-		auto InsertVertexFunc = [DynamicMesh](const FVector3f& Vertex)
+		auto InsertVertexFunc = [DynamicMesh, &DynamicMeshGuard](const FVector& Vertex)
 		{
 			if (!IsValid(DynamicMesh))
 			{
 				return;
 			}
 
+			FScopeLock Lock(&DynamicMeshGuard);
 			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
 			{
-				int32 NewVertexIndex = EditMesh.AppendVertex(FVector(Vertex));
+				int32 NewVertexIndex = EditMesh.AppendVertex(Vertex);
 			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology, true);
 		};
 
-		auto InsertTriangleFunc = [DynamicMesh](const MarchingCubes::FTriangle& Triangle)
+		auto InsertTriangleFunc = [DynamicMesh, &DynamicMeshGuard](const MarchingCubes::FTriangle& Triangle)
 		{
 			if (!IsValid(DynamicMesh))
 			{
 				return;
 			}
 
+			FScopeLock Lock(&DynamicMeshGuard);
 			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
 			{
 				int32 NewTriangleID = EditMesh.AppendTriangle(Triangle.Indices[0], Triangle.Indices[1], Triangle.Indices[2]);
@@ -268,4 +272,89 @@ void UVoxelGrid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		InternalVoxelGrid->DrawDebugChunks(*World, LocationToCheck);
 	}
 #endif
+}
+
+void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount)
+{
+	using namespace NSVE;
+	using namespace NSVE::Triangulation;
+	using namespace MarchingCubes;
+
+	SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid, FColorList::Quartz)
+
+	OutVertexCount = 0;
+	OutTriangleCount = 0;
+
+	FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
+
+	TAtomic<int32> CombinedVertexCount = 0;
+
+	TArray<FVector> CombinedVertices;
+	TArray<FTriangle> CombinedTriangles;
+	CombinedVertices.Reserve(1000 * InternalGrid.GetChunkCount());
+	CombinedTriangles.Reserve(1000 * InternalGrid.GetChunkCount());
+
+	FCriticalSection CombinedVerticesGuard;
+	FCriticalSection CombinedTrianglesGuard;
+
+	InternalGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 Index)
+	{
+		static constexpr int32 InitialArraySize = 1000;
+
+		TArray<FVector> Vertices;
+		TArray<FTriangle> Triangles;
+		Vertices.Reserve(InitialArraySize);
+		Triangles.Reserve(InitialArraySize);
+
+		auto InsertVertexFn = [&Vertices](const FVector& Vertex)
+		{
+			Vertices.Add(Vertex);
+		};
+		auto InsertTriangleFn = [&Triangles](const FTriangle& Triangle)
+		{
+			Triangles.Add(Triangle);
+		};
+		TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFn, InsertTriangleFn);
+
+		const int32 VertexCount = Vertices.Num();
+		const int32 PreviousVertexCount = CombinedVertexCount.AddExchange(VertexCount);
+
+		{
+			FScopeLock Lock(&CombinedVerticesGuard);
+			Algo::Copy(Vertices, CombinedVertices);
+		}
+
+		{
+			FScopeLock Lock(&CombinedTrianglesGuard);
+			Algo::Transform(Triangles, CombinedTriangles, [&](FTriangle Triangle)
+			{
+				Triangle.Indices[0] += PreviousVertexCount;
+				Triangle.Indices[1] += PreviousVertexCount;
+				Triangle.Indices[2] += PreviousVertexCount;
+				return Triangle;
+			});
+		}
+	});
+
+	OutVertexCount = CombinedVertexCount;
+	OutTriangleCount = CombinedTriangles.Num();
+
+	if (DynamicMesh)
+	{
+		SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_EditMesh, FColorList::NavyBlue)
+
+		DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
+		{
+			EditMesh.Clear();
+
+			for (const FVector& Vertex : CombinedVertices)
+			{
+				EditMesh.AppendVertex(Vertex);
+			}
+			for (const FTriangle& Triangle : CombinedTriangles)
+			{
+				EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+			}
+		}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology);
+	}
 }

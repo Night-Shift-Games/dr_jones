@@ -23,7 +23,7 @@ namespace NSVE::Triangulation
 			{
 				for (int32 X = 0; X < Dimensions.X - 1; ++X)
 				{
-					SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_TriangulateCell, FColorList::Bronze)
+					// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_TriangulateCell, FColorList::Bronze)
 
 					const FIntVector3 GridCellCornerCoords[8] = {
 						FIntVector3{ X,     Y,     Z     },
@@ -41,11 +41,11 @@ namespace NSVE::Triangulation
 					{
 						const FVoxel& Voxel = VoxelArray.GetAtCoords(GridCellCornerCoords[Corner]);
 						GridCell.Values[Corner] = Voxel.bSolid ? -1.0f : 1.0f;
-						GridCell.Positions[Corner] = FVector3f(FVoxelChunk::LocalPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData));
+						GridCell.Positions[Corner] = FVoxelChunk::LocalPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
 					}
 
 					// Data local to the current cell
-					FVector3f Vertices[12];
+					FVector Vertices[12];
 					FTriangle Triangles[5];
 					int32 VertexCount;
 					int32 TriangleCount;
@@ -55,7 +55,7 @@ namespace NSVE::Triangulation
 					}
 
 					{
-						SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertVertices, FColorList::IndianRed)
+						// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertVertices, FColorList::IndianRed)
 						for (int32 I = 0; I < VertexCount; ++I)
 						{
 							InsertVertexFunc(Vertices[I]);
@@ -63,7 +63,7 @@ namespace NSVE::Triangulation
 					}
 
 					{
-						SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertTriangles, FColorList::MediumBlue)
+						// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertTriangles, FColorList::MediumBlue)
 						for (int32 I = 0; I < TriangleCount; ++I)
 						{
 							// The triangles' indices need to be offset from the local cell's space.

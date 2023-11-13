@@ -308,13 +308,22 @@ namespace MarchingCubes
 
 	struct FGridCell
 	{
-		FVector3f Positions[8];
+		FVector Positions[8];
 		float Values[8];
 	};
 
 	struct FTriangle
 	{
-		int32 Indices[3];
+		union
+		{
+			int32 Indices[3];
+			struct
+			{
+				int32 A;
+				int32 B;
+				int32 C;
+			};
+		};
 	};
 
 	inline uint32 CalculateCubeIndex(const float(& Values)[8])
@@ -336,7 +345,7 @@ namespace MarchingCubes
 		return EdgeTable[CubeIndex] == 0;
 	}
 
-	inline void TriangulateNonEmptyGridCell(uint32 CubeIndex, const FGridCell& Cell, FVector3f(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
+	inline void TriangulateNonEmptyGridCell(uint32 CubeIndex, const FGridCell& Cell, FVector(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
 	{
 		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateNonEmptyGridCell, FColorList::DarkOrchid)
 
@@ -357,13 +366,13 @@ namespace MarchingCubes
 			{ 3, 7 },
 		};
 
-		FVector3f Vertices[12];
+		FVector Vertices[12];
 		for (int32 EdgeIndex = 0; EdgeIndex < 12; ++EdgeIndex)
 		{
 			if (EdgeTable[CubeIndex] & (1 << EdgeIndex))
 			{
-				const FVector3f& VertexA = Cell.Positions[EdgeAsCornerIndices[EdgeIndex][0]];
-				const FVector3f& VertexB = Cell.Positions[EdgeAsCornerIndices[EdgeIndex][1]];
+				const FVector& VertexA = Cell.Positions[EdgeAsCornerIndices[EdgeIndex][0]];
+				const FVector& VertexB = Cell.Positions[EdgeAsCornerIndices[EdgeIndex][1]];
 				Vertices[EdgeIndex] = FMath::Lerp(VertexA, VertexB, 0.5);
 			}
 		}
@@ -388,7 +397,7 @@ namespace MarchingCubes
 			++OutTriangleCount;
 		}
 
-		if (CVarMarchingCubesDebug.GetValueOnGameThread())
+		if (CVarMarchingCubesDebug.GetValueOnAnyThread())
 		{
 			TArray<FString> VerticesStrArr;
 			for (int I = 0; I < OutVertexCount; ++I)
@@ -408,7 +417,7 @@ namespace MarchingCubes
 		}
 	}
 
-	inline bool TriangulateGridCell(const FGridCell& Cell, FVector3f(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
+	inline bool TriangulateGridCell(const FGridCell& Cell, FVector(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
 	{
 		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateGridCell, FColorList::MediumOrchid)
 
