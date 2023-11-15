@@ -85,4 +85,63 @@ namespace NSVE::Triangulation
 	{
 		TriangulateVoxelArray_MarchingCubes(VoxelChunk.Voxels, VoxelChunk.MakeLocalToWorldTransformData(), InsertVertexFunc, InsertTriangleFunc);
 	}
+
+	inline void TriangulateVoxelGrid_MarchingCubes(const FVoxelGrid& VoxelGrid, TArray<FVector>& OutCombinedVertices, TArray<MarchingCubes::FTriangle>& OutCombinedTriangles, int32& OutVertexCount, int32& OutTriangleCount)
+	{
+		using namespace MarchingCubes;
+
+		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelGrid_MarchingCubes, FColorList::Wheat)
+
+		OutVertexCount = 0;
+		OutTriangleCount = 0;
+
+		TAtomic<int32> CombinedVertexCount = 0;
+
+		OutCombinedVertices.Reserve(1000 * VoxelGrid.GetChunkCount());
+		OutCombinedTriangles.Reserve(1000 * VoxelGrid.GetChunkCount());
+		FCriticalSection CombinedVerticesGuard;
+		FCriticalSection CombinedTrianglesGuard;
+
+		VoxelGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 Index)
+		{
+			static constexpr int32 InitialArraySize = 1000;
+
+			TArray<FVector> Vertices;
+			TArray<FTriangle> Triangles;
+			Vertices.Reserve(InitialArraySize);
+			Triangles.Reserve(InitialArraySize);
+
+			auto InsertVertexFn = [&Vertices](const FVector& Vertex)
+			{
+				Vertices.Add(Vertex);
+			};
+			auto InsertTriangleFn = [&Triangles](const FTriangle& Triangle)
+			{
+				Triangles.Add(Triangle);
+			};
+			TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFn, InsertTriangleFn);
+
+			const int32 VertexCount = Vertices.Num();
+			const int32 PreviousVertexCount = CombinedVertexCount.AddExchange(VertexCount);
+
+			{
+				FScopeLock Lock(&CombinedVerticesGuard);
+				Algo::Copy(Vertices, OutCombinedVertices);
+			}
+
+			{
+				FScopeLock Lock(&CombinedTrianglesGuard);
+				Algo::Transform(Triangles, OutCombinedTriangles, [&](FTriangle Triangle)
+				{
+					Triangle.Indices[0] += PreviousVertexCount;
+					Triangle.Indices[1] += PreviousVertexCount;
+					Triangle.Indices[2] += PreviousVertexCount;
+					return Triangle;
+				});
+			}
+		});
+
+		OutVertexCount = CombinedVertexCount;
+		OutTriangleCount = OutCombinedTriangles.Num();
+	}
 }

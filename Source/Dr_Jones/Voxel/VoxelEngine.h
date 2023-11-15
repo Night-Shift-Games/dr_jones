@@ -254,6 +254,7 @@ namespace NSVE
 
 		void Clear();
 		void FillTest();
+		void FillSurface(float SurfaceZ_WS);
 
 		struct FLocalToWorldTransformData
 		{
@@ -276,6 +277,8 @@ namespace NSVE
 	{
 		FTransform Transform;
 		FBoxSphereBounds Bounds;
+		// TODO: Make some fill initializer
+		float FillSurfaceZ_WS;
 	};
 
 	// Structure that stores voxels in a grid of separate chunks to optimize the usage
@@ -311,6 +314,18 @@ namespace NSVE
 
 				ForEachChunk(*Chunk, Index);
 			});
+		}
+
+		template <typename FFunc>
+		void IterateChunks(FFunc ForEachChunk) const
+		{
+			const_cast<FVoxelGrid*>(this)->IterateChunks(ForEachChunk);
+		}
+
+		template <typename FFunc>
+		void IterateChunks_Parallel(FFunc ForEachChunk) const
+		{
+			const_cast<FVoxelGrid*>(this)->IterateChunks_Parallel(ForEachChunk);
 		}
 
 		FVoxelChunkBounds CalcChunkWorldBoundsFromIndex(int32 Index) const;

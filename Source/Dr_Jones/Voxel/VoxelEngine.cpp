@@ -83,6 +83,23 @@ namespace NSVE
 		Voxels.Difference(TestArray);
 	}
 
+	void FVoxelChunk::FillSurface(float SurfaceZ_WS)
+	{
+		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillSurface, FColorList::BlueViolet)
+
+		VoxelOctree.Destroy();
+
+		const FLocalToWorldTransformData TransformData = MakeLocalToWorldTransformData();
+
+		Voxels.Clear();
+		Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+		{
+			const FVector WorldPosition = LocalPositionToWorld_Static(Coords, TransformData);
+			Voxel.bSolid = WorldPosition.Z <= SurfaceZ_WS;
+			Voxel.LocalMaterial = 0;
+		});
+	}
+
 #if ENABLE_VOXEL_ENGINE_DEBUG
 	void FVoxelChunk::DrawDebugVoxels() const
 	{
@@ -134,10 +151,10 @@ namespace NSVE
 		}
 
 		const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-		ParallelForTemplate(ChunkCount, [this](int32 Index)
+		ParallelForTemplate(ChunkCount, [this, &Initializer](int32 Index)
 		{
 			check(Chunks.IsValidIndex(Index));
-			Chunks[Index].FillTest();
+			Chunks[Index].FillSurface(Initializer.FillSurfaceZ_WS);
 		});
 	}
 

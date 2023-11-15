@@ -10,7 +10,11 @@
 
 FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridVisualizer* InComponent) :
 	FPrimitiveSceneProxy(InComponent),
+#if WITH_EDITORONLY_DATA
 	bDrawDebug(InComponent->GetVoxelGrid()->bDrawDebug)
+#else
+	bDrawDebug(false)
+#endif
 {
 	using namespace NSVE;
 
@@ -82,7 +86,9 @@ FPrimitiveViewRelevance FVoxelGridVisualizerSceneProxy::GetViewRelevance(const F
 
 UVoxelGridVisualizer::UVoxelGridVisualizer()
 {
+#if WITH_EDITORONLY_DATA
 	SetIsVisualizationComponent(true);
+#endif
 
 	bAutoActivate = true;
 	PrimaryComponentTick.bCanEverTick = true;
@@ -245,7 +251,8 @@ void UVoxelGrid::BeginPlay()
 
 	FVoxelGridInitializer Initializer;
 	Initializer.Transform = Owner->GetTransform();
-	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());;
+	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());
+	Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z - 20;
 
 	check(InternalVoxelGrid);
 	InternalVoxelGrid->Initialize(Initializer);
@@ -282,62 +289,15 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamic
 
 	SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid, FColorList::Quartz)
 
-	OutVertexCount = 0;
-	OutTriangleCount = 0;
-
-	FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
-
-	TAtomic<int32> CombinedVertexCount = 0;
+	if (!VoxelGrid)
+	{
+		UE_LOG(LogDrJones, Error, TEXT("Cannot triangulate a null VoxelGrid"));
+		return;
+	}
 
 	TArray<FVector> CombinedVertices;
 	TArray<FTriangle> CombinedTriangles;
-	CombinedVertices.Reserve(1000 * InternalGrid.GetChunkCount());
-	CombinedTriangles.Reserve(1000 * InternalGrid.GetChunkCount());
-
-	FCriticalSection CombinedVerticesGuard;
-	FCriticalSection CombinedTrianglesGuard;
-
-	InternalGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 Index)
-	{
-		static constexpr int32 InitialArraySize = 1000;
-
-		TArray<FVector> Vertices;
-		TArray<FTriangle> Triangles;
-		Vertices.Reserve(InitialArraySize);
-		Triangles.Reserve(InitialArraySize);
-
-		auto InsertVertexFn = [&Vertices](const FVector& Vertex)
-		{
-			Vertices.Add(Vertex);
-		};
-		auto InsertTriangleFn = [&Triangles](const FTriangle& Triangle)
-		{
-			Triangles.Add(Triangle);
-		};
-		TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFn, InsertTriangleFn);
-
-		const int32 VertexCount = Vertices.Num();
-		const int32 PreviousVertexCount = CombinedVertexCount.AddExchange(VertexCount);
-
-		{
-			FScopeLock Lock(&CombinedVerticesGuard);
-			Algo::Copy(Vertices, CombinedVertices);
-		}
-
-		{
-			FScopeLock Lock(&CombinedTrianglesGuard);
-			Algo::Transform(Triangles, CombinedTriangles, [&](FTriangle Triangle)
-			{
-				Triangle.Indices[0] += PreviousVertexCount;
-				Triangle.Indices[1] += PreviousVertexCount;
-				Triangle.Indices[2] += PreviousVertexCount;
-				return Triangle;
-			});
-		}
-	});
-
-	OutVertexCount = CombinedVertexCount;
-	OutTriangleCount = CombinedTriangles.Num();
+	TriangulateVoxelGrid_MarchingCubes(VoxelGrid->GetInternal(), CombinedVertices, CombinedTriangles, OutVertexCount, OutTriangleCount);
 
 	if (DynamicMesh)
 	{

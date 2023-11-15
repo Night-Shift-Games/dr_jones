@@ -1,7 +1,9 @@
 ﻿// Property of Night Shift Games, all rights reserved.
 
 #pragma once
+
 #include "Dr_Jones.h"
+#include "IndexTypes.h"
 
 inline TAutoConsoleVariable<bool> CVarMarchingCubesDebug(
 	TEXT("NS.VE.MarchingCubes.Debug"),
@@ -324,6 +326,22 @@ namespace MarchingCubes
 				int32 C;
 			};
 		};
+
+		FORCEINLINE UE::Geometry::FIndex3i ToIndex3i() const
+		{
+			if constexpr (sizeof(A) == sizeof(UE::Geometry::FIndex3i::A))
+			{
+				return *reinterpret_cast<const UE::Geometry::FIndex3i*>(this);
+			}
+			else
+			{
+				UE::Geometry::FIndex3i Index3i;
+				Index3i.A = static_cast<decltype(UE::Geometry::FIndex3i::A)>(A);
+				Index3i.B = static_cast<decltype(UE::Geometry::FIndex3i::B)>(B);
+				Index3i.C = static_cast<decltype(UE::Geometry::FIndex3i::C)>(C);
+				return Index3i;
+			}
+		}
 	};
 
 	inline uint32 CalculateCubeIndex(const float(& Values)[8])
@@ -347,7 +365,7 @@ namespace MarchingCubes
 
 	inline void TriangulateNonEmptyGridCell(uint32 CubeIndex, const FGridCell& Cell, FVector(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
 	{
-		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateNonEmptyGridCell, FColorList::DarkOrchid)
+		// SCOPED_NAMED_EVENT(MarchingCubes_TriangulateNonEmptyGridCell, FColorList::DarkOrchid)
 
 		check(!IsEmptyCube(CubeIndex));
 
@@ -419,7 +437,7 @@ namespace MarchingCubes
 
 	inline bool TriangulateGridCell(const FGridCell& Cell, FVector(& OutVertices)[12], FTriangle(& OutTriangles)[5], int32& OutVertexCount, int32& OutTriangleCount)
 	{
-		SCOPED_NAMED_EVENT(MarchingCubes_TriangulateGridCell, FColorList::MediumOrchid)
+		// SCOPED_NAMED_EVENT(MarchingCubes_TriangulateGridCell, FColorList::MediumOrchid)
 
 		OutVertexCount = 0;
 		OutTriangleCount = 0;
