@@ -251,8 +251,8 @@ namespace QuestSystemUtils
 		}
 	}
 #else
-	static constexpr bool IsQuestSystemDebugEnabled() { return false; }
-	template<int32 Length, typename... Types> static void LogDebug(const FString& Message) { }
-	template<int32 Length, typename... Types> static void LogDebugIfEnabled(const FString& Message) { }
+	static constexpr bool IsDebugEnabled() { return false; }
+	template<int32 Length, typename... Types> static void LogDebug(const TCHAR(&Format)[Length], Types&&... Args) { }
+	template<int32 Length, typename... Types> static void LogDebugIfEnabled(const TCHAR(&Format)[Length], Types&&... Args) { }
 #endif
 }
