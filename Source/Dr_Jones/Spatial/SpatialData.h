@@ -73,7 +73,8 @@ class DR_JONES_API FSpatialDataTexelAccessor
 public:
 	template<typename DataT>
 	const DataT* GetAttributeData(const FName& Name) const;
-	
+	const FSpatialDataBufferLayout& GetLayout() const;
+
 private:
 	FSpatialDataTexelAccessor(const FSpatialDataBufferLayout& Layout, const uint8* Data);
 
@@ -174,6 +175,11 @@ const DataT* FSpatialDataTexelAccessor::GetAttributeData(const FName& Name) cons
 	}
 
 	return reinterpret_cast<const DataT*>(Data + AttributeDescriptor->Stride);
+}
+
+FORCEINLINE const FSpatialDataBufferLayout& FSpatialDataTexelAccessor::GetLayout() const
+{
+	return Layout;
 }
 
 // FSpatialDataBuffer impl
