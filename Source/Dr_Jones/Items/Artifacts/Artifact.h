@@ -51,23 +51,15 @@ public:
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
-	FName ArtifactID;
-	
-	int ArtifactAge = 2500.f;
-
-	FName ArtifactUsage = NAME_None;
-	
-	FName ArtifactCulture = NAME_None;
-
-	EArtifactRarity ArtifactRarity;
-
-	EArtifactSize ArtifactSize;
-
-	EArtifactWear ArtifactWear;
-	
-	FText ArtifactDescription = FText::AsCultureInvariant(TEXT(""));
-
+	FName ArtifactID = NAME_None;
 	FText ArtifactName = FText::AsCultureInvariant(TEXT(""));
+	FText ArtifactDescription = FText::AsCultureInvariant(TEXT(""));
+	int ArtifactAge = 2500.f;
+	FName ArtifactUsage = NAME_None;
+	FName ArtifactCulture = NAME_None;
+	EArtifactRarity ArtifactRarity = EArtifactRarity::Common;
+	EArtifactSize ArtifactSize = EArtifactSize::Normal;
+	EArtifactWear ArtifactWear = EArtifactWear::MinimalWear;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Artifact")
 	FProceduralArtifactData ProceduralData;
