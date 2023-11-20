@@ -68,6 +68,8 @@ private:
 	friend class FSpatialDataBufferBuilder;
 };
 
+// This class holds a direct reference to the buffer layout,
+// and therefore should never stay in scope longer than the buffer itself.
 class DR_JONES_API FSpatialDataTexelAccessor
 {
 public:

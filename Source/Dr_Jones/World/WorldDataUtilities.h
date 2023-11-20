@@ -10,6 +10,39 @@
 
 #include "WorldDataUtilities.generated.h"
 
+USTRUCT(BlueprintType)
+struct FCultureTimeRange
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Begin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 End;
+};
+
+USTRUCT(BlueprintType)
+struct FSingleCultureData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FCultureTimeRange> CultureTimeRanges;
+};
+
+USTRUCT(BlueprintType)
+struct FCombinedCultureData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FSingleCultureData> Cultures;
+};
+
 UCLASS()
 class DR_JONES_API UWorldDataUtilities : public UBlueprintFunctionLibrary
 {
@@ -61,6 +94,9 @@ class DR_JONES_API UWorldDataUtilities : public UBlueprintFunctionLibrary
 	}
 
 	// USpatialData utilities
+
+	UFUNCTION(BlueprintCallable, Category = "Spatial")
+	static FCombinedCultureData SampleCombinedCultureData(UWorldSpatialData* Target, FGeoLocation GeoLocation);
 
 	UFUNCTION(BlueprintCallable, Category = "Spatial")
 	static float SampleCulture(UWorldSpatialData* Target, FName CultureID, FGeoLocation GeoLocation, float Year)

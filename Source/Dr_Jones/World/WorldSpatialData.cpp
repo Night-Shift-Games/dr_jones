@@ -21,7 +21,7 @@ void UWorldSpatialData::SetBuffer(const TSharedRef<FSpatialDataBuffer>& Buffer)
 float UWorldSpatialData::SampleByteNormalized(const FName& AttributeNameNoYear, const FGeoLocation& GeoLocation, float Year) const
 {
 	const uint8 Value = Sample<uint8>(AttributeNameNoYear, GeoLocation, Year);
-	return static_cast<float>(Value) / static_cast<float>(TNumericLimits<uint8>::Max());
+	return NormalizeCultureAttributeByte(Value);
 }
 
 TSet<FName> UWorldSpatialData::FindAvailableAttributeNamesExcludingYear() const
@@ -41,4 +41,21 @@ TSet<FName> UWorldSpatialData::FindAvailableAttributeNamesExcludingYear() const
 	}
 
 	return AvailableNames;
+}
+
+float UWorldSpatialData::NormalizeCultureAttributeByte(uint8 Value)
+{
+	return static_cast<float>(Value) / static_cast<float>(TNumericLimits<uint8>::Max());
+}
+
+TPair<FName, int32> UWorldSpatialData::SplitWorldDataAttributeName(const FName& AttributeRawName)
+{
+	FString AttributeName;
+	FString AttributeYear;
+	verifyf(AttributeRawName.ToString().Split(";", &AttributeName, &AttributeYear), TEXT("Attribute %s cannot be split, because it's not a valid World Data Attribute"), *AttributeRawName.ToString());
+
+	const int32 ConvertedYear = FCString::Atoi(*AttributeYear);
+	checkf(ConvertedYear != 0 || AttributeYear == "0", TEXT("Invalid year format."));
+
+	return TPair<FName, int32>(AttributeName, ConvertedYear);
 }

@@ -43,6 +43,10 @@ public:
 
 	TSet<FName> FindAvailableAttributeNamesExcludingYear() const;
 
+	static float NormalizeCultureAttributeByte(uint8 Value);
+
+	static TPair<FName, int32> SplitWorldDataAttributeName(const FName& AttributeRawName);
+
 private:
 	TSharedPtr<FSpatialDataBuffer> SpatialData;
 };
