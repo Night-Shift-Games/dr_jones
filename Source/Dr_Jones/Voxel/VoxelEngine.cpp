@@ -28,6 +28,22 @@ namespace NSVE
 		}
 	}
 
+	FORCENOINLINE bool FVoxelArray::IsUniform() const
+	{
+		SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IsUniform, FColorList::NeonPink)
+		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IsUniform"), STAT_VoxelEngine_FVoxelArray_IsUniform, STATGROUP_VoxelEngine)
+
+		const FVoxel FirstVoxel = Voxels[0];
+		for (int32 Index = 1; Index < ElementCount; ++Index)
+		{
+			if (Voxels[Index].bSolid != FirstVoxel.bSolid)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	// -------------------------- FVoxelChunk ----------------------------------------------------------------------
 
 	FVoxelChunk::FVoxelChunk(const FVoxelChunkBounds& Bounds) :
@@ -89,12 +105,12 @@ namespace NSVE
 
 		VoxelOctree.Destroy();
 
-		const FLocalToWorldTransformData TransformData = MakeLocalToWorldTransformData();
+		const FTransformData TransformData = MakeTransformData();
 
 		Voxels.Clear();
 		Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		{
-			const FVector WorldPosition = LocalPositionToWorld_Static(Coords, TransformData);
+			const FVector WorldPosition = GridPositionToWorld_Static(Coords, TransformData);
 			Voxel.bSolid = WorldPosition.Z <= SurfaceZ_WS;
 			Voxel.LocalMaterial = 0;
 		});
@@ -108,11 +124,11 @@ namespace NSVE
 			return;
 		}
 
-		const FLocalToWorldTransformData LocalToWorldTransformData = MakeLocalToWorldTransformData();
+		const FTransformData TransformData = MakeTransformData();
 
-		Voxels.Iterate([&LocalToWorldTransformData](const FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+		Voxels.Iterate([&TransformData](const FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		{
-			DrawDebugPoint(GWorld, LocalPositionToWorld_Static(Coords, LocalToWorldTransformData), 4.0f, Voxel.bSolid ? FColor::Green : FColor::Red);
+			DrawDebugPoint(GWorld, GridPositionToWorld_Static(Coords, TransformData), 4.0f, Voxel.bSolid ? FColor::Green : FColor::Red);
 		});
 	}
 #endif

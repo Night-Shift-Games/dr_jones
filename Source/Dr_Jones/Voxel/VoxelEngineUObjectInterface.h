@@ -41,7 +41,7 @@ public:
 
 private:
 	TArray<FVoxelSceneData> Voxels;
-	NSVE::FVoxelChunk::FLocalToWorldTransformData LocalToWorldTransformData;
+	NSVE::FVoxelChunk::FTransformData TransformData;
 	bool bDrawDebug;
 };
 

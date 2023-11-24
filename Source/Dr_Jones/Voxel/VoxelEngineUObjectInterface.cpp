@@ -29,10 +29,10 @@ FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridV
 		return;
 	}
 
-	LocalToWorldTransformData = Chunk->MakeLocalToWorldTransformData();
+	TransformData = Chunk->MakeTransformData();
 	Chunk->Voxels.Iterate([this](const FVoxel& Voxel, int32 Index, const FIntVector3& Coords)
 	{
-		const FVector Location = FVoxelChunk::LocalPositionToWorld_Static(Coords, LocalToWorldTransformData);
+		const FVector Location = FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
 		FVoxelSceneData& VoxelSceneData = Voxels.Emplace_GetRef();
 		VoxelSceneData.Location = Location;
 		VoxelSceneData.bSolid = Voxel.bSolid;

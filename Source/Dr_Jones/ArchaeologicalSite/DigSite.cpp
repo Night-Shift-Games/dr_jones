@@ -2,6 +2,7 @@
 
 #include "DigSite.h"
 
+#include "Utilities.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
 ADigSite::ADigSite()
@@ -12,6 +13,30 @@ ADigSite::ADigSite()
 	DynamicMeshComponent->SetupAttachment(RootComponent);
 
 	VoxelGrid = CreateDefaultSubobject<UVoxelGrid>(TEXT("VoxelGrid"));
+}
+
+void ADigSite::Dig(const FVector& Location)
+{
+	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
+
+	static constexpr float DigRadius = 20.0f;
+
+	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
+	NSVE::FVoxelChunk* Chunk = InternalGrid.GetChunkByIndex(InternalGrid.CalcChunkIndexFromWorldPosition(Location));
+	if (!Chunk)
+	{
+		return;
+	}
+
+	NSVE::FVoxelChunk::FTransformData TransformData = Chunk->MakeTransformData();
+	Chunk->Voxels.Iterate([&TransformData, &Location](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	{
+		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
+		check((bIsInRadius & 1) == bIsInRadius);
+
+		Voxel.bSolid &= !bIsInRadius;
+	});
 }
 
 void ADigSite::BeginPlay()

@@ -31,5 +31,5 @@ uint32 Utilities::WrapIndexToSize(int64 Index, const uint32 Size)
 
 bool Utilities::IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, const float Radius)
 {
-	return (SphereOrigin - Point).Length() < Radius;
+	return (SphereOrigin - Point).SquaredLength() < (Radius * Radius);
 }

@@ -19,11 +19,14 @@ class DR_JONES_API ADigSite : public AActor
 public:
 	ADigSite();
 
+	UFUNCTION(BlueprintCallable, Category = "Dig Site")
+	void Dig(const FVector& Location);
+
 protected:
 	virtual void BeginPlay() override;
 
 	void SetupDigSite(const FVector& DigSiteLocation);
-	
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;

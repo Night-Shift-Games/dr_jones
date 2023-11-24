@@ -106,6 +106,9 @@ namespace NSVE
 
 		void FillTestCube(const FIntVector& Offset = {});
 
+		// If it's either completely solid, or empty
+		bool IsUniform() const;
+
 		FVoxel& Get(int32 Index);
 		FVoxel& GetAtCoords(const FIntVector3& Coords);
 
@@ -256,17 +259,23 @@ namespace NSVE
 		void FillTest();
 		void FillSurface(float SurfaceZ_WS);
 
-		struct FLocalToWorldTransformData
+		struct FTransformData
 		{
 			FVector RootCenter;
 			FVector::FReal RootExtent;
 			FVector::FReal VoxelSize;
 		};
 
-		FLocalToWorldTransformData MakeLocalToWorldTransformData() const;
-		FVector LocalPositionToWorld(const FIntVector& LocalPosition) const;
-		static FVector LocalPositionToWorld_Static(const FIntVector& LocalPosition, const FLocalToWorldTransformData& TransformData);
+		FTransformData MakeTransformData() const;
+
+		FVector GridPositionToWorld(const FIntVector& LocalPosition) const;
+		static FVector GridPositionToWorld_Static(const FIntVector& LocalPosition, const FTransformData& TransformData);
+
+		FIntVector WorldPositionToGrid(const FVector& WorldPosition) const;
+		static FIntVector WorldPositionToGrid_Static(const FVector& WorldPosition, const FTransformData& TransformData);
+
 		static FIntVector IndexToCoords(int32 Index);
+		static int32 CoordsToIndex(const FIntVector& Coords);
 
 #if ENABLE_VOXEL_ENGINE_DEBUG
 		void DrawDebugVoxels() const;
@@ -498,21 +507,21 @@ namespace NSVE
 
 	// -------------------------- FVoxelChunk ----------------------------------------------------------------------
 
-	FORCEINLINE FVoxelChunk::FLocalToWorldTransformData FVoxelChunk::MakeLocalToWorldTransformData() const
+	FORCEINLINE FVoxelChunk::FTransformData FVoxelChunk::MakeTransformData() const
 	{
-		FLocalToWorldTransformData TransformData;
+		FTransformData TransformData;
 		TransformData.RootCenter = Bounds.Origin;
 		TransformData.RootExtent = Bounds.Extent;
 		TransformData.VoxelSize = (TransformData.RootExtent * 2.0) / FVoxelEngineConfig::ChunkResolution;
 		return TransformData;
 	}
 
-	FORCEINLINE FVector FVoxelChunk::LocalPositionToWorld(const FIntVector& LocalPosition) const
+	FORCEINLINE FVector FVoxelChunk::GridPositionToWorld(const FIntVector& LocalPosition) const
 	{
-		return LocalPositionToWorld_Static(LocalPosition, MakeLocalToWorldTransformData());
+		return GridPositionToWorld_Static(LocalPosition, MakeTransformData());
 	}
 
-	FORCEINLINE FVector FVoxelChunk::LocalPositionToWorld_Static(const FIntVector& LocalPosition, const FLocalToWorldTransformData& TransformData)
+	FORCEINLINE FVector FVoxelChunk::GridPositionToWorld_Static(const FIntVector& LocalPosition, const FTransformData& TransformData)
 	{
 		const FVector WorldPositionNoOffset = FVector(LocalPosition.X, LocalPosition.Y, LocalPosition.Z) * TransformData.VoxelSize;
 		const FVector Offset = -FVector(TransformData.RootExtent - TransformData.VoxelSize / 2.0);
@@ -520,9 +529,26 @@ namespace NSVE
 		return Location;
 	}
 
+	FORCEINLINE FIntVector FVoxelChunk::WorldPositionToGrid(const FVector& WorldPosition) const
+	{
+		return WorldPositionToGrid_Static(WorldPosition, MakeTransformData());
+	}
+
+	FORCEINLINE FIntVector FVoxelChunk::WorldPositionToGrid_Static(const FVector& WorldPosition, const FTransformData& TransformData)
+	{
+		const FVector LocalPosition = WorldPosition - (TransformData.RootCenter - TransformData.RootExtent);
+		const FIntVector GridPosition = FIntVector(LocalPosition / TransformData.VoxelSize);
+		return GridPosition;
+	}
+
 	FORCEINLINE FIntVector FVoxelChunk::IndexToCoords(int32 Index)
 	{
 		return decltype(Voxels)::IndexToCoords(Index);
+	}
+
+	FORCEINLINE int32 FVoxelChunk::CoordsToIndex(const FIntVector& Coords)
+	{
+		return decltype(Voxels)::CoordsToIndex(Coords);
 	}
 
 	// -------------------------- FVoxelChunk ----------------------------------------------------------------------

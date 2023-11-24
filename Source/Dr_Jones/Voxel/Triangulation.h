@@ -8,11 +8,17 @@
 namespace NSVE::Triangulation
 {
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
-	void TriangulateVoxelArray_MarchingCubes(const FVoxelArray& VoxelArray, const FVoxelChunk::FLocalToWorldTransformData& TransformData, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
+	void TriangulateVoxelArray_MarchingCubes(const FVoxelArray& VoxelArray, const FVoxelChunk::FTransformData& TransformData, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
 	{
 		using namespace MarchingCubes;
 
 		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes, FColorList::Feldspar)
+
+		// Uniform array will never produce any vertices
+		if (VoxelArray.IsUniform())
+		{
+			return;
+		}
 
 		const FIntVector3 Dimensions = VoxelArray.GetDimensions();
 
@@ -41,7 +47,7 @@ namespace NSVE::Triangulation
 					{
 						const FVoxel& Voxel = VoxelArray.GetAtCoords(GridCellCornerCoords[Corner]);
 						GridCell.Values[Corner] = Voxel.bSolid ? -1.0f : 1.0f;
-						GridCell.Positions[Corner] = FVoxelChunk::LocalPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
+						GridCell.Positions[Corner] = FVoxelChunk::GridPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
 					}
 
 					// Data local to the current cell
@@ -83,7 +89,7 @@ namespace NSVE::Triangulation
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
 	void TriangulateVoxelChunk_MarchingCubes(const FVoxelChunk& VoxelChunk, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
 	{
-		TriangulateVoxelArray_MarchingCubes(VoxelChunk.Voxels, VoxelChunk.MakeLocalToWorldTransformData(), InsertVertexFunc, InsertTriangleFunc);
+		TriangulateVoxelArray_MarchingCubes(VoxelChunk.Voxels, VoxelChunk.MakeTransformData(), InsertVertexFunc, InsertTriangleFunc);
 	}
 
 	inline void TriangulateVoxelGrid_MarchingCubes(const FVoxelGrid& VoxelGrid, TArray<FVector>& OutCombinedVertices, TArray<MarchingCubes::FTriangle>& OutCombinedTriangles, int32& OutVertexCount, int32& OutTriangleCount)
@@ -95,12 +101,11 @@ namespace NSVE::Triangulation
 		OutVertexCount = 0;
 		OutTriangleCount = 0;
 
-		TAtomic<int32> CombinedVertexCount = 0;
-
+		int32 CombinedVertexCount = 0;
 		OutCombinedVertices.Reserve(1000 * VoxelGrid.GetChunkCount());
 		OutCombinedTriangles.Reserve(1000 * VoxelGrid.GetChunkCount());
-		FCriticalSection CombinedVerticesGuard;
-		FCriticalSection CombinedTrianglesGuard;
+
+		FCriticalSection TransactionGuard;
 
 		VoxelGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 Index)
 		{
@@ -122,22 +127,18 @@ namespace NSVE::Triangulation
 			TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFn, InsertTriangleFn);
 
 			const int32 VertexCount = Vertices.Num();
-			const int32 PreviousVertexCount = CombinedVertexCount.AddExchange(VertexCount);
-
 			{
-				FScopeLock Lock(&CombinedVerticesGuard);
+				FScopeLock Lock(&TransactionGuard);
+
 				Algo::Copy(Vertices, OutCombinedVertices);
-			}
-
-			{
-				FScopeLock Lock(&CombinedTrianglesGuard);
 				Algo::Transform(Triangles, OutCombinedTriangles, [&](FTriangle Triangle)
 				{
-					Triangle.Indices[0] += PreviousVertexCount;
-					Triangle.Indices[1] += PreviousVertexCount;
-					Triangle.Indices[2] += PreviousVertexCount;
+					Triangle.Indices[0] += CombinedVertexCount;
+					Triangle.Indices[1] += CombinedVertexCount;
+					Triangle.Indices[2] += CombinedVertexCount;
 					return Triangle;
 				});
+				CombinedVertexCount += VertexCount;
 			}
 		});
 
