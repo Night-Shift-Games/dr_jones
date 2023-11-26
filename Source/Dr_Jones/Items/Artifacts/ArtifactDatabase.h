@@ -67,6 +67,12 @@ struct FArtifactData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	EArtifactSize Size = EArtifactSize::Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	FText Name = FText::AsCultureInvariant(TEXT("None"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	FText Description = FText::AsCultureInvariant(TEXT("None"));
 };
 
 UCLASS(Blueprintable)

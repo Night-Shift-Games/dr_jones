@@ -34,24 +34,23 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
-
-	UFUNCTION()
-	void Take(ADrJonesCharacter* Taker);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnArtifactTake(APawn* Taker);
-
-	virtual UMeshComponent* GetMeshComponent() const override;
-
-	void SetupArtifact(const FArtifactData& ArtifactData);
-	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	
+	UFUNCTION()
+	void PickUp(ADrJonesCharacter* Taker);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnArtifactPickedUp(APawn* Taker);
+
+	virtual UMeshComponent* GetMeshComponent() const override { return ArtifactMeshComponent; }
+	void SetupArtifact(const FArtifactData& ArtifactData);
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactID = NAME_None;
+
 	FText ArtifactName = FText::AsCultureInvariant(TEXT(""));
 	FText ArtifactDescription = FText::AsCultureInvariant(TEXT(""));
 	int ArtifactAge = 2500.f;
@@ -81,8 +80,8 @@ class UArtifactFactory : public UObject
 	GENERATED_BODY()
 	
 public:
-	static AArtifact* ConstructArtifactFromDatabase(const UObject& WorldContextObject, FName& ArtifactID);
-	static FArtifactData* PullArtifactDataFromDatabase(FName& ArtifactID);
+	static AArtifact* ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID);
+	static FArtifactData* PullArtifactDataFromDatabase(const FName& ArtifactID);
 	static AArtifact* ConstructArtifact(const UObject& WorldContextObject, TSubclassOf<AArtifact> ArtifactClass);
 	static AArtifact* ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData);
 };
