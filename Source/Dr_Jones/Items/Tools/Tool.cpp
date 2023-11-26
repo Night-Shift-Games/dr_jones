@@ -4,7 +4,7 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/PlayerComponents/HotBarComponent.h"
+#include "Player/PlayerComponents/InventoryComponent.h"
 #include "SharedComponents/ActionComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 

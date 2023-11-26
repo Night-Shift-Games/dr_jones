@@ -4,7 +4,7 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "PlayerComponents/HotBarComponent.h"
+#include "PlayerComponents/InventoryComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
 #include "PlayerComponents/ReputationComponent.h"
@@ -15,7 +15,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
-	HotBarComponent = CreateDefaultSubobject<UHotBarComponent>(TEXT("ToolbarComponent"));
+	HotBarComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("ToolbarComponent"));
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));

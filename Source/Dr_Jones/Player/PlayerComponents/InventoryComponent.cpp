@@ -1,6 +1,6 @@
 // Property of Night Shift Games, all rights reserved.
 
-#include "HotBarComponent.h"
+#include "InventoryComponent.h"
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "Items/Tools/Tool.h"
@@ -8,18 +8,27 @@
 #include "ReactionComponent.h"
 #include "Utilities.h"
 
-void UHotBarComponent::BeginPlay()
+void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner<ADrJonesCharacter>();
+	UWorld* World = GetWorld();
+	check (Owner.Get())
+	check (World)
+	for (TSubclassOf<ATool> ToolClass : DefaultTools)
+	{
+		ATool* NewTool = World->SpawnActor<ATool>(ToolClass);
+		// TODO: XDDDDD
+		NewTool->PickUp(Owner.Get());
+	}
 }
 
-void UHotBarComponent::SetupPlayerInput(UInputComponent* InputComponent)
+void UInventoryComponent::SetupPlayerInput(UInputComponent* InputComponent)
 {
-	InputComponent->BindAxis(TEXT("Scroll"), this, &UHotBarComponent::ChangeActiveItem);
+	InputComponent->BindAxis(TEXT("Scroll"), this, &UInventoryComponent::ChangeActiveItem);
 }
 
-void UHotBarComponent::ChangeActiveItem(float Value)
+void UInventoryComponent::ChangeActiveItem(float Value)
 {
 	if (Value == 0 || Tools.Num() < 2)
 	{
@@ -33,7 +42,7 @@ void UHotBarComponent::ChangeActiveItem(float Value)
 	}
 }
 
-void UHotBarComponent::AddTool(ATool& ToolToAdd)
+void UInventoryComponent::AddTool(ATool& ToolToAdd)
 {
 	Tools.Emplace(&ToolToAdd);
 	if (Tools.Num() < 2)
@@ -46,12 +55,12 @@ void UHotBarComponent::AddTool(ATool& ToolToAdd)
 	OnToolAdded.Broadcast(&ToolToAdd);
 }
 
-void UHotBarComponent::RemoveTool(ATool& ToolToRemove)
+void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
 {
 	Tools.Remove(&ToolToRemove);
 }
 
-void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
+void UInventoryComponent::SetActiveItem(ATool& NewActiveTool)
 {
 	if (ActiveTool)
 	{
@@ -67,12 +76,12 @@ void UHotBarComponent::SetActiveItem(ATool& NewActiveTool)
 	Owner->GetWidgetManager()->RequestWidgetUpdate(HotBarUI, NullOpt);
 }
 
-ATool* UHotBarComponent::GetActiveTool() const
+ATool* UInventoryComponent::GetActiveTool() const
 {
 	return ActiveTool;
 }
 
-TArray<ATool*> UHotBarComponent::GetTools() const
+TArray<ATool*> UInventoryComponent::GetTools() const
 {
 	return Tools;
 }

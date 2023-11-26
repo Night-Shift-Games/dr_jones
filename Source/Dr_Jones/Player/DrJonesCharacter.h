@@ -13,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 class AItem;
 class UInteractionComponent;
 class UReactionComponent;
-class UHotBarComponent;
+class UInventoryComponent;
 class UCharacterAnimationComponent;
 class UWidgetManager;
 
@@ -49,7 +49,7 @@ public:
 	TObjectPtr<UWidgetManager> WidgetManager;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UHotBarComponent> HotBarComponent;
+	TObjectPtr<UInventoryComponent> HotBarComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;

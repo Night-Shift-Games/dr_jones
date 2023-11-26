@@ -6,7 +6,7 @@
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/PlayerComponents/HotBarComponent.h"
+#include "Player/PlayerComponents/InventoryComponent.h"
 #include "SharedComponents/ActionComponent.h"
 
 void AShovel::BeginPlay()

@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "UI/DrJonesWidgetBase.h"
 
-#include "HotBarComponent.generated.h"
+#include "InventoryComponent.generated.h"
 
 class ADrJonesCharacter;
 class ATool;
@@ -15,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolAddedDelegate, ATool*, Tool);
 
 UCLASS(Blueprintable, ClassGroup = "Player Components",
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
-class DR_JONES_API UHotBarComponent : public UActorComponent
+class DR_JONES_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	
@@ -40,6 +40,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "UI");
 	TSubclassOf<UDrJonesWidgetBase> HotBarUI;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI");
+	TArray<TSubclassOf<ATool>> DefaultTools;
 	
 private:
 	UPROPERTY(Transient)
