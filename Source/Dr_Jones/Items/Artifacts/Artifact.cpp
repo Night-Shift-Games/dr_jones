@@ -3,6 +3,7 @@
 #include "Artifact.h"
 
 #include "ArtifactDatabase.h"
+#include "Player/PlayerComponents/InventoryComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 
 AArtifact::AArtifact()
@@ -60,6 +61,21 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
+	checkf(Taker, TEXT("Player is missing!"));
+
+	GetRootComponent()->SetMobility(EComponentMobility::Movable);
+	if (UMeshComponent* Mesh = GetMeshComponent())
+	{
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	}
+
+	checkf(Taker->InventoryComponent, TEXT("Toolbar component is missing!"));
+	Taker->InventoryComponent->AddArtifact(*this);
+	// TODO: Attaching & reattaching should be inside Inventory.
+	Taker->InventoryComponent->SetActiveItem(*this);
+	GetMeshComponent()->SetSimulatePhysics(false);
+	InteractableComponent->SetInteractionEnabled(false);
+	AttachToComponent(Taker->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
 	OnArtifactPickedUp(Taker);
 }
 

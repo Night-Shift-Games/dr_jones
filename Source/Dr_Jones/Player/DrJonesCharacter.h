@@ -49,7 +49,7 @@ public:
 	TObjectPtr<UWidgetManager> WidgetManager;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UInventoryComponent> HotBarComponent;
+	TObjectPtr<UInventoryComponent> InventoryComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;

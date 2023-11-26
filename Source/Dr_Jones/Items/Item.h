@@ -22,7 +22,9 @@ public:
 	TSubclassOf<UAnimInstance> GetItemAnimation() const;
 
 	UTexture2D* GetItemIcon() const;
-	
+
+	void EnableInteraction(bool bEnabled);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UInteractableComponent> InteractableComponent;

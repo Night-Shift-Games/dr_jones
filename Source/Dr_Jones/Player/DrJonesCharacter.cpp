@@ -15,7 +15,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
-	HotBarComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("ToolbarComponent"));
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
@@ -29,7 +29,7 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ADrJonesCharacter::LookUp);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	HotBarComponent->SetupPlayerInput(PlayerInputComponent);
+	InventoryComponent->SetupPlayerInput(PlayerInputComponent);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
 	InteractionComponent->SetupPlayerInput(PlayerInputComponent);
 }

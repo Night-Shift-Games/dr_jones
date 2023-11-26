@@ -20,3 +20,8 @@ UTexture2D* AItem::GetItemIcon() const
 {
 	return ItemIcon;
 }
+
+void AItem::EnableInteraction(bool bEnabled)
+{
+	InteractableComponent->SetInteractionEnabled(bEnabled);
+}

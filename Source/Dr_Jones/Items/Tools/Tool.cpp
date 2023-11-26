@@ -36,10 +36,10 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 
-	checkf(Player->HotBarComponent, TEXT("Toolbar component is missing!"));
-	Player->HotBarComponent->AddTool(*this);
-	// TODO: Attaching & reattaching should be inside Hotbar.
-	Player->HotBarComponent->SetActiveItem(*this);
+	checkf(Player->InventoryComponent, TEXT("Toolbar component is missing!"));
+	Player->InventoryComponent->AddTool(*this);
+	// TODO: Attaching & reattaching should be inside Inventory.
+	Player->InventoryComponent->SetActiveItem(*this);
 	InteractableComponent->SetInteractionEnabled(false);
 	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
 }

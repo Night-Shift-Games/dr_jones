@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Items/Artifacts/Artifact.h"
 #include "UI/DrJonesWidgetBase.h"
 
 #include "InventoryComponent.generated.h"
@@ -26,23 +27,39 @@ public:
 	void ChangeActiveItem(float Value);
 	void AddTool(ATool& ToolToAdd);
 	void RemoveTool(ATool& ToolToRemove);
-	void SetActiveItem(ATool& NewActiveTool);
+	void SetActiveItem(AItem& NewActiveItem);
+
+	void AttachItemToHand(AItem& ItemToAttach);
+	void DetachActiveItemFromHand();
+	
+	void OpenInventory(bool bOpen = true) const;
 
 	UFUNCTION(BlueprintPure)
-	ATool* GetActiveTool() const;
+	AItem* GetItemInHand() const { return ItemInHand; }
 
 	UFUNCTION(BlueprintPure)
 	TArray<ATool*> GetTools() const;
+
+	void AddArtifact(AArtifact& Artifact);
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "UI");
-	TSubclassOf<UDrJonesWidgetBase> HotBarUI;
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UDrJonesWidgetBase> ItemInfo;
 
-	UPROPERTY(EditDefaultsOnly, Category = "UI");
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UDrJonesWidgetBase> InventoryMenu;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TArray<TSubclassOf<ATool>> DefaultTools;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	TObjectPtr<AArtifact> ArtifactInHand;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	TObjectPtr<AItem> ItemInHand;
 	
 private:
 	UPROPERTY(Transient)
