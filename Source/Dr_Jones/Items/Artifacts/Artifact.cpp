@@ -62,21 +62,11 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
-
-	GetRootComponent()->SetMobility(EComponentMobility::Movable);
-	if (UMeshComponent* Mesh = GetMeshComponent())
+	if (UInventoryComponent* Inventory = Taker->GetInventory())
 	{
-		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		Inventory->AddArtifact(*this);
+		OnArtifactPickedUp(Taker);
 	}
-
-	checkf(Taker->InventoryComponent, TEXT("Toolbar component is missing!"));
-	Taker->InventoryComponent->AddArtifact(*this);
-	// TODO: Attaching & reattaching should be inside Inventory.
-	Taker->InventoryComponent->SetActiveItem(*this);
-	GetMeshComponent()->SetSimulatePhysics(false);
-	InteractableComponent->SetInteractionEnabled(false);
-	AttachToComponent(Taker->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
-	OnArtifactPickedUp(Taker);
 }
 
 void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)

@@ -18,8 +18,7 @@ void UInventoryComponent::BeginPlay()
 	for (TSubclassOf<ATool> ToolClass : DefaultTools)
 	{
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass);
-		// TODO: XDDDDD
-		NewTool->PickUp(Owner.Get());
+		AddTool(*NewTool);
 	}
 }
 
@@ -36,9 +35,38 @@ void UInventoryComponent::SetupPlayerInput(UInputComponent* InputComponent)
 	{
 		OpenInventory(false);
 	});
+	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
+	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
+	{
+		DetachActiveItemFromHand();
+	});
 	InputComponent->AddActionBinding(OpenInventoryMenu);
 	InputComponent->AddActionBinding(CloseInventoryMenu);
-	InputComponent->BindAction(TEXT("CancelItemHold"), IE_Pressed, this, &UInventoryComponent::DetachActiveItemFromHand);
+	InputComponent->AddActionBinding(CancelHold);
+}
+
+void UInventoryComponent::AddArtifact(AArtifact& ArtifactToAdd)
+{
+	SetActiveItem(ArtifactToAdd);
+}
+
+void UInventoryComponent::AddTool(ATool& ToolToAdd)
+{
+	Tools.Emplace(&ToolToAdd);
+	AttachItemToHand(ToolToAdd);
+
+	if (Tools.Num() < 2)
+	{
+		SetActiveItem(ToolToAdd);
+	}
+	
+	Owner->WidgetManager->RequestWidgetUpdate(ItemInfo, NullOpt);
+	OnToolAdded.Broadcast(&ToolToAdd);
+}
+
+void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
+{
+	Tools.Remove(&ToolToRemove);
 }
 
 void UInventoryComponent::ChangeActiveItem(float Value)
@@ -52,28 +80,11 @@ void UInventoryComponent::ChangeActiveItem(float Value)
 		return;
 	}
 	int32 ActiveItemID;
-	if (Tools.Find(ActiveTool, ActiveItemID))
+	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
+	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
 	{
-		SetActiveItem(*Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)]);
+		SetActiveItem(*ActiveItem);
 	}
-}
-
-void UInventoryComponent::AddTool(ATool& ToolToAdd)
-{
-	Tools.Emplace(&ToolToAdd);
-	if (Tools.Num() < 2)
-	{
-		SetActiveItem(ToolToAdd);
-	}
-	const TOptional<float> None;
-	Owner->WidgetManager->RequestWidgetUpdate(ItemInfo, None);
-
-	OnToolAdded.Broadcast(&ToolToAdd);
-}
-
-void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
-{
-	Tools.Remove(&ToolToRemove);
 }
 
 void UInventoryComponent::SetActiveItem(AItem& NewActiveItem)
@@ -89,38 +100,35 @@ void UInventoryComponent::SetActiveItem(AItem& NewActiveItem)
 		ItemInHand->FindComponentByClass<UMeshComponent>()->SetVisibility(false);
 	}
 
+	AttachItemToHand(NewActiveItem);
 	ItemInHand = &NewActiveItem;
-
-	if (NewActiveItem.IsA<ATool>())
-	{
-		ActiveTool = Cast<ATool>(&NewActiveItem);
-	}
-	else if (ActiveTool)
-	{
-		ActiveTool->GetMeshComponent()->SetVisibility(false);
-	}
 	
-	NewActiveItem.GetMeshComponent()->SetVisibility(true);
+	ItemInHand->GetMeshComponent()->SetVisibility(true);
 	Owner->ReactionComponent->SetActiveItem(NewActiveItem);
 	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem.GetItemAnimation());
+
 	Owner->GetWidgetManager()->RequestWidgetUpdate(ItemInfo, NullOpt);
 }
 
 void UInventoryComponent::AttachItemToHand(AItem& ItemToAttach)
 {
-	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("RightHandSocket"));
+	ItemToAttach.SetupItemInHandProperties();
+	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
+	ItemInHand = &ItemToAttach;
 }
 
-void UInventoryComponent::DetachActiveItemFromHand()
+AItem* UInventoryComponent::DetachActiveItemFromHand()
 {
-	if (!ItemInHand)
+	if (!ItemInHand || ItemInHand->IsA<ATool>())
 	{
-		return;
+		return nullptr;;
 	}
+
 	ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	ItemInHand->GetMeshComponent()->SetSimulatePhysics(true);
-	ItemInHand->EnableInteraction(true);
+	ItemInHand->SetupItemGroundProperties();
+	AItem* ReturnValue = ItemInHand;
 	ItemInHand = nullptr;
+	return ReturnValue;
 }
 
 void UInventoryComponent::OpenInventory(bool bOpen) const
@@ -147,12 +155,3 @@ void UInventoryComponent::OpenInventory(bool bOpen) const
 	ItemMenu->UpdateData();
 }
 
-TArray<ATool*> UInventoryComponent::GetTools() const
-{
-	return Tools;
-}
-
-void UInventoryComponent::AddArtifact(AArtifact& Artifact)
-{
-	ArtifactInHand = &Artifact;
-}

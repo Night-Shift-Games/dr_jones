@@ -5,13 +5,7 @@
 #include "Animation/CharacterAnimationComponent.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
-#include "SharedComponents/ActionComponent.h"
 #include "SharedComponents/InteractableComponent.h"
-
-ATool::ATool()
-{
-
-}
 
 void ATool::BeginPlay()
 {
@@ -29,19 +23,10 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing!"));
 	OwningPlayer = Player;
-	
-	GetRootComponent()->SetMobility(EComponentMobility::Movable);
-	if (UMeshComponent* Mesh = GetMeshComponent())
-	{
-		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	}
+	UInventoryComponent* InventoryComponent = Player->GetInventory();
+	checkf(InventoryComponent, TEXT("Inventory is missing!"));
 
-	checkf(Player->InventoryComponent, TEXT("Toolbar component is missing!"));
-	Player->InventoryComponent->AddTool(*this);
-	// TODO: Attaching & reattaching should be inside Inventory.
-	Player->InventoryComponent->SetActiveItem(*this);
-	InteractableComponent->SetInteractionEnabled(false);
-	AttachToComponent(Player->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, AttachmentSocket);
+	InventoryComponent->AddTool(*this);
 }
 
 UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const

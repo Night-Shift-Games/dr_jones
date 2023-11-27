@@ -11,17 +11,40 @@ AItem::AItem()
 	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
-UMeshComponent* AItem::GetMeshComponent() const
+void AItem::SetInteractionEnabled(bool bEnabled) const
 {
-	return FindComponentByClass<UMeshComponent>();
-}
-
-UTexture2D* AItem::GetItemIcon() const
-{
-	return ItemIcon;
-}
-
-void AItem::EnableInteraction(bool bEnabled)
-{
+	check(InteractableComponent);
 	InteractableComponent->SetInteractionEnabled(bEnabled);
+}
+
+void AItem::SetAttachmentPhysics()
+{
+	RootComponent->SetMobility(EComponentMobility::Movable);
+	if (UMeshComponent* Mesh = GetMeshComponent())
+	{
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		Mesh->SetSimulatePhysics(false);
+	}
+}
+
+void AItem::SetGroundPhysics()
+{
+	RootComponent->SetMobility(EComponentMobility::Movable);
+	if (UMeshComponent* Mesh = GetMeshComponent())
+	{
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		Mesh->SetSimulatePhysics(false);
+	}
+}
+
+void AItem::SetupItemInHandProperties()
+{
+	SetInteractionEnabled(false);
+	SetAttachmentPhysics();
+}
+
+void AItem::SetupItemGroundProperties()
+{
+	SetInteractionEnabled(true);
+	SetGroundPhysics();
 }

@@ -17,14 +17,19 @@ class DR_JONES_API AItem : public AActor
 	
 public:
 	AItem();
-	virtual UMeshComponent* GetMeshComponent() const;
+	
+	virtual UMeshComponent* GetMeshComponent() const { return FindComponentByClass<UMeshComponent>(); }
+	TSubclassOf<UAnimInstance> GetItemAnimation() const { return ItemAnimation; }
+	UTexture2D* GetItemIcon() const { return ItemIcon; }
+	FName GetItemAttachmentSocket() const { return AttachmentSocket; }
 
-	TSubclassOf<UAnimInstance> GetItemAnimation() const;
+	void SetInteractionEnabled(bool bEnabled) const;
+	virtual void SetAttachmentPhysics();
+	virtual void SetGroundPhysics();
 
-	UTexture2D* GetItemIcon() const;
-
-	void EnableInteraction(bool bEnabled);
-
+	void SetupItemInHandProperties();
+	void SetupItemGroundProperties();
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UInteractableComponent> InteractableComponent;
@@ -41,8 +46,3 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|UI")
 	TObjectPtr<UTexture2D> ItemIcon;
 };
-
-FORCEINLINE TSubclassOf<UAnimInstance> AItem::GetItemAnimation() const
-{
-	return ItemAnimation;
-}

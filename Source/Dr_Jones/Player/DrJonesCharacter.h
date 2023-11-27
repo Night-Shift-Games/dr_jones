@@ -24,7 +24,8 @@ class DR_JONES_API ADrJonesCharacter : public ACharacter
 public:
 	ADrJonesCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	UWidgetManager* GetWidgetManager() const { return WidgetManager; };
+	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
+	UInventoryComponent* GetInventory() const { return InventoryComponent; }
 
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);

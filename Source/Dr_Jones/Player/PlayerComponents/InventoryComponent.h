@@ -23,24 +23,24 @@ class DR_JONES_API UInventoryComponent : public UActorComponent
 public:
 	virtual void BeginPlay() override;
 	void SetupPlayerInput(UInputComponent* InputComponent);
-	
-	void ChangeActiveItem(float Value);
-	void AddTool(ATool& ToolToAdd);
-	void RemoveTool(ATool& ToolToRemove);
-	void SetActiveItem(AItem& NewActiveItem);
-
-	void AttachItemToHand(AItem& ItemToAttach);
-	void DetachActiveItemFromHand();
-	
-	void OpenInventory(bool bOpen = true) const;
 
 	UFUNCTION(BlueprintPure)
 	AItem* GetItemInHand() const { return ItemInHand; }
 
 	UFUNCTION(BlueprintPure)
-	TArray<ATool*> GetTools() const;
+	TArray<ATool*> GetTools() const {return Tools; }
+	
+	void AddArtifact(AArtifact& ArtifactToAdd);
 
-	void AddArtifact(AArtifact& Artifact);
+	void AddTool(ATool& ToolToAdd);
+	void RemoveTool(ATool& ToolToRemove);
+
+	void ChangeActiveItem(float Value);
+	void SetActiveItem(AItem& NewActiveItem);
+	void AttachItemToHand(AItem& ItemToAttach);
+	AItem* DetachActiveItemFromHand();
+	
+	void OpenInventory(bool bOpen = true) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;
@@ -54,9 +54,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TArray<TSubclassOf<ATool>> DefaultTools;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
-	TObjectPtr<AArtifact> ArtifactInHand;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TObjectPtr<AItem> ItemInHand;
@@ -64,9 +61,6 @@ protected:
 private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ATool>> Tools;
-	
-	UPROPERTY(Transient)
-	TObjectPtr<ATool> ActiveTool;
 	
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
 };
