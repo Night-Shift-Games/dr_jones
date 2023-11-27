@@ -30,15 +30,20 @@ void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 	Widget->UpdateData();
 }
 
-void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd)
+void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Player)
 {
+	Player->GetInventory()->DetachActiveItemFromHand();
 	if (Artifacts.Contains(ArtifactToAdd))
 	{
 		return; 
 	}
 	Artifacts.Add(ArtifactToAdd);
-	ArtifactToAdd->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
+
+	UWidgetManager* WidgetManager = Player->GetWidgetManager();
+	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
+	Widget->UpdateData();
 }
 
 AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)

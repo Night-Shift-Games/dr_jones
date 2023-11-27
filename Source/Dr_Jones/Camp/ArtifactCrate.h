@@ -26,7 +26,7 @@ public:
 	void OnInteract(ADrJonesCharacter* Player);
 
 	UFUNCTION(BlueprintCallable)
-	void AddArtifact(AArtifact* ArtifactToAdd);
+	void AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Player);
 
 	UFUNCTION(BlueprintCallable)
 	AArtifact* PullOutArtifact(AArtifact* ArtifactToPullOut);
