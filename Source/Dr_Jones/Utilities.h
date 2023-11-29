@@ -1,7 +1,10 @@
 ﻿#pragma once
 
+class ADrJonesCharacter;
+
 namespace Utilities
 {
+	ADrJonesCharacter& GetPlayerCharacter(const UObject& WorldContextObject);
 	float CalculateAngleBetweenTwoVectors(const FVector& Direction, const FVector& Second);
 	float GetChordLength(const float SphereRadius, const FVector& Direction, const FVector& Second);
 	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, const float Radius);

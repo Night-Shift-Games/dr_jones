@@ -1,5 +1,14 @@
 ﻿#include "Utilities.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Player/DrJonesCharacter.h"
+
+ADrJonesCharacter& Utilities::GetPlayerCharacter(const UObject& WorldContextObject)
+{
+	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(&WorldContextObject, 0);
+	return *Cast<ADrJonesCharacter>(PlayerCharacter);
+}
+
 float Utilities::CalculateAngleBetweenTwoVectors(const FVector& Direction, const FVector& Second)
 {
 	return FMath::Acos(FVector::DotProduct(Direction, Second));

@@ -1,5 +1,6 @@
 #include "ArtifactCrate.h"
 
+#include "Utilities.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/WidgetManager.h"
@@ -41,7 +42,7 @@ void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Pl
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
 
-	UWidgetManager* WidgetManager = Player->GetWidgetManager();
+	const UWidgetManager* WidgetManager = Player->GetWidgetManager();
 	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
 	Widget->UpdateData();
 }
@@ -53,8 +54,7 @@ AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 		return nullptr; 
 	}
 	Artifacts.Remove(ArtifactToPullOut);
-	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(this, 0);
-	Cast<ADrJonesCharacter>(PlayerCharacter)->InventoryComponent->AddArtifact(*ArtifactToPullOut);
+	Utilities::GetPlayerCharacter(*this).GetInventory()->AddArtifact(*ArtifactToPullOut);
 	return ArtifactToPullOut;
 }
 
@@ -68,7 +68,7 @@ void AArtifactCrate::SendArtifacts()
 
 void AArtifactCrate::CloseWidget()
 {
-	UWidgetManager* WidgetManager = Cast<ADrJonesCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))->GetWidgetManager();
+	UWidgetManager* WidgetManager = Utilities::GetPlayerCharacter(*this).GetWidgetManager();
 	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
 	if (!Widget)
 	{
