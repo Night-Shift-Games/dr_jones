@@ -61,6 +61,7 @@ protected:
 private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ATool>> Tools;
-	
-	TWeakObjectPtr<ADrJonesCharacter> Owner;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ADrJonesCharacter> Owner;
 };

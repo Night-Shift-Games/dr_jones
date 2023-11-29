@@ -126,6 +126,10 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 
 	ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ItemInHand->SetupItemGroundProperties();
+	TArray<AActor*> ActorsToIgnore = { Owner, ItemInHand};
+	Algo::Copy(Tools, ActorsToIgnore);
+	const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
+	ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator::ZeroRotator);
 	AItem* ReturnValue = ItemInHand;
 	ItemInHand = nullptr;
 	return ReturnValue;
