@@ -13,11 +13,13 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 	Owner = GetOwner<ADrJonesCharacter>();
 	UWorld* World = GetWorld();
-	check (Owner.Get())
+	check (Owner)
 	check (World)
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = Owner;
 	for (TSubclassOf<ATool> ToolClass : DefaultTools)
 	{
-		ATool* NewTool = World->SpawnActor<ATool>(ToolClass);
+		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
 		AddTool(*NewTool);
 	}
 }
