@@ -76,7 +76,7 @@ namespace NSVE
 	struct FVoxelEngineConfig
 	{
 		// Size of the chunk in UU. Every chunk is a cube
-		static constexpr double ChunkSize = 200.0;
+		static constexpr double ChunkSize = 400.0;
 		static constexpr double HalfChunkSize = ChunkSize / 2.0;
 
 		// How many voxels are in each chunk (in one dimension)
@@ -117,7 +117,7 @@ namespace NSVE
 
 		// Iterate through all voxels using a function with signature void(FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		template <typename Func>
-		FORCENOINLINE void Iterate(Func IterateFunc)
+		void Iterate(Func IterateFunc)
 		{
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxels, FColorList::MandarianOrange)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxels"), STAT_VoxelEngine_FVoxelArray_IterateVoxels, STATGROUP_VoxelEngine)
@@ -133,7 +133,7 @@ namespace NSVE
 
 		// Iterate through all voxels using a function with signature void(const FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		template <typename Func>
-		FORCENOINLINE void Iterate(Func IterateFunc) const
+		void Iterate(Func IterateFunc) const
 		{
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxels, FColorList::MandarianOrange)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxels"), STAT_VoxelEngine_FVoxelArray_IterateVoxels, STATGROUP_VoxelEngine)
@@ -150,7 +150,7 @@ namespace NSVE
 		// Iterate through all voxels using a function with signature void(FVoxel& Voxel, int32 Index)
 		// Version without precalculated coords
 		template <typename Func>
-		FORCENOINLINE void IterateFast(Func IterateFunc)
+		void IterateFast(Func IterateFunc)
 		{
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxelsFast, FColorList::Copper)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxelsFast"), STAT_VoxelEngine_FVoxelArray_IterateVoxelsFast, STATGROUP_VoxelEngine)
@@ -166,7 +166,7 @@ namespace NSVE
 		// Iterate through all voxels using a function with signature void(const FVoxel& Voxel, int32 Index)
 		// Version without precalculated coords
 		template <typename Func>
-		FORCENOINLINE void IterateFast(Func IterateFunc) const
+		void IterateFast(Func IterateFunc) const
 		{
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxelsFast, FColorList::Copper)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxelsFast"), STAT_VoxelEngine_FVoxelArray_IterateVoxelsFast, STATGROUP_VoxelEngine)
@@ -181,7 +181,7 @@ namespace NSVE
 
 		// Perform a boolean operation on two voxel arrays
 		template <typename OpFunc>
-		FORCENOINLINE FVoxelArray& Op(const FVoxelArray& OtherArray, OpFunc Operation)
+		FVoxelArray& Op(const FVoxelArray& OtherArray, OpFunc Operation)
 		{
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_Op, FColorList::YellowGreen)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::Op"), STAT_VoxelEngine_FVoxelArray_Op, STATGROUP_VoxelEngine)
@@ -311,17 +311,11 @@ namespace NSVE
 		template <typename FFunc>
 		void IterateChunks_Parallel(FFunc ForEachChunk)
 		{
+			FVoxelChunk* FirstChunk = Chunks.GetData();
 			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-			ParallelForTemplate(ChunkCount, [this, ForEachChunk](int32 Index)
+			ParallelForTemplate(ChunkCount, [this, ForEachChunk, FirstChunk](int32 Index)
 			{
-				FVoxelChunk* Chunk;
-				{
-					FScopeLock Lock(&ChunksGuard);
-					check(Chunks.IsValidIndex(Index));
-					Chunk = &Chunks[Index];
-				}
-
-				ForEachChunk(*Chunk, Index);
+				ForEachChunk(*(FirstChunk + Index), Index);
 			});
 		}
 
