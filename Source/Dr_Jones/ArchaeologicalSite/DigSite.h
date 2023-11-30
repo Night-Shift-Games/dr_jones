@@ -22,6 +22,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void Dig(const FVector& Location);
 
+	UFUNCTION(BlueprintCallable, Category = "Dig Site")
+	void UpdateMesh(bool bAsync = true);
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -37,11 +37,27 @@ void ADigSite::Dig(const FVector& Location)
 
 		Voxel.bSolid &= !bIsInRadius;
 	});
+
+	UpdateMesh(true);
+}
+
+void ADigSite::UpdateMesh(bool bAsync)
+{
+	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
+	int32 VerticesCount;
+	int32 TriangleCount;
+	UVoxelEngineUtilities::TriangulateVoxelGrid(VoxelGrid, DynamicMesh, VerticesCount, TriangleCount);
+
+	DynamicMeshComponent->bUseAsyncCooking = bAsync;
+	DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
+	DynamicMeshComponent->UpdateCollision(true);
 }
 
 void ADigSite::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UpdateMesh(false);
 }
 
 void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
