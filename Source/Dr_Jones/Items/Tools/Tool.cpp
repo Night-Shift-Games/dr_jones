@@ -11,6 +11,7 @@ void ATool::BeginPlay()
 {
 	Super::BeginPlay();
 	InteractableComponent->InteractDelegate.AddUniqueDynamic(this, &ATool::PickUp);
+	OwningPlayer = GetOwner<ADrJonesCharacter>();
 }
 
 void ATool::EndPlay(const EEndPlayReason::Type EndPlayReason)

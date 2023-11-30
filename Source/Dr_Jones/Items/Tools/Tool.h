@@ -22,6 +22,7 @@ UCLASS()
 class DR_JONES_API ATool : public AItem
 {
 	GENERATED_BODY()
+	
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
