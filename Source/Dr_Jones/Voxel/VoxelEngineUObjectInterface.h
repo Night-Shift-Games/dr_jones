@@ -106,6 +106,8 @@ class DR_JONES_API UVoxelEngineUtilities : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	static void TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount, TFunction<void()> OnCompleted, bool bAsync = true);
+
 	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
 	static void TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount);
 };

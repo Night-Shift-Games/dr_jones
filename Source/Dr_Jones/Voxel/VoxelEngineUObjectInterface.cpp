@@ -281,12 +281,89 @@ void UVoxelGrid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 #endif
 }
 
-void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount)
+void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid,
+	UDynamicMesh* DynamicMesh,
+	int32& OutVertexCount,
+	int32& OutTriangleCount,
+	TFunction<void()> OnCompleted,
+	bool bAsync)
 {
 	using namespace NSVE;
 	using namespace NSVE::Triangulation;
 	using namespace MarchingCubes;
 
+	SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal, FColorList::Quartz)
+
+	auto EditDynamicMeshFn = [DynamicMesh, OnCompleted](const TArray<FVector>& CombinedVertices, const TArray<FTriangle>& CombinedTriangles)
+	{
+		{
+			SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh, FColorList::NavyBlue)
+
+			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
+			{
+				EditMesh.Clear();
+
+				for (const FVector& Vertex : CombinedVertices)
+				{
+					EditMesh.AppendVertex(Vertex);
+				}
+				for (const FTriangle& Triangle : CombinedTriangles)
+				{
+					EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+				}
+			}, EDynamicMeshChangeType::MeshVertexChange, EDynamicMeshAttributeChangeFlags::MeshTopology);
+		}
+
+		OnCompleted();
+	};
+
+	if (bAsync)
+	{
+		OutVertexCount = 0;
+		OutTriangleCount = 0;
+		AsyncTask(ENamedThreads::AnyHiPriThreadHiPriTask, [EditDynamicMeshFn,
+			// TODO: Kamilu to jebnie
+			&VoxelGrid,
+			DynamicMesh,
+			OnCompleted]
+		{
+			TArray<FVector> CombinedVerticesAsync;
+			TArray<FTriangle> CombinedTrianglesAsync;
+			int32 VertexCount;
+			int32 TriangleCount;
+			TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVerticesAsync, CombinedTrianglesAsync, VertexCount, TriangleCount);
+			if (!DynamicMesh)
+			{
+				OnCompleted();
+				return;
+			}
+
+			AsyncTask(ENamedThreads::GameThread, [EditDynamicMeshFn,
+				CombinedVerticesAsync = MoveTemp(CombinedVerticesAsync),
+				CombinedTrianglesAsync = MoveTemp(CombinedTrianglesAsync)]
+			{
+				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync);
+			});
+		});
+	}
+	else
+	{
+		TArray<FVector> CombinedVertices;
+		TArray<FTriangle> CombinedTriangles;
+		TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVertices, CombinedTriangles, OutVertexCount, OutTriangleCount);
+		if (DynamicMesh)
+		{
+			EditDynamicMeshFn(CombinedVertices, CombinedTriangles);
+		}
+		else
+		{
+			OnCompleted();
+		}
+	}
+}
+
+void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount)
+{
 	SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid, FColorList::Quartz)
 
 	if (!VoxelGrid)
@@ -295,26 +372,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamic
 		return;
 	}
 
-	TArray<FVector> CombinedVertices;
-	TArray<FTriangle> CombinedTriangles;
-	TriangulateVoxelGrid_MarchingCubes(VoxelGrid->GetInternal(), CombinedVertices, CombinedTriangles, OutVertexCount, OutTriangleCount);
-
-	if (DynamicMesh)
-	{
-		SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_EditMesh, FColorList::NavyBlue)
-
-		DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
-		{
-			EditMesh.Clear();
-
-			for (const FVector& Vertex : CombinedVertices)
-			{
-				EditMesh.AppendVertex(Vertex);
-			}
-			for (const FTriangle& Triangle : CombinedTriangles)
-			{
-				EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
-			}
-		}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology);
-	}
+	OutVertexCount = 0;
+	OutTriangleCount = 0;
+	int32 VertexCount;
+	int32 TriangleCount;
+	TriangulateVoxelGrid_Internal(VoxelGrid->GetInternal(), DynamicMesh, VertexCount, TriangleCount, []{}, true);
 }

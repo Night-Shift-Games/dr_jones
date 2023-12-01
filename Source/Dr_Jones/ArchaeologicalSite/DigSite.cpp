@@ -2,6 +2,7 @@
 
 #include "DigSite.h"
 
+#include "Dr_Jones.h"
 #include "Utilities.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
@@ -44,13 +45,16 @@ void ADigSite::Dig(const FVector& Location)
 void ADigSite::UpdateMesh(bool bAsync)
 {
 	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
+	const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
 	int32 VerticesCount;
 	int32 TriangleCount;
-	UVoxelEngineUtilities::TriangulateVoxelGrid(VoxelGrid, DynamicMesh, VerticesCount, TriangleCount);
-
-	DynamicMeshComponent->bUseAsyncCooking = bAsync;
-	DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
-	DynamicMeshComponent->UpdateCollision(true);
+	auto UpdateMeshComponentFn = [this, bAsync]
+	{
+		DynamicMeshComponent->bUseAsyncCooking = bAsync;
+		DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
+		DynamicMeshComponent->UpdateCollision(true);
+	};
+	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true);
 }
 
 void ADigSite::BeginPlay()

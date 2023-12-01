@@ -38,5 +38,5 @@ protected:
 	TObjectPtr<UVoxelGrid> VoxelGrid;
 
 	double Width = 1500.0;
-	double Height = 1500.0; 
+	double Height = 1500.0;
 };
