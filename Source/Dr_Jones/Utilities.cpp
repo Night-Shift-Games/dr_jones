@@ -2,6 +2,8 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Player/DrJonesCharacter.h"
+#include "Player/WidgetManager.h"
+
 namespace Utilities
 {
 	ADrJonesCharacter& GetPlayerCharacter(const UObject& WorldContextObject)
@@ -59,4 +61,14 @@ namespace Utilities
 		return Index;
 	}
 
+	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject)
+	{
+		const ADrJonesCharacter& PlayerCharacter = GetPlayerCharacter(WorldContextObject);
+		return *PlayerCharacter.GetWidgetManager();
+	}
+
+	UDrJonesWidgetBase* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
+	{
+		return GetWidgetManager(WorldContextObject).GetWidget(WidgetClass);
+	}
 }

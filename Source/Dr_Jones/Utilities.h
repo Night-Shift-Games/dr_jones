@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Player/DrJonesCharacter.h"
+#include "UI/DrJonesWidgetBase.h"
 
 class ADrJonesCharacter;
 
@@ -13,7 +14,16 @@ namespace Utilities
 	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, const float Radius);
 	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore);
 	uint32 WrapIndexToSize(int64 Index, uint32 Size);
+	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
 	
+	template <class TWidgetClass>
+	TWidgetClass* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
+	{
+		UDrJonesWidgetBase* Widget = GetWidget(WidgetClass);
+		return Widget ? Cast<TWidgetClass>(Widget) : nullptr;
+	}
+
 	template <typename T>
 	uint32 WrapIndexToArray(int64 Index, TArray<T> Array)
 	{

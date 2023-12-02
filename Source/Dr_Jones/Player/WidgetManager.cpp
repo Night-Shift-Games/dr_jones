@@ -56,6 +56,16 @@ void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClas
 	WidgetToHide->RemoveFromParent();
 }
 
+void UWidgetManager::SetWidgetVisibility(TSubclassOf<UDrJonesWidgetBase> WidgetClass, ESlateVisibility Visibility) const
+{
+	UDrJonesWidgetBase* Widget = GetWidget(WidgetClass);
+	if (!Widget)
+	{
+		return;
+	}
+	Widget->SetVisibility(Visibility);
+}
+
 void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
 	// TODO: It's not actually removing anything xD
