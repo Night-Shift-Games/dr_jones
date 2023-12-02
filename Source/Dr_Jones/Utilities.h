@@ -1,6 +1,9 @@
 ﻿#pragma once
+#include "Player/DrJonesCharacter.h"
 
 class ADrJonesCharacter;
+
+#include "Utilities.generated.h"
 
 namespace Utilities
 {
@@ -23,3 +26,26 @@ namespace Utilities
 		return WrapIndexToSize(Index, Array.Num());
 	}
 }	
+
+UCLASS()
+class UDrJonesUtilitiesFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+	
+public:
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
+	static ADrJonesCharacter* GetDrJonesCharacter(const UObject* WorldContextObject)
+	{ return WorldContextObject ? &Utilities::GetPlayerCharacter(*WorldContextObject) : nullptr; }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
+	static FVector FindGround(const UObject* WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore)
+	{ return WorldContextObject ? Utilities::FindGround(*WorldContextObject, StartLocation, ActorsToIgnore) : FVector::ZeroVector; }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
+	static int64 WrapIndexToSize(int64 Index, int32 Size)
+	{ return Utilities::WrapIndexToSize(Index, Size); }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
+	static FHitResult GetHitResultOfPlayerSight(float Reach = 400.f)
+	{ return ADrJonesCharacter::GetPlayerLookingAt(Reach); }
+};
