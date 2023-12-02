@@ -24,7 +24,7 @@ public:
 	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget, TOptional<float> AxisValue) const;
-	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const;
+	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass) const;
 	
 public:
 	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (DisplayName = "Widgets"))

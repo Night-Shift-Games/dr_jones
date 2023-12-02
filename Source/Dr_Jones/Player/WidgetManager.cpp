@@ -34,7 +34,7 @@ void UWidgetManager::ShowWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClas
 	{
 		return;
 	}
-	UDrJonesWidgetBase* WidgetToShow = Widgets.FindRef(WidgetClass);
+	UDrJonesWidgetBase* WidgetToShow = GetWidget(WidgetClass);
 	if (!WidgetToShow || WidgetToShow->IsInViewport())
 	{
 		return;
@@ -48,7 +48,7 @@ void UWidgetManager::HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClas
 	{
 		return;
 	}
-	UDrJonesWidgetBase* WidgetToHide = Widgets.FindRef(WidgetClass);
+	UDrJonesWidgetBase* WidgetToHide = GetWidget(WidgetClass);
 	if (!WidgetToHide || !WidgetToHide->IsInViewport())
 	{
 		return;
@@ -63,21 +63,42 @@ void UWidgetManager::RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetCl
 	{
 		return;
 	}
-	if (UUserWidget* WidgetToShow = Widgets.FindRef(WidgetClass); !WidgetToShow->IsInViewport())
+	if (UUserWidget* WidgetToShow = GetWidget(WidgetClass); !WidgetToShow->IsInViewport())
 	{
 		WidgetToShow->AddToViewport();
 	}
 }
 
-UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBase> Widget) const
+UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass) const
 {
-	return Widgets.FindRef(Widget);
+	if (!WidgetClass)
+	{
+		return nullptr;
+	}
+	UDrJonesWidgetBase* FoundWidget = Widgets.FindRef(WidgetClass);
+	if (FoundWidget)
+	{
+		return FoundWidget;
+	}
+	// Check active page first if still not found.
+	for (auto& KV : Widgets)
+	{
+		if(KV.Value)
+		{
+			FoundWidget = KV.Value->GetChildWidget(WidgetClass);
+		}
+		if (FoundWidget)
+		{
+			break;
+		}
+	}
+	return FoundWidget;
 }
 
 void UWidgetManager::RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget,
 	TOptional<float> AxisValue) const
 {
-	UDrJonesWidgetBase* WidgetToUpdate = Widgets.FindRef(Widget);
+	UDrJonesWidgetBase* WidgetToUpdate = GetWidget(Widget);
 	if (!WidgetToUpdate)
 	{
 		return;
