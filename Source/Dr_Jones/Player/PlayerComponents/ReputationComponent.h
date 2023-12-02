@@ -15,50 +15,12 @@ static TAutoConsoleVariable CVarReputationDebug(
 	ECVF_Cheat
 );
 
-USTRUCT(BlueprintType, Category = "Reputation")
-struct FReputationAdjustmentParams
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 ScienceWorld;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TreasureHunter;
-};
-
-USTRUCT(BlueprintType, Category = "Reputation")
-struct FReputationChangeData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 ScienceWorldReputationPoints;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 ScienceWorldLevel;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bScienceWorldLevelChanged;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TreasureHunterReputationPoints;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TreasureHunterLevel;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bTreasureHunterLevelChanged;
-};
-
 UENUM(BlueprintType)
 enum class EReputationType : uint8
 {
-	Archaeologist,
+	Archaeologist = 0,
 	TreasureHunter,
 };
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReputationChange, const FReputationChangeData&, ShiftData);
 
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent),
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
@@ -69,21 +31,22 @@ class DR_JONES_API UReputationComponent : public UActorComponent
 public:
 	UReputationComponent();
 
-	UFUNCTION(BlueprintCallable, Category = "Reputation")
-	void AdjustReputation(const FReputationAdjustmentParams& AdjustmentParams);
-
+	UFUNCTION(BlueprintCallable, Category = "Night Shift|Reputation")
+	void AddReputation(EReputationType Faction, int32 ReputationToAdd);
+	
 	UFUNCTION(BlueprintPure, Category = "Reputation")
 	int32 GetReputation(EReputationType ReputationType) const;
 
-public:
-	UPROPERTY(BlueprintAssignable, Category = "Reputation")
-	FOnReputationChange OnReputationChange;
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reputation")
-	TObjectPtr<UCurveFloat> ReputationPointsToLevelCurve;
-
+	UFUNCTION(BlueprintPure, Category = "Reputation")
+	float GetMorality() const { return Morality; }
 private:
+
+	void SetReputation(EReputationType Faction, int32 NewReputation);
+	
+private:
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
+	float Morality = 0.5;
+	
 	// "Positive" reputation
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
 	int32 ArchaeologistReputation = 0;
@@ -92,35 +55,3 @@ private:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
 	int32 TreasureHunterReputation = 0;
 };
-
-// TODO: Make a generic logger
-namespace ReputationUtils
-{
-#if !NO_LOGGING
-	static bool IsDebugEnabled() { return CVarReputationDebug.GetValueOnGameThread(); }
-
-	template<int32 Length, typename... Types>
-	static void LogDebug(const TCHAR(&Format)[Length], Types&&... Args)
-	{
-		check(GEngine);
-		const FString Message = FString::Printf(Format, Forward<Types>(Args)...);
-		GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Turquoise, Message);
-		// Yep. TEXT("%s"). I don't care...
-		UE_LOG(LogDrJones, Log, TEXT("%s"), *Message);
-	}
-
-	template<int32 Length, typename... Types>
-	static void LogDebugIfEnabled(const TCHAR(&Format)[Length], Types&&... Args)
-	{
-		if (IsDebugEnabled())
-		{
-			LogDebug(Format, Forward<Types>(Args)...);
-		}
-	}
-#else
-	static constexpr bool IsQuestSystemDebugEnabled() { return false; }
-	template<int32 Length, typename... Types> static void LogDebug(const TCHAR(&Format)[Length], Types&&... Args) { }
-	template<int32 Length, typename... Types> static void LogDebugIfEnabled(const TCHAR(&Format)[Length], Types&&... Args) { }
-#endif
-}
-
