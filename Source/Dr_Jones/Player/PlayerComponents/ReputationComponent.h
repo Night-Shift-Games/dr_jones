@@ -34,15 +34,19 @@ struct FReputationChangeData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ScienceWorldReputationPoints;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ScienceWorldLevel;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bScienceWorldLevelChanged;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TreasureHunterReputationPoints;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TreasureHunterLevel;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bTreasureHunterLevelChanged;
 };
@@ -50,7 +54,7 @@ struct FReputationChangeData
 UENUM(BlueprintType)
 enum class EReputationType : uint8
 {
-	ScienceWorld,
+	Archaeologist,
 	TreasureHunter,
 };
 
@@ -65,17 +69,11 @@ class DR_JONES_API UReputationComponent : public UActorComponent
 public:
 	UReputationComponent();
 
-	int32 GetScienceWorldReputation() const { return ScienceWorldReputation; }
-	int32 GetTreasureHunterReputation() const { return TreasureHunterReputation; }
-
 	UFUNCTION(BlueprintCallable, Category = "Reputation")
 	void AdjustReputation(const FReputationAdjustmentParams& AdjustmentParams);
 
 	UFUNCTION(BlueprintPure, Category = "Reputation")
-	int32 GetReputationLevel(EReputationType ReputationType) const;
-
-protected:
-	virtual void BeginPlay() override;
+	int32 GetReputation(EReputationType ReputationType) const;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Reputation")
@@ -88,14 +86,11 @@ protected:
 private:
 	// "Positive" reputation
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
-	int32 ScienceWorldReputation = 0;
+	int32 ArchaeologistReputation = 0;
 
 	// "Negative" reputation
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
 	int32 TreasureHunterReputation = 0;
-
-	int32 CachedScienceWorldLevel = 0;
-	int32 CachedTreasureHunterLevel = 0;
 };
 
 // TODO: Make a generic logger

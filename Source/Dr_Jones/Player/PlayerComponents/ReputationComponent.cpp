@@ -11,22 +11,18 @@ UReputationComponent::UReputationComponent()
 
 void UReputationComponent::AdjustReputation(const FReputationAdjustmentParams& AdjustmentParams)
 {
-	ScienceWorldReputation += AdjustmentParams.ScienceWorld;
+	ArchaeologistReputation += AdjustmentParams.ScienceWorld;
 	TreasureHunterReputation += AdjustmentParams.TreasureHunter;
 
 	FReputationChangeData ChangeData;
-	ChangeData.ScienceWorldReputationPoints = ScienceWorldReputation;
+	ChangeData.ScienceWorldReputationPoints = ArchaeologistReputation;
 	ChangeData.TreasureHunterReputationPoints = TreasureHunterReputation;
 
 	if (ReputationPointsToLevelCurve && ReputationPointsToLevelCurve->IsValidLowLevel())
 	{
-		ChangeData.ScienceWorldLevel = ReputationPointsToLevelCurve->GetFloatValue(ScienceWorldReputation);
-		ChangeData.bScienceWorldLevelChanged = ChangeData.ScienceWorldLevel != CachedScienceWorldLevel;
-		CachedScienceWorldLevel = ChangeData.ScienceWorldLevel;
+		ChangeData.ScienceWorldLevel = ReputationPointsToLevelCurve->GetFloatValue(ArchaeologistReputation);
 
 		ChangeData.TreasureHunterLevel = ReputationPointsToLevelCurve->GetFloatValue(TreasureHunterReputation);
-		ChangeData.bTreasureHunterLevelChanged = ChangeData.TreasureHunterLevel != CachedTreasureHunterLevel;
-		CachedTreasureHunterLevel = ChangeData.TreasureHunterLevel;
 	}
 	else
 	{
@@ -36,38 +32,17 @@ void UReputationComponent::AdjustReputation(const FReputationAdjustmentParams& A
 	OnReputationChange.Broadcast(ChangeData);
 
 	ReputationUtils::LogDebugIfEnabled(TEXT("Reputation has been adjusted."));
-	ReputationUtils::LogDebugIfEnabled(TEXT("SW: %i -> %i"), ScienceWorldReputation - AdjustmentParams.ScienceWorld, ScienceWorldReputation);
+	ReputationUtils::LogDebugIfEnabled(TEXT("SW: %i -> %i"), ArchaeologistReputation - AdjustmentParams.ScienceWorld, ArchaeologistReputation);
 	ReputationUtils::LogDebugIfEnabled(TEXT("TH: %i -> %i"), TreasureHunterReputation - AdjustmentParams.TreasureHunter, TreasureHunterReputation);
 }
 
-int32 UReputationComponent::GetReputationLevel(EReputationType ReputationType) const
+int32 UReputationComponent::GetReputation(EReputationType ReputationType) const
 {
 	if (!ReputationPointsToLevelCurve || !ReputationPointsToLevelCurve->IsValidLowLevel())
 	{
 		UE_LOG(LogDrJones, Error, TEXT("ReputationPointsToLevelCurve has not been set."));
 		return 0;
 	}
-
-	int32 ReputationPoints;
-	switch (ReputationType)
-	{
-	case EReputationType::ScienceWorld:
-		ReputationPoints = ScienceWorldReputation;
-		break;
-	case EReputationType::TreasureHunter:
-		ReputationPoints = TreasureHunterReputation;
-		break;
-	default:
-		checkNoEntry();
-	}
-
-	return ReputationPointsToLevelCurve->GetFloatValue(ReputationPoints);
-}
-
-void UReputationComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CachedScienceWorldLevel = GetReputationLevel(EReputationType::ScienceWorld);
-	CachedTreasureHunterLevel = GetReputationLevel(EReputationType::TreasureHunter);
+	
+	return ReputationType == EReputationType::Archaeologist ? ArchaeologistReputation : TreasureHunterReputation;
 }
