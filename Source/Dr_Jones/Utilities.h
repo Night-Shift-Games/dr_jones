@@ -18,9 +18,9 @@ namespace Utilities
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
 	
 	template <class TWidgetClass>
-	TWidgetClass* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
+	TWidgetClass* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 	{
-		UDrJonesWidgetBase* Widget = GetWidget(WidgetClass);
+		UDrJonesWidgetBase* Widget = GetWidget(WorldContextObject, WidgetClass);
 		return Widget ? Cast<TWidgetClass>(Widget) : nullptr;
 	}
 

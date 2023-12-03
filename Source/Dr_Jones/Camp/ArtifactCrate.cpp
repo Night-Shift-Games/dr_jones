@@ -41,9 +41,8 @@ void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Pl
 	Artifacts.Add(ArtifactToAdd);
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
-
-	const UWidgetManager* WidgetManager = Player->GetWidgetManager();
-	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
+	
+	UReturnArtifactWidget* Widget = Utilities::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass);
 	Widget->UpdateData();
 }
 
