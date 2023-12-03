@@ -29,6 +29,6 @@ void UReputationComponent::SetReputation(EReputationType Faction, int32 NewReput
 	{
 		TreasureHunterReputation = NewReputation;
 	}
-	Morality = ArchaeologistReputation / (ArchaeologistReputation + TreasureHunterReputation);
+	Morality = static_cast<float>(ArchaeologistReputation) / static_cast<float>(ArchaeologistReputation + TreasureHunterReputation);
 	Utilities::GetWidget(*this, ReputationBarWidgetClass)->UpdateData();
 }
