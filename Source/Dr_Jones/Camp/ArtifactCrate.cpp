@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/WidgetManager.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
+#include "Player/PlayerComponents/ReputationComponent.h"
 
 AArtifactCrate::AArtifactCrate()
 {
@@ -62,6 +63,7 @@ void AArtifactCrate::SendArtifacts()
 	for (AArtifact* Artifact : Artifacts)
 	{
 		Artifact->Destroy();
+		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(EReputationType::Archaeologist, 10.f);
 	}
 }
 

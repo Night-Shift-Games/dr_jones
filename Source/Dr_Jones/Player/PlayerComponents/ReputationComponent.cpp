@@ -2,6 +2,8 @@
 
 #include "ReputationComponent.h"
 
+#include "Utilities.h"
+
 UReputationComponent::UReputationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -28,4 +30,5 @@ void UReputationComponent::SetReputation(EReputationType Faction, int32 NewReput
 		TreasureHunterReputation = NewReputation;
 	}
 	Morality = ArchaeologistReputation / (ArchaeologistReputation + TreasureHunterReputation);
+	Utilities::GetWidget(*this, ReputationBarWidgetClass)->UpdateData();
 }
