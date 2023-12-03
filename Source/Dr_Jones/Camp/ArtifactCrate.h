@@ -48,5 +48,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> CrateStaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsArchaeologistCrate = true;
 	
 };

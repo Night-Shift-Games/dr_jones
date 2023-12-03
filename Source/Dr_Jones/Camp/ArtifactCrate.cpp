@@ -2,7 +2,6 @@
 
 #include "Utilities.h"
 #include "Items/Artifacts/Artifact.h"
-#include "Kismet/GameplayStatics.h"
 #include "Player/WidgetManager.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
 #include "Player/PlayerComponents/ReputationComponent.h"
@@ -54,16 +53,16 @@ AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 		return nullptr; 
 	}
 	Artifacts.Remove(ArtifactToPullOut);
-	Utilities::GetPlayerCharacter(*this).GetInventory()->AddArtifact(*ArtifactToPullOut);
 	return ArtifactToPullOut;
 }
 
 void AArtifactCrate::SendArtifacts()
 {
-	for (AArtifact* Artifact : Artifacts)
+	for (int i = 0; i < Artifacts.Num(); i++)
 	{
-		Artifact->Destroy();
-		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(EReputationType::Archaeologist, 10.f);
+		AArtifact* ArtifactToRemove = PullOutArtifact(Artifacts[i]);
+		ArtifactToRemove->Destroy();
+		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, 10.f);
 	}
 }
 
