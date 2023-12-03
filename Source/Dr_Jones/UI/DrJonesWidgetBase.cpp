@@ -1,5 +1,11 @@
 #include "DrJonesWidgetBase.h"
 
+bool UDrJonesWidgetBase::Initialize()
+{
+	LowLevelRename(GetClass()->GetFName());
+	return Super::Initialize();
+}
+
 UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
 	if (!WidgetClass)

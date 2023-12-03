@@ -20,6 +20,8 @@ protected:
 	TMap<TSubclassOf<UDrJonesWidgetBase>, TObjectPtr<UDrJonesWidgetBase>> ChildWidgets;
 
 public:
+	virtual bool Initialize() override;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateData();
 

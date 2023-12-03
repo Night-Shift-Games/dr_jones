@@ -14,7 +14,7 @@ namespace Utilities
 	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, const float Radius);
 	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore);
 	uint32 WrapIndexToSize(int64 Index, uint32 Size);
-	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	UDrJonesWidgetBase* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
 	
 	template <class TWidgetClass>

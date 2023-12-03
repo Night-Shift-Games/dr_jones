@@ -108,8 +108,11 @@ void UInventoryComponent::SetActiveItem(AItem& NewActiveItem)
 	ItemInHand->GetMeshComponent()->SetVisibility(true);
 	Owner->ReactionComponent->SetActiveItem(NewActiveItem);
 	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem.GetItemAnimation());
-
-	Owner->GetWidgetManager()->RequestWidgetUpdate(ItemInfo, NullOpt);
+	
+	if (UDrJonesWidgetBase* Widget = Utilities::GetWidget(*this, ItemInfo))
+	{
+		Widget->UpdateData();
+	}
 }
 
 void UInventoryComponent::AttachItemToHand(AItem& ItemToAttach)
@@ -144,20 +147,13 @@ void UInventoryComponent::OpenInventory(bool bOpen) const
 		return;
 	}
 	UWidgetManager* WidgetManager = Owner->GetWidgetManager();
-	UDrJonesWidgetBase* ItemMenu = WidgetManager->GetWidget(InventoryMenu);
+	UDrJonesWidgetBase* ItemMenu = Utilities::GetWidget(*this, InventoryMenu);
 	if (!ItemMenu)
 	{
 		WidgetManager->AddWidget(InventoryMenu);
 		ItemMenu = WidgetManager->GetWidget(InventoryMenu);
 	}
-	if (bOpen && !ItemMenu->IsInViewport())
-	{
-		WidgetManager->ShowWidget(InventoryMenu);
-	}
-	else if (!bOpen && ItemMenu->IsInViewport())
-	{
-		WidgetManager->HideWidget(InventoryMenu);
-	}
+	WidgetManager->SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	ItemMenu->UpdateData();
 }
 

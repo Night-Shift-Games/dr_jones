@@ -109,7 +109,7 @@ void UWidgetManager::RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> W
 	TOptional<float> AxisValue) const
 {
 	UDrJonesWidgetBase* WidgetToUpdate = GetWidget(Widget);
-	if (!WidgetToUpdate)
+67	if (!WidgetToUpdate)
 	{
 		return;
 	}
