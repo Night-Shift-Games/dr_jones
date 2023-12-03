@@ -141,6 +141,11 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 	return ReturnValue;
 }
 
+bool UInventoryComponent::CanPickUpItem() const
+{
+	return !ItemInHand || ItemInHand && !ItemInHand->IsA<AArtifact>();
+}
+
 void UInventoryComponent::OpenInventory(bool bOpen) const
 {
 	if (!InventoryMenu)

@@ -39,6 +39,8 @@ public:
 	void SetActiveItem(AItem& NewActiveItem);
 	void AttachItemToHand(AItem& ItemToAttach);
 	AItem* DetachActiveItemFromHand();
+
+	bool CanPickUpItem() const;
 	
 	void OpenInventory(bool bOpen = true) const;
 

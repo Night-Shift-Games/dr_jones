@@ -62,7 +62,7 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
-	if (UInventoryComponent* Inventory = Taker->GetInventory())
+	if (UInventoryComponent* Inventory = Taker->GetInventory(); Inventory && Inventory->CanPickUpItem())
 	{
 		Inventory->AddArtifact(*this);
 		OnArtifactPickedUp(Taker);
