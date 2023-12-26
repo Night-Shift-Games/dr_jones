@@ -61,6 +61,7 @@ void ADigSite::BeginPlay()
 {
 	Super::BeginPlay();
 
+	DynamicMeshComponent->SetWorldTransform(FTransform{});
 	UpdateMesh(false);
 }
 
