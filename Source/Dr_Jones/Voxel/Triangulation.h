@@ -7,14 +7,132 @@
 
 namespace NSVE::Triangulation
 {
+	namespace Private
+	{
+		struct FChunkNeighbors
+		{
+			const FVoxelChunk* _Reserved;
+			const FVoxelChunk* X1   = nullptr;
+			const FVoxelChunk* Y1   = nullptr;
+			const FVoxelChunk* XY1  = nullptr;
+			const FVoxelChunk* Z1   = nullptr;
+			const FVoxelChunk* XZ1  = nullptr;
+			const FVoxelChunk* YZ1  = nullptr;
+			const FVoxelChunk* XYZ1 = nullptr;
+
+			const FVoxelChunk* const* AsArray() const
+			{
+				return reinterpret_cast<const FVoxelChunk* const*>(this);
+			}
+		};
+
+		inline FChunkNeighbors MakeNeighborsOfChunk(const FVoxelGrid& Grid, int32 ChunkIndex)
+		{
+			FChunkNeighbors Neighbors;
+			const FIntVector Coords = Grid.IndexToCoords(ChunkIndex);
+			const FIntVector& GridDimensions = Grid.GetDimensionsInChunks();
+			if (Coords.X + 1 < GridDimensions.X)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y, Coords.Z);
+				Neighbors.X1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.X1);
+			}
+			if (Coords.Y + 1 < GridDimensions.Y)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y + 1, Coords.Z);
+				Neighbors.Y1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.Y1);
+			}
+			if (Coords.X + 1 < GridDimensions.X && Coords.Y + 1 < GridDimensions.Y)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y + 1, Coords.Z);
+				Neighbors.XY1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.XY1);
+			}
+			if (Coords.Z + 1 < GridDimensions.Z)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y, Coords.Z + 1);
+				Neighbors.Z1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.Z1);
+			}
+			if (Coords.X + 1 < GridDimensions.X && Coords.Z + 1 < GridDimensions.Z)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y, Coords.Z + 1);
+				Neighbors.XZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.XZ1);
+			}
+			if (Coords.Y + 1 < GridDimensions.Y && Coords.Z + 1 < GridDimensions.Z)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y + 1, Coords.Z + 1);
+				Neighbors.YZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.YZ1);
+			}
+			if (Coords.X + 1 < GridDimensions.X && Coords.Y + 1 < GridDimensions.Y && Coords.Z + 1 < GridDimensions.Z)
+			{
+				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y + 1, Coords.Z + 1);
+				Neighbors.XYZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
+				check(Neighbors.XYZ1);
+			}
+			return Neighbors;
+		}
+	}
+
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
-	void TriangulateVoxelArray_MarchingCubes(const FVoxelArray& VoxelArray, const FVoxelChunk::FTransformData& TransformData, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
+	bool TriangulateCell_MarchingCubes(
+		const MarchingCubes::FGridCell& GridCell,
+		int32 CurrentIndex,
+		FInsertVertexFunc InsertVertexFunc,
+		FInsertTriangleFunc InsertTriangleFunc,
+		int32& OutVertexCount,
+		int32& OutTriangleCount)
+	{
+		using namespace MarchingCubes;
+
+		// Data local to the current cell
+		FVector Vertices[12];
+		FTriangle Triangles[5];
+		if (!TriangulateGridCell(GridCell, Vertices, Triangles, OutVertexCount, OutTriangleCount))
+		{
+			return false;
+		}
+
+		{
+			// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertVertices, FColorList::IndianRed)
+			for (int32 I = 0; I < OutVertexCount; ++I)
+			{
+				InsertVertexFunc(Vertices[I]);
+			}
+		}
+
+		{
+			// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertTriangles, FColorList::MediumBlue)
+			for (int32 I = 0; I < OutTriangleCount; ++I)
+			{
+				// The triangles' indices need to be offset from the local cell's space.
+				Triangles[I].Indices[0] += CurrentIndex;
+				Triangles[I].Indices[1] += CurrentIndex;
+				Triangles[I].Indices[2] += CurrentIndex;
+				InsertTriangleFunc(Triangles[I]);
+			}
+		}
+
+		return true;
+	}
+
+	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
+	void TriangulateVoxelArray_MarchingCubes(
+		const FVoxelArray& VoxelArray,
+		const FVoxelChunk::FTransformData& TransformData,
+		const Private::FChunkNeighbors& Neighbors,
+		FInsertVertexFunc InsertVertexFunc,
+		FInsertTriangleFunc InsertTriangleFunc)
 	{
 		using namespace MarchingCubes;
 
 		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes, FColorList::Feldspar)
 
 		// Uniform array will never produce any vertices
+		// TODO: Neighbors will screw this up
 		if (VoxelArray.IsUniform())
 		{
 			return;
@@ -22,12 +140,40 @@ namespace NSVE::Triangulation
 
 		const FIntVector3 Dimensions = VoxelArray.GetDimensions();
 
-		int32 LastIndex = 0;
-		for (int32 Z = 0; Z < Dimensions.Z - 1; ++Z)
+		auto ResolveVoxel = [&](const FIntVector& VoxelCoords) -> const FVoxel*
 		{
-			for (int32 Y = 0; Y < Dimensions.Y - 1; ++Y)
+			const bool bRequiresNeighbor = VoxelCoords.X >= Dimensions.X || VoxelCoords.Y >= Dimensions.Y || VoxelCoords.Z >= Dimensions.Z;
+			if (!bRequiresNeighbor)
 			{
-				for (int32 X = 0; X < Dimensions.X - 1; ++X)
+				return &VoxelArray.GetAtCoords(VoxelCoords);
+			}
+
+			const int32 NeighborIndex =
+				(VoxelCoords.X >= Dimensions.X) |
+				(VoxelCoords.Y >= Dimensions.Y) << 1 |
+				(VoxelCoords.Z >= Dimensions.Z) << 2;
+			if (!ensure(NeighborIndex != 0))
+			{
+				return nullptr;
+			}
+
+			const FVoxelChunk* NeighborChunk = Neighbors.AsArray()[NeighborIndex];
+			// Means there's physically no neighbor
+			if (!NeighborChunk)
+			{
+				return nullptr;
+			}
+
+			const FIntVector TransformedCoords = FIntVector(VoxelCoords.X % Dimensions.X, VoxelCoords.Y % Dimensions.Y, VoxelCoords.Z % Dimensions.Z);
+			return &NeighborChunk->Voxels.GetAtCoords(TransformedCoords);
+		};
+
+		int32 LastIndex = 0;
+		for (int32 Z = 0; Z < Dimensions.Z; ++Z)
+		{
+			for (int32 Y = 0; Y < Dimensions.Y; ++Y)
+			{
+				for (int32 X = 0; X < Dimensions.X; ++X)
 				{
 					// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_TriangulateCell, FColorList::Bronze)
 
@@ -45,39 +191,21 @@ namespace NSVE::Triangulation
 					FGridCell GridCell;
 					for (int32 Corner = 0; Corner < 8; ++Corner)
 					{
-						const FVoxel& Voxel = VoxelArray.GetAtCoords(GridCellCornerCoords[Corner]);
-						GridCell.Values[Corner] = Voxel.bSolid ? -1.0f : 1.0f;
+						const FIntVector& VoxelCoords = GridCellCornerCoords[Corner];
+						const FVoxel* Voxel = ResolveVoxel(VoxelCoords);
+						if (!Voxel)
+						{
+							continue;
+						}
+						GridCell.Values[Corner] = Voxel->bSolid ? -1.0f : 1.0f;
 						GridCell.Positions[Corner] = FVoxelChunk::GridPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
 					}
 
-					// Data local to the current cell
-					FVector Vertices[12];
-					FTriangle Triangles[5];
 					int32 VertexCount;
 					int32 TriangleCount;
-					if (!TriangulateGridCell(GridCell, Vertices, Triangles, VertexCount, TriangleCount))
+					if (!TriangulateCell_MarchingCubes(GridCell, LastIndex, InsertVertexFunc, InsertTriangleFunc, VertexCount, TriangleCount))
 					{
 						continue;
-					}
-
-					{
-						// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertVertices, FColorList::IndianRed)
-						for (int32 I = 0; I < VertexCount; ++I)
-						{
-							InsertVertexFunc(Vertices[I]);
-						}
-					}
-
-					{
-						// SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes_InsertTriangles, FColorList::MediumBlue)
-						for (int32 I = 0; I < TriangleCount; ++I)
-						{
-							// The triangles' indices need to be offset from the local cell's space.
-							Triangles[I].Indices[0] += LastIndex;
-							Triangles[I].Indices[1] += LastIndex;
-							Triangles[I].Indices[2] += LastIndex;
-							InsertTriangleFunc(Triangles[I]);
-						}
 					}
 
 					LastIndex += VertexCount;
@@ -87,14 +215,24 @@ namespace NSVE::Triangulation
 	}
 
 	template <typename FInsertVertexFunc, typename FInsertTriangleFunc>
-	void TriangulateVoxelChunk_MarchingCubes(const FVoxelChunk& VoxelChunk, FInsertVertexFunc InsertVertexFunc, FInsertTriangleFunc InsertTriangleFunc)
+	void TriangulateVoxelChunk_MarchingCubes(
+		const FVoxelChunk& VoxelChunk,
+		const Private::FChunkNeighbors& Neighbors,
+		FInsertVertexFunc InsertVertexFunc,
+		FInsertTriangleFunc InsertTriangleFunc)
 	{
-		TriangulateVoxelArray_MarchingCubes(VoxelChunk.Voxels, VoxelChunk.MakeTransformData(), InsertVertexFunc, InsertTriangleFunc);
+		TriangulateVoxelArray_MarchingCubes(VoxelChunk.Voxels, VoxelChunk.MakeTransformData(), Neighbors, InsertVertexFunc, InsertTriangleFunc);
 	}
 
-	inline void TriangulateVoxelGrid_MarchingCubes(const FVoxelGrid& VoxelGrid, TArray<FVector>& OutCombinedVertices, TArray<MarchingCubes::FTriangle>& OutCombinedTriangles, int32& OutVertexCount, int32& OutTriangleCount)
+	inline void TriangulateVoxelGrid_MarchingCubes(
+		const FVoxelGrid& VoxelGrid,
+		TArray<FVector>& OutCombinedVertices,
+		TArray<MarchingCubes::FTriangle>& OutCombinedTriangles,
+		int32& OutVertexCount,
+		int32& OutTriangleCount)
 	{
 		using namespace MarchingCubes;
+		using namespace Private;
 
 		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelGrid_MarchingCubes, FColorList::Wheat)
 
@@ -116,15 +254,10 @@ namespace NSVE::Triangulation
 			Vertices.Reserve(InitialArraySize);
 			Triangles.Reserve(InitialArraySize);
 
-			auto InsertVertexFn = [&Vertices](const FVector& Vertex)
-			{
-				Vertices.Add(Vertex);
-			};
-			auto InsertTriangleFn = [&Triangles](const FTriangle& Triangle)
-			{
-				Triangles.Add(Triangle);
-			};
-			TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFn, InsertTriangleFn);
+			const FChunkNeighbors Neighbors = MakeNeighborsOfChunk(VoxelGrid, Index);
+			auto InsertVertexFn   = [&Vertices] (const FVector& Vertex)     { Vertices.Add(Vertex);    };
+			auto InsertTriangleFn = [&Triangles](const FTriangle& Triangle) { Triangles.Add(Triangle); };
+			TriangulateVoxelChunk_MarchingCubes(Chunk, Neighbors, InsertVertexFn, InsertTriangleFn);
 
 			const int32 VertexCount = Vertices.Num();
 			{

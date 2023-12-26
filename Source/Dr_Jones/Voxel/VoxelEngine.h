@@ -248,7 +248,6 @@ namespace NSVE
 	class DR_JONES_API alignas(Alignment) FVoxelChunk
 	{
 	public:
-		TOctree2<FVoxelRef, FVoxelSemantics> VoxelOctree;
 		FVoxelChunkBounds Bounds;
 		FVoxelArray Voxels;
 

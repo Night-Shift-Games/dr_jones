@@ -212,7 +212,7 @@ void UVoxelGrid::GenerateMesh(UDynamicMesh* DynamicMesh)
 			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::MeshTopology, true);
 		};
 
-		Triangulation::TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFunc, InsertTriangleFunc);
+		// Triangulation::TriangulateVoxelChunk_MarchingCubes(Chunk, InsertVertexFunc, InsertTriangleFunc);
 
 		// Just post an update, can't find a better way to do this
 		DynamicMesh->EditMesh([&](FDynamicMesh3&) { });

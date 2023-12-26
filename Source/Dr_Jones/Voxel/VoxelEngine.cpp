@@ -47,7 +47,6 @@ namespace NSVE
 	// -------------------------- FVoxelChunk ----------------------------------------------------------------------
 
 	FVoxelChunk::FVoxelChunk(const FVoxelChunkBounds& Bounds) :
-		VoxelOctree(Bounds.Origin, Bounds.Extent),
 		Bounds(Bounds)
 	{
 	}
@@ -57,15 +56,12 @@ namespace NSVE
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_Clear, FColorList::BlueViolet)
 		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelChunk::Clear"), STAT_VoxelEngine_FVoxelChunk_Clear, STATGROUP_VoxelEngine)
 
-		VoxelOctree.Destroy();
 		Voxels.Clear();
 	}
 
 	void FVoxelChunk::FillTest()
 	{
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillTest, FColorList::BlueViolet)
-
-		VoxelOctree.Destroy();
 
 		Voxels.Clear();
 		Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
@@ -102,8 +98,6 @@ namespace NSVE
 	void FVoxelChunk::FillSurface(float SurfaceZ_WS)
 	{
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillSurface, FColorList::BlueViolet)
-
-		VoxelOctree.Destroy();
 
 		const FTransformData TransformData = MakeTransformData();
 
