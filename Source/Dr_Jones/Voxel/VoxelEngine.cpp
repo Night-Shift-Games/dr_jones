@@ -28,7 +28,7 @@ namespace NSVE
 		}
 	}
 
-	FORCENOINLINE bool FVoxelArray::IsUniform() const
+	FORCENOINLINE bool FVoxelArray::IsUniformlySolid() const
 	{
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IsUniform, FColorList::NeonPink)
 		DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IsUniform"), STAT_VoxelEngine_FVoxelArray_IsUniform, STATGROUP_VoxelEngine)

@@ -107,7 +107,7 @@ namespace NSVE
 		void FillTestCube(const FIntVector& Offset = {});
 
 		// If it's either completely solid, or empty
-		bool IsUniform() const;
+		bool IsUniformlySolid() const;
 
 		FVoxel& Get(int32 Index);
 		FVoxel& GetAtCoords(const FIntVector3& Coords);
@@ -465,14 +465,12 @@ namespace NSVE
 
 	FORCEINLINE FVoxelArray::FElement& FVoxelArray::operator[](size_t Index)
 	{
-		check(Index < ElementCount);
-		return Voxels[Index];
+		return Get(Index);
 	}
 
 	FORCEINLINE const FVoxelArray::FElement& FVoxelArray::operator[](size_t Index) const
 	{
-		check(Index < ElementCount);
-		return Voxels[Index];
+		return Get(Index);
 	}
 
 	// -------------------------- FVoxelChunkBounds ----------------------------------------------------------------

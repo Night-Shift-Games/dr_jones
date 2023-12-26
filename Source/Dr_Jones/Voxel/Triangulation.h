@@ -11,18 +11,47 @@ namespace NSVE::Triangulation
 	{
 		struct FChunkNeighbors
 		{
-			const FVoxelChunk* _Reserved;
-			const FVoxelChunk* X1   = nullptr;
-			const FVoxelChunk* Y1   = nullptr;
-			const FVoxelChunk* XY1  = nullptr;
-			const FVoxelChunk* Z1   = nullptr;
-			const FVoxelChunk* XZ1  = nullptr;
-			const FVoxelChunk* YZ1  = nullptr;
-			const FVoxelChunk* XYZ1 = nullptr;
+			static constexpr int32 Count = 8;
 
-			const FVoxelChunk* const* AsArray() const
+			union
 			{
-				return reinterpret_cast<const FVoxelChunk* const*>(this);
+				struct
+				{
+					const FVoxelChunk* _Reserved;
+					const FVoxelChunk* X1;
+					const FVoxelChunk* Y1;
+					const FVoxelChunk* XY1;
+					const FVoxelChunk* Z1;
+					const FVoxelChunk* XZ1;
+					const FVoxelChunk* YZ1;
+					const FVoxelChunk* XYZ1;
+				};
+				/**
+				 * The neighbors can be indexed in a bitfield style,
+				 * where each bit corresponds to each dimension.
+				 *
+				 * 1 << 0  =>  X
+				 * 1 << 1  =>  Y
+				 * 1 << 2  =>  Z
+				 * 
+				 * e.g. 011 (3) - this would be the XY neighbor
+				 *
+				 * This cool little trick is possible, because we only
+				 * need to have access to the positive offset neighbors.
+				 */
+				const FVoxelChunk* Chunks[Count];
+			};
+
+			const FVoxelChunk* AtIndex(int32 Index) const
+			{
+				// NOTE: 0th index is not a neighbor at all
+				check(Index > 0 && Index < Count);
+				return Chunks[Index];
+			}
+
+			const FVoxelChunk* operator[](int32 Index) const
+			{
+				return AtIndex(Index);
 			}
 		};
 
@@ -31,49 +60,61 @@ namespace NSVE::Triangulation
 			FChunkNeighbors Neighbors;
 			const FIntVector Coords = Grid.IndexToCoords(ChunkIndex);
 			const FIntVector& GridDimensions = Grid.GetDimensionsInChunks();
-			if (Coords.X + 1 < GridDimensions.X)
+			for (int32 N = 1; N < FChunkNeighbors::Count; ++N)
 			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y, Coords.Z);
-				Neighbors.X1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.X1);
-			}
-			if (Coords.Y + 1 < GridDimensions.Y)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y + 1, Coords.Z);
-				Neighbors.Y1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.Y1);
-			}
-			if (Coords.X + 1 < GridDimensions.X && Coords.Y + 1 < GridDimensions.Y)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y + 1, Coords.Z);
-				Neighbors.XY1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.XY1);
-			}
-			if (Coords.Z + 1 < GridDimensions.Z)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y, Coords.Z + 1);
-				Neighbors.Z1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.Z1);
-			}
-			if (Coords.X + 1 < GridDimensions.X && Coords.Z + 1 < GridDimensions.Z)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y, Coords.Z + 1);
-				Neighbors.XZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.XZ1);
-			}
-			if (Coords.Y + 1 < GridDimensions.Y && Coords.Z + 1 < GridDimensions.Z)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X, Coords.Y + 1, Coords.Z + 1);
-				Neighbors.YZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.YZ1);
-			}
-			if (Coords.X + 1 < GridDimensions.X && Coords.Y + 1 < GridDimensions.Y && Coords.Z + 1 < GridDimensions.Z)
-			{
-				const FIntVector NeighborCoords = FIntVector(Coords.X + 1, Coords.Y + 1, Coords.Z + 1);
-				Neighbors.XYZ1 = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
-				check(Neighbors.XYZ1);
+				const int32 OX = (N & (1 << 0)) > 0;
+				const int32 OY = (N & (1 << 1)) > 0;
+				const int32 OZ = (N & (1 << 2)) > 0;
+				if (Coords.X + OX >= GridDimensions.X ||
+					Coords.Y + OY >= GridDimensions.Y ||
+					Coords.Z + OZ >= GridDimensions.Z)
+				{
+					Neighbors.Chunks[N] = nullptr;
+					continue;
+				}
+				const FIntVector NeighborCoords = FIntVector(Coords.X + OX, Coords.Y + OY, Coords.Z + OZ);
+				Neighbors.Chunks[N] = Grid.GetChunkByIndex(Grid.CoordsToIndex(NeighborCoords));
 			}
 			return Neighbors;
+		}
+
+		inline bool IsVoxelArrayUniformlySolid_NeighborFix(const FVoxelArray& VoxelArray, const FChunkNeighbors& Neighbors)
+		{
+			const FVoxel FirstVoxel = VoxelArray[0];
+			const FIntVector Dimensions = VoxelArray.GetDimensions();
+			for (int32 Z = 0; Z < Dimensions.Z + 1; ++Z)
+			{
+				for (int32 Y = 0; Y < Dimensions.Y + 1; ++Y)
+				{
+					for (int32 X = 0; X < Dimensions.X + 1; ++X)
+					{
+						FVoxel Voxel;
+						const int32 NeighborIndex =
+							X / Dimensions.X << 0 |
+							Y / Dimensions.Y << 1 |
+							Z / Dimensions.Z << 2;
+						if (NeighborIndex > 0)
+						{
+							const FVoxelChunk* Neighbor = Neighbors.Chunks[NeighborIndex];
+							if (Neighbor == nullptr)
+							{
+								continue;
+							}
+							Voxel = Neighbor->Voxels.GetAtCoords(FIntVector(X % Dimensions.X, Y % Dimensions.Y, Z % Dimensions.Z));
+						}
+						else
+						{
+							Voxel = VoxelArray.GetAtCoords(FIntVector(X, Y, Z));
+						}
+
+						if (Voxel.bSolid != FirstVoxel.bSolid)
+						{
+							return false;
+						}
+					}
+				}
+			}
+			return true;
 		}
 	}
 
@@ -128,12 +169,12 @@ namespace NSVE::Triangulation
 		FInsertTriangleFunc InsertTriangleFunc)
 	{
 		using namespace MarchingCubes;
+		using namespace Private;
 
 		SCOPED_NAMED_EVENT(VoxelEngine_Triangulation_TriangulateVoxelArray_MarchingCubes, FColorList::Feldspar)
 
 		// Uniform array will never produce any vertices
-		// TODO: Neighbors will screw this up
-		if (VoxelArray.IsUniform())
+		if (IsVoxelArrayUniformlySolid_NeighborFix(VoxelArray, Neighbors))
 		{
 			return;
 		}
@@ -149,7 +190,7 @@ namespace NSVE::Triangulation
 			}
 
 			const int32 NeighborIndex =
-				(VoxelCoords.X >= Dimensions.X) |
+				(VoxelCoords.X >= Dimensions.X) << 0 |
 				(VoxelCoords.Y >= Dimensions.Y) << 1 |
 				(VoxelCoords.Z >= Dimensions.Z) << 2;
 			if (!ensure(NeighborIndex != 0))
@@ -157,7 +198,7 @@ namespace NSVE::Triangulation
 				return nullptr;
 			}
 
-			const FVoxelChunk* NeighborChunk = Neighbors.AsArray()[NeighborIndex];
+			const FVoxelChunk* NeighborChunk = Neighbors.Chunks[NeighborIndex];
 			// Means there's physically no neighbor
 			if (!NeighborChunk)
 			{
