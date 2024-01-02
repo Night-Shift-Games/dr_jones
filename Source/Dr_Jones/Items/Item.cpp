@@ -41,6 +41,8 @@ void AItem::SetupItemInHandProperties()
 {
 	SetInteractionEnabled(false);
 	SetAttachmentPhysics();
+	// By default we should hide mesh in hand if it's not active.
+	GetMeshComponent()->SetVisibility(false);
 }
 
 void AItem::SetupItemGroundProperties()

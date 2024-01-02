@@ -55,11 +55,13 @@ void UInventoryComponent::AddArtifact(AArtifact& ArtifactToAdd)
 void UInventoryComponent::AddTool(ATool& ToolToAdd)
 {
 	Tools.Emplace(&ToolToAdd);
-	AttachItemToHand(ToolToAdd);
-
 	if (Tools.Num() < 2)
 	{
 		SetActiveItem(ToolToAdd);
+	}
+	else
+	{
+		AttachItemToHand(ToolToAdd);
 	}
 	
 	Owner->WidgetManager->RequestWidgetUpdate(ItemInfo, NullOpt);
@@ -119,7 +121,6 @@ void UInventoryComponent::AttachItemToHand(AItem& ItemToAttach)
 {
 	ItemToAttach.SetupItemInHandProperties();
 	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
-	ItemInHand = &ItemToAttach;
 }
 
 AItem* UInventoryComponent::DetachActiveItemFromHand()
