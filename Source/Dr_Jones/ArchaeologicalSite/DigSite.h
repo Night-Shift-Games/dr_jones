@@ -20,7 +20,7 @@ public:
 	ADigSite();
 
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
-	void Dig(const FVector& Location);
+	void Dig(const FVector& Location, float DigRadius);
 
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void UpdateMesh(bool bAsync = true);
