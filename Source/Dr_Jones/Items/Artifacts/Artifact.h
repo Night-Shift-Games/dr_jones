@@ -48,16 +48,31 @@ public:
 	void SetupArtifact(const FArtifactData& ArtifactData);
 	
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactID = NAME_None;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FText ArtifactName = FText::AsCultureInvariant(TEXT(""));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FText ArtifactDescription = FText::AsCultureInvariant(TEXT(""));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	int ArtifactAge = 2500.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactUsage = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactCulture = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	EArtifactRarity ArtifactRarity = EArtifactRarity::Common;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	EArtifactSize ArtifactSize = EArtifactSize::Normal;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	EArtifactWear ArtifactWear = EArtifactWear::MinimalWear;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Artifact")
