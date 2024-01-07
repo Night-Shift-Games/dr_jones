@@ -19,22 +19,23 @@ ADigSite::ADigSite()
 void ADigSite::Dig(const FVector& Location, float DigRadius)
 {
 	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
-	
+
 	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
-	NSVE::FVoxelChunk* Chunk = InternalGrid.GetChunkByIndex(InternalGrid.CalcChunkIndexFromWorldPosition(Location));
-	if (!Chunk)
-	{
-		return;
-	}
 
-	NSVE::FVoxelChunk::FTransformData TransformData = Chunk->MakeTransformData();
-	Chunk->Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
+	ChunksInRadius.Reserve(InternalGrid.GetChunkCount());
+	const double DigRadiusSquared = DigRadius * DigRadius;
+	InternalGrid.IterateChunks([&](NSVE::FVoxelChunk& Chunk, int32 Index)
 	{
-		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
-		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
-		check((bIsInRadius & 1) == bIsInRadius);
-
-		Voxel.bSolid &= !bIsInRadius;
+		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
+		{
+			ChunksInRadius.Add(&Chunk);
+		}
+	});
+	const int32 ChunkCount = ChunksInRadius.Num();
+	ParallelForTemplate(ChunkCount, [ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
+	{
+		DigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
 
 	UpdateMesh(true);
@@ -73,6 +74,19 @@ void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
 	SetActorLocation(NewLocation);
 	
 	//DynamicMeshComponent->SetMesh(MeshData);
+}
+
+void ADigSite::DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius)
+{
+	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
+	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	{
+		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
+		check((bIsInRadius & 1) == bIsInRadius);
+
+		Voxel.bSolid &= !bIsInRadius;
+	});
 }
 
 

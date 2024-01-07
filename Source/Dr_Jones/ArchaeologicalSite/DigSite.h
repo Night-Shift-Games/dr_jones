@@ -9,6 +9,12 @@
 
 #include "DigSite.generated.h"
 
+namespace NSVE
+{
+	class FVoxelGrid;
+	class FVoxelChunk;
+}
+
 class UVoxelGrid;
 
 UCLASS()
@@ -29,6 +35,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void SetupDigSite(const FVector& DigSiteLocation);
+	static void DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
