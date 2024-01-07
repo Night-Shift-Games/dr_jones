@@ -5,6 +5,7 @@
 #include "Triangulation.h"
 #include "UDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
+#include "DynamicMesh/MeshNormals.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -311,7 +312,13 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 				{
 					EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
 				}
-			}, EDynamicMeshChangeType::MeshVertexChange, EDynamicMeshAttributeChangeFlags::MeshTopology);
+
+				if (!EditMesh.HasAttributes())
+				{
+					EditMesh.EnableAttributes();
+				}
+				UE::Geometry::FMeshNormals::QuickComputeVertexNormals(EditMesh);
+			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::Unknown);
 		}
 
 		OnCompleted();
