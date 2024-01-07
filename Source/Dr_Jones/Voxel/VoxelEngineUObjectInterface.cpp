@@ -6,6 +6,7 @@
 #include "UDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
 #include "DynamicMesh/MeshNormals.h"
+#include "DynamicMesh/Operations/MergeCoincidentMeshEdges.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -312,6 +313,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 				{
 					EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
 				}
+
+				UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
+				MergeEdges.Apply();
 
 				if (!EditMesh.HasAttributes())
 				{
