@@ -36,7 +36,7 @@ public:
 	void RemoveTool(ATool& ToolToRemove);
 
 	void ChangeActiveItem(float Value);
-	void SetActiveItem(AItem& NewActiveItem);
+	void SetActiveItem(AItem* NewActiveItem);
 	void AttachItemToHand(AItem& ItemToAttach);
 	AItem* DetachActiveItemFromHand();
 

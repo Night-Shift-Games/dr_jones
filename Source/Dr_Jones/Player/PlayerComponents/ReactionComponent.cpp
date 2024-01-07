@@ -15,10 +15,10 @@ void UReactionComponent::CallAction()
 	ActiveItem.Value->CallPrimaryAction(GetOwner<ADrJonesCharacter>());
 }
 
-void UReactionComponent::SetActiveItem(AItem& NewActiveItem)
+void UReactionComponent::SetActiveItem(AItem* NewActiveItem)
 {
-	UActionComponent* ActionComponent = NewActiveItem.FindComponentByClass<UActionComponent>();
-	ActiveItem = MakeTuple(&NewActiveItem, ActionComponent);
+	UActionComponent* ActionComponent = NewActiveItem ? NewActiveItem->FindComponentByClass<UActionComponent>() : nullptr;
+	ActiveItem = MakeTuple(NewActiveItem, ActionComponent);
 }
 
 AItem* UReactionComponent::GetActiveItem() const

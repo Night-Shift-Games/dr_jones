@@ -63,7 +63,7 @@ public:
 
 	UAnimMontage* FindItemActionMontage(const AItem& Item, const FName& Action);
 
-	void SetActiveItemAnimation(const TSubclassOf<UAnimInstance>& AnimInstanceClass);
+	void SetActiveItemAnimation(const TSubclassOf<UAnimInstance> AnimInstanceClass);
 
 	UFUNCTION()
 	void OnMontageCompletedEvent(UAnimMontage* Montage, bool bInterrupted);

@@ -77,15 +77,15 @@ UAnimMontage* UCharacterAnimationComponent::FindItemActionMontage(const AItem& I
 	return *Montage;
 }
 
-void UCharacterAnimationComponent::SetActiveItemAnimation(const TSubclassOf<UAnimInstance>& AnimInstanceClass)
+void UCharacterAnimationComponent::SetActiveItemAnimation(const TSubclassOf<UAnimInstance> AnimInstanceClass)
 {
 	checkf(CharacterMeshComponent, TEXT("Cannot change the active item animation because the mesh component is not set."));
 	
-	if (*ActiveItemAnimation != nullptr)
+	if (ActiveItemAnimation != nullptr)
 	{
 		CharacterMeshComponent->UnlinkAnimClassLayers(ActiveItemAnimation);
 	}
-	if (*AnimInstanceClass != nullptr)
+	if (AnimInstanceClass != nullptr)
 	{
 		CharacterMeshComponent->LinkAnimClassLayers(AnimInstanceClass);
 	}

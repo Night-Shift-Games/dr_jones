@@ -49,15 +49,15 @@ void UInventoryComponent::SetupPlayerInput(UInputComponent* InputComponent)
 
 void UInventoryComponent::AddArtifact(AArtifact& ArtifactToAdd)
 {
-	SetActiveItem(ArtifactToAdd);
+	SetActiveItem(&ArtifactToAdd);
 }
 
 void UInventoryComponent::AddTool(ATool& ToolToAdd)
 {
 	Tools.Emplace(&ToolToAdd);
-	if (Tools.Num() < 2)
+	if (!ItemInHand)
 	{
-		SetActiveItem(ToolToAdd);
+		SetActiveItem(&ToolToAdd);
 	}
 	else
 	{
@@ -87,29 +87,33 @@ void UInventoryComponent::ChangeActiveItem(float Value)
 	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
 	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
 	{
-		SetActiveItem(*ActiveItem);
+		SetActiveItem(ActiveItem);
 	}
 }
 
-void UInventoryComponent::SetActiveItem(AItem& NewActiveItem)
+void UInventoryComponent::SetActiveItem(AItem* NewActiveItem)
 {
-	if (&NewActiveItem == ItemInHand)
+	if (NewActiveItem == ItemInHand)
 	{
 		return;
 	}
-	
-	if (ItemInHand)
+
+	if (ItemInHand && ItemInHand->IsA<ATool>())
 	{
 		// TODO: Recreating & Destroying mesh
 		ItemInHand->FindComponentByClass<UMeshComponent>()->SetVisibility(false);
 	}
 
-	AttachItemToHand(NewActiveItem);
-	ItemInHand = &NewActiveItem;
+	ItemInHand = NewActiveItem;
 	
-	ItemInHand->GetMeshComponent()->SetVisibility(true);
+	if (NewActiveItem)
+	{
+		AttachItemToHand(*NewActiveItem);
+		ItemInHand->GetMeshComponent()->SetVisibility(true);
+	}
+	
 	Owner->ReactionComponent->SetActiveItem(NewActiveItem);
-	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem.GetItemAnimation());
+	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem ? NewActiveItem->GetItemAnimation() : nullptr);
 	
 	if (UDrJonesWidgetBase* Widget = Utilities::GetWidget(*this, ItemInfo))
 	{
@@ -125,20 +129,25 @@ void UInventoryComponent::AttachItemToHand(AItem& ItemToAttach)
 
 AItem* UInventoryComponent::DetachActiveItemFromHand()
 {
-	if (!ItemInHand || ItemInHand->IsA<ATool>())
+	if (!ItemInHand)
 	{
 		return nullptr;;
 	}
-
-	ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	ItemInHand->SetupItemGroundProperties();
-	TArray<AActor*> ActorsToIgnore = {Owner, ItemInHand};
-	Algo::Copy(Tools, ActorsToIgnore);
-	Algo::Copy(Owner->Children, ActorsToIgnore);
-	const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
-	ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator::ZeroRotator);
+	
+	if (ItemInHand->IsA<AArtifact>())
+	{
+		ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		ItemInHand->SetupItemGroundProperties();
+		TArray<AActor*> ActorsToIgnore = {Owner, ItemInHand};
+		Algo::Copy(Tools, ActorsToIgnore);
+		Algo::Copy(Owner->Children, ActorsToIgnore);
+		const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
+		ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator::ZeroRotator);
+	}
+	
 	AItem* ReturnValue = ItemInHand;
-	ItemInHand = nullptr;
+	SetActiveItem(nullptr);
+	
 	return ReturnValue;
 }
 
