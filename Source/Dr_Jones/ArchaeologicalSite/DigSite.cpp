@@ -41,6 +41,31 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 	UpdateMesh(true);
 }
 
+void ADigSite::UnDig(const FVector& Location, float DigRadius)
+{
+	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
+
+	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
+
+	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
+	ChunksInRadius.Reserve(InternalGrid.GetChunkCount());
+	const double DigRadiusSquared = DigRadius * DigRadius;
+	InternalGrid.IterateChunks([&](NSVE::FVoxelChunk& Chunk, int32 Index)
+	{
+		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
+		{
+			ChunksInRadius.Add(&Chunk);
+		}
+	});
+	const int32 ChunkCount = ChunksInRadius.Num();
+	ParallelForTemplate(ChunkCount, [ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
+	{
+		UnDigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
+	});
+
+	UpdateMesh(true);
+}
+
 void ADigSite::UpdateMesh(bool bAsync)
 {
 	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
@@ -86,6 +111,19 @@ void ADigSite::DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Locati
 		check((bIsInRadius & 1) == bIsInRadius);
 
 		Voxel.bSolid &= !bIsInRadius;
+	});
+}
+
+void ADigSite::UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius)
+{
+	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
+	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	{
+		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
+		check((bIsInRadius & 1) == bIsInRadius);
+
+		Voxel.bSolid |= bIsInRadius;
 	});
 }
 

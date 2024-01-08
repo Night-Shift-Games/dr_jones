@@ -76,11 +76,11 @@ namespace NSVE
 	struct FVoxelEngineConfig
 	{
 		// Size of the chunk in UU. Every chunk is a cube
-		static constexpr double ChunkSize = 400.0;
+		static constexpr double ChunkSize = 200.0;
 		static constexpr double HalfChunkSize = ChunkSize / 2.0;
 
 		// How many voxels are in each chunk (in one dimension)
-		static constexpr int32 ChunkResolution = 1 << 5;
+		static constexpr int32 ChunkResolution = 1 << 4;
 
 		// Max count of voxels in a single voxel chunk
 		static constexpr int32 ChunkMaxVoxelCount = ChunkResolution * ChunkResolution * ChunkResolution;

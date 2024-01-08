@@ -29,6 +29,9 @@ public:
 	void Dig(const FVector& Location, float DigRadius);
 
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
+	void UnDig(const FVector& Location, float DigRadius);
+
+	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void UpdateMesh(bool bAsync = true);
 
 protected:
@@ -36,6 +39,7 @@ protected:
 
 	void SetupDigSite(const FVector& DigSiteLocation);
 	static void DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
+	static void UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
