@@ -305,23 +305,32 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			{
 				EditMesh.Clear();
 
-				for (const FVector& Vertex : CombinedVertices)
 				{
-					EditMesh.AppendVertex(Vertex);
-				}
-				for (const FTriangle& Triangle : CombinedTriangles)
-				{
-					EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_Append, FColorList::DustyRose)
+					for (const FVector& Vertex : CombinedVertices)
+					{
+						EditMesh.AppendVertex(Vertex);
+					}
+					for (const FTriangle& Triangle : CombinedTriangles)
+					{
+						EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+					}
 				}
 
-				UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
-				MergeEdges.Apply();
-
-				if (!EditMesh.HasAttributes())
 				{
-					EditMesh.EnableAttributes();
+					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_MergeEdges, FColorList::DustyRose)
+					UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
+					MergeEdges.Apply();
 				}
-				UE::Geometry::FMeshNormals::QuickComputeVertexNormals(EditMesh);
+
+				{
+					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_ComputeNormals, FColorList::DustyRose)
+					if (!EditMesh.HasAttributes())
+					{
+						EditMesh.EnableAttributes();
+					}
+					UE::Geometry::FMeshNormals::QuickComputeVertexNormals(EditMesh);
+				}
 			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::Unknown);
 		}
 
