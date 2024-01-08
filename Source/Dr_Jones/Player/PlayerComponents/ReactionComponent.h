@@ -19,6 +19,7 @@ class DR_JONES_API UReactionComponent : public UActorComponent
 	
 public:
 	void CallAction();
+	void CallSecondaryAction();
 	void SetActiveItem(AItem* NewActiveItem);
 	
 	UFUNCTION(BlueprintPure, Category = "DrJones")
