@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "CampEntity.h"
 #include "SharedComponents/InteractableComponent.h"
 #include "UI/DrJonesWidgetBase.h"
 #include "UI/ReturnArtifactWidget.h"
@@ -13,7 +13,7 @@
 class AArtifact;
 
 UCLASS()
-class DR_JONES_API AArtifactCrate : public AActor
+class DR_JONES_API AArtifactCrate : public ACampEntity
 {
 	GENERATED_BODY()
 
@@ -36,6 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CloseWidget();
+	
 public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UInteractableComponent> InteractableComponent;
