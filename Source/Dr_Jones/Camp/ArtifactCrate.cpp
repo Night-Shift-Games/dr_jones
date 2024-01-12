@@ -26,6 +26,15 @@ void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 	WidgetManager->AddWidget(ReturnArtifactsWidgetClass);
 	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
 	WidgetManager->ShowWidget(ReturnArtifactsWidgetClass);
+
+	UInventoryComponent* Inventory = Player->GetInventory();
+	AItem* ItemInHand = Inventory->GetItemInHand();
+	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr)
+	{
+		Inventory->DetachActiveItemFromHand();
+		AddArtifact(Artifact, Player);
+	}
+
 	Widget->OwningArtifactCrate = this;
 	Widget->OnShow();
 	Widget->UpdateData();
@@ -41,9 +50,11 @@ void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Pl
 	Artifacts.Add(ArtifactToAdd);
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
-	
-	UReturnArtifactWidget* Widget = Utilities::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass);
-	Widget->UpdateData();
+
+	if (UReturnArtifactWidget* Widget = Utilities::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass))
+	{
+		Widget->UpdateData();
+	}
 }
 
 AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
@@ -58,10 +69,12 @@ AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 
 void AArtifactCrate::SendArtifacts()
 {
-	for (int i = 0; i < Artifacts.Num(); i++)
+	while (!Artifacts.IsEmpty())
 	{
-		AArtifact* ArtifactToRemove = PullOutArtifact(Artifacts[i]);
-		ArtifactToRemove->Destroy();
+		AArtifact* ArtifactToSend = Artifacts.Last();
+		PullOutArtifact(ArtifactToSend);
+		ArtifactToSend->Destroy();
+		// TODO: Calculate renown based on artifact parameters.
 		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, 10.f);
 	}
 }
