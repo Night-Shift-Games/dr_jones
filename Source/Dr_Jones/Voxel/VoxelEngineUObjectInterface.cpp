@@ -114,6 +114,10 @@ NSVE::FVoxelChunk* UVoxelGridVisualizer::GetCurrentChunk() const
 	FVoxelGrid& VoxelGrid = GetVoxelGrid()->GetInternal();
 	const UWorld* World = GetWorld();
 	const ACharacter* Character = UGameplayStatics::GetPlayerCharacter(World, 0);
+	if (!Character)
+	{
+		return nullptr;
+	}
 
 	for (auto It = VoxelGrid.GetChunks().CreateConstIterator(); It; ++It)
 	{
