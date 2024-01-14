@@ -2,7 +2,13 @@
 
 bool UDrJonesWidgetBase::Initialize()
 {
+	if (HasAnyFlags(RF_ClassDefaultObject))
+	{
+		return false;
+	}
+	
 	LowLevelRename(GetClass()->GetFName());
+	
 	return Super::Initialize();
 }
 

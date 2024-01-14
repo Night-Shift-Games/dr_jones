@@ -33,13 +33,13 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 		return;
 	}
 	
-	Controller->SetViewTargetWithBlend(NewViewTarget, 1.0f);
+	Controller->SetViewTargetWithBlend(NewViewTarget, 0.5f);
 
 	if (WidgetToFocus)
 	{
 		Controller->bShowMouseCursor = true;
 
-		FInputModeUIOnly InputMode;
+		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
 		Controller->SetInputMode(InputMode);
@@ -60,7 +60,7 @@ void UBlendCameraComponent::ResetViewTarget()
 		return;
 	}
 
-	Controller->SetViewTargetWithBlend(MainViewTarget, 1.0f);
+	Controller->SetViewTargetWithBlend(MainViewTarget, 0.3f);
 
 	Controller->bShowMouseCursor = false;
 
@@ -76,28 +76,7 @@ void UBlendCameraComponent::ResetViewTarget()
 
 APlayerController* UBlendCameraComponent::GetViewingController() const
 {
-	AActor* Owner = GetOwner();
-	if (!Owner)
-	{
-		return nullptr;
-	}
-
-	APlayerController* Controller;
-
-	APawn* PawnOwner = Cast<APawn>(Owner);
-	if (PawnOwner)
-	{
-		Controller = PawnOwner->GetLocalViewingPlayerController();
-	}
-	else
-	{
-		Controller = Cast<APlayerController>(Owner);
-		if (!Controller)
-		{
-			return nullptr;
-		}
-	}
-
-	return Controller;
+	const APawn* Pawn = GetOwner<APawn>();
+	return Pawn ? Pawn->GetController<APlayerController>() : nullptr;
 }
 

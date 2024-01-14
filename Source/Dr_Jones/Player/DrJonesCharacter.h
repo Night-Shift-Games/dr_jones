@@ -11,6 +11,7 @@ class UReputationComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 class AItem;
+class UBlendCameraComponent;
 class UInteractionComponent;
 class UReactionComponent;
 class UInventoryComponent;
@@ -21,12 +22,15 @@ UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
 {
 	GENERATED_BODY()
+	
 public:
 	ADrJonesCharacter();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
 	UInventoryComponent* GetInventory() const { return InventoryComponent; }
-
+	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
+	
 	UFUNCTION(BlueprintPure)
 	static FHitResult GetPlayerLookingAt(const float Reach);
 
@@ -55,6 +59,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UBlendCameraComponent> BlendCameraComponent;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
 

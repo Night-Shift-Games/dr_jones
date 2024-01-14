@@ -9,6 +9,7 @@
 #include "PlayerComponents/ReactionComponent.h"
 #include "PlayerComponents/ReputationComponent.h"
 #include "WidgetManager.h"
+#include "SharedComponents/BlendCameraComponent.h"
 
 ADrJonesCharacter::ADrJonesCharacter()
 {
@@ -19,6 +20,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
+	BlendCameraComponent = CreateDefaultSubobject<UBlendCameraComponent>(TEXT("BlendCameraComponent"));
 }
 
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
