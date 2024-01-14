@@ -243,6 +243,12 @@ namespace NSVE
 		static void SetElementId(const FVoxelRef& Element, FOctreeElementId2 Id);
 	};
 
+	struct FVoxelLayer
+	{
+		float PlaneMaxZ = 0;
+		uint8 LocalMaterialIndex = 0;
+	};
+
 	// Single voxel chunk that exists in a voxel grid
 	// Used to store data in segments that can be loaded/unloaded on demand only when needed
 	class DR_JONES_API alignas(Alignment) FVoxelChunk
@@ -257,6 +263,7 @@ namespace NSVE
 		void Clear();
 		void FillTest();
 		void FillSurface(float SurfaceZ_WS);
+		void FillLayered(TArray<FVoxelLayer> VoxelLayers);
 
 		struct FTransformData
 		{
@@ -287,6 +294,7 @@ namespace NSVE
 		FBoxSphereBounds Bounds;
 		// TODO: Make some fill initializer
 		float FillSurfaceZ_WS;
+		TArray<FVoxelLayer> Layers;
 	};
 
 	// Structure that stores voxels in a grid of separate chunks to optimize the usage

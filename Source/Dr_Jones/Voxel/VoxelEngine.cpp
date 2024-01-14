@@ -110,6 +110,32 @@ namespace NSVE
 		});
 	}
 
+	void FVoxelChunk::FillLayered(TArray<FVoxelLayer> VoxelLayers)
+	{
+		SCOPED_NAMED_EVENT(VoxelEngine_VoxelChunk_FillSurface, FColorList::BlueViolet)
+
+		const FTransformData TransformData = MakeTransformData();
+
+		VoxelLayers.Sort([](const FVoxelLayer& Lhs, const FVoxelLayer& Rhs)
+		{
+			return Lhs.PlaneMaxZ > Rhs.PlaneMaxZ;
+		});
+
+		Voxels.Clear();
+		for (const FVoxelLayer& Layer : VoxelLayers)
+		{
+			Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+			{
+				const FVector WorldPosition = GridPositionToWorld_Static(Coords, TransformData);
+				if (WorldPosition.Z <= Layer.PlaneMaxZ)
+				{
+					Voxel.bSolid = true;
+					Voxel.LocalMaterial = Layer.LocalMaterialIndex;
+				}
+			});
+		}
+	}
+
 #if ENABLE_VOXEL_ENGINE_DEBUG
 	void FVoxelChunk::DrawDebugVoxels() const
 	{
@@ -161,11 +187,22 @@ namespace NSVE
 		}
 
 		const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-		ParallelForTemplate(ChunkCount, [this, &Initializer](int32 Index)
+		if (!Initializer.Layers.IsEmpty())
 		{
-			check(Chunks.IsValidIndex(Index));
-			Chunks[Index].FillSurface(Initializer.FillSurfaceZ_WS);
-		});
+			ParallelForTemplate(ChunkCount, [this, &Initializer](int32 Index)
+			{
+				check(Chunks.IsValidIndex(Index));
+				Chunks[Index].FillLayered(Initializer.Layers);
+			});
+		}
+		else
+		{
+			ParallelForTemplate(ChunkCount, [this, &Initializer](int32 Index)
+			{
+				check(Chunks.IsValidIndex(Index));
+				Chunks[Index].FillSurface(Initializer.FillSurfaceZ_WS);
+			});
+		}
 	}
 
 #if ENABLE_VOXEL_ENGINE_DEBUG

@@ -327,6 +327,8 @@ namespace MarchingCubes
 			};
 		};
 
+		uint8 MaterialIndex;
+
 		FORCEINLINE UE::Geometry::FIndex3i ToIndex3i() const
 		{
 			if constexpr (sizeof(A) == sizeof(UE::Geometry::FIndex3i::A))

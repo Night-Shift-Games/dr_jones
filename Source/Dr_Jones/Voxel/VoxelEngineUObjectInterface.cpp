@@ -258,7 +258,21 @@ void UVoxelGrid::BeginPlay()
 	FVoxelGridInitializer Initializer;
 	Initializer.Transform = Owner->GetTransform();
 	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());
-	Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
+	if (!GeneratedLayers.IsEmpty())
+	{
+		const double BaseZ = Initializer.Transform.GetLocation().Z;
+		for (int32 I = 0; I < GeneratedLayers.Num(); ++I)
+		{
+			const FVoxelGridGeneratedLayer& Layer = GeneratedLayers[I];
+			FVoxelLayer& VoxelLayer = Initializer.Layers.AddDefaulted_GetRef();
+			VoxelLayer.PlaneMaxZ = BaseZ + Layer.Depth;
+			VoxelLayer.LocalMaterialIndex = I;
+		}
+	}
+	else
+	{
+		Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
+	}
 
 	check(InternalVoxelGrid);
 	InternalVoxelGrid->Initialize(Initializer);
@@ -309,19 +323,31 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			{
 				EditMesh.Clear();
 
+				if (!EditMesh.HasAttributes())
+				{
+					EditMesh.EnableAttributes();
+				}
+				if (EditMesh.Attributes()->HasMaterialID() == false)
+				{
+					EditMesh.Attributes()->EnableMaterialID();
+				}
+
 				{
 					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_Append, FColorList::DustyRose)
 					for (const FVector& Vertex : CombinedVertices)
 					{
 						EditMesh.AppendVertex(Vertex);
 					}
+					UE::Geometry::FDynamicMeshMaterialAttribute* MaterialIDs = EditMesh.Attributes()->GetMaterialID();
 					for (const FTriangle& Triangle : CombinedTriangles)
 					{
-						EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+						const int32 TriangleID = EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+						MaterialIDs->SetValue(TriangleID, static_cast<int32>(Triangle.MaterialIndex));
 					}
 				}
 
 				{
+					// TODO: Optimize: do this earlier => This thing takes like 90% of the whole edit mesh
 					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_MergeEdges, FColorList::DustyRose)
 					UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
 					MergeEdges.Apply();
@@ -329,10 +355,6 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 
 				{
 					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_ComputeNormals, FColorList::DustyRose)
-					if (!EditMesh.HasAttributes())
-					{
-						EditMesh.EnableAttributes();
-					}
 					UE::Geometry::FMeshNormals::QuickComputeVertexNormals(EditMesh);
 				}
 			}, EDynamicMeshChangeType::GeneralEdit, EDynamicMeshAttributeChangeFlags::Unknown);

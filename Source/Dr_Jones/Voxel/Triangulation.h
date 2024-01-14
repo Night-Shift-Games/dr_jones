@@ -229,6 +229,10 @@ namespace NSVE::Triangulation
 						FIntVector3{ X,     Y + 1, Z + 1 },
 					};
 
+					struct FMaterialIndex { uint8 Index : 3; } BestMaterialIndex;
+					TArray<int32, TInlineAllocator<8>> MaterialIndexOccurrences;
+					MaterialIndexOccurrences.SetNumZeroed(8);
+
 					FGridCell GridCell;
 					for (int32 Corner = 0; Corner < 8; ++Corner)
 					{
@@ -240,11 +244,29 @@ namespace NSVE::Triangulation
 						}
 						GridCell.Values[Corner] = Voxel->bSolid ? -1.0f : 1.0f;
 						GridCell.Positions[Corner] = FVoxelChunk::GridPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
+						check(Voxel->LocalMaterial < 8);
+						MaterialIndexOccurrences[Voxel->LocalMaterial] += 1;
 					}
+
+					int32 MaxOccurrences = 0;
+					for (int32 Index = 0; Index < 8; ++Index)
+					{
+						if (MaterialIndexOccurrences[Index] > MaxOccurrences)
+						{
+							MaxOccurrences = MaterialIndexOccurrences[Index];
+							BestMaterialIndex.Index = Index;
+						}
+					}
+
+					auto InsertTriangleFunc2 = [&](FTriangle Triangle)
+					{
+						Triangle.MaterialIndex = BestMaterialIndex.Index;
+						InsertTriangleFunc(Triangle);
+					};
 
 					int32 VertexCount;
 					int32 TriangleCount;
-					if (!TriangulateCell_MarchingCubes(GridCell, LastIndex, InsertVertexFunc, InsertTriangleFunc, VertexCount, TriangleCount))
+					if (!TriangulateCell_MarchingCubes(GridCell, LastIndex, InsertVertexFunc, InsertTriangleFunc2, VertexCount, TriangleCount))
 					{
 						continue;
 					}

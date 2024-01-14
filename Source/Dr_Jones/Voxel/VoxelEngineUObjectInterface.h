@@ -64,6 +64,18 @@ protected:
 	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 };
 
+USTRUCT(BlueprintType)
+struct FVoxelGridGeneratedLayer
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Depth = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UMaterialInterface> Material;
+};
+
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent), HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UVoxelGrid : public UActorComponent
 {
@@ -87,6 +99,9 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
 	FVector Extents = FVector(400.0, 400.0, 400.0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
+	TArray<FVoxelGridGeneratedLayer> GeneratedLayers;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NightShift|VoxelEngine")

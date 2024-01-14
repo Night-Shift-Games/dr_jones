@@ -87,6 +87,13 @@ void ADigSite::BeginPlay()
 
 	DynamicMeshComponent->SetWorldTransform(FTransform{});
 	UpdateMesh(false);
+
+	TArray<UMaterialInterface*> MaterialSet;
+	for (auto It = VoxelGrid->GeneratedLayers.CreateConstIterator(); It; ++It)
+	{
+		MaterialSet.Add(It->Material);
+	}
+	DynamicMeshComponent->ConfigureMaterialSet(MaterialSet);
 }
 
 void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
