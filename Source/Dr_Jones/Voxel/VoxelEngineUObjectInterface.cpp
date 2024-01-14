@@ -258,7 +258,7 @@ void UVoxelGrid::BeginPlay()
 	FVoxelGridInitializer Initializer;
 	Initializer.Transform = Owner->GetTransform();
 	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());
-	Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z - 20;
+	Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
 
 	check(InternalVoxelGrid);
 	InternalVoxelGrid->Initialize(Initializer);
