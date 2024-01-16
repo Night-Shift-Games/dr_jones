@@ -103,6 +103,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
 	TArray<FVoxelGridGeneratedLayer> GeneratedLayers;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
+	TObjectPtr<UMaterialInterface> ArtifactHintMaterial;
+
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NightShift|VoxelEngine")
 	bool bDrawDebug = false;

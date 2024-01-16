@@ -193,6 +193,20 @@ namespace NSVE
 			{
 				check(Chunks.IsValidIndex(Index));
 				Chunks[Index].FillLayered(Initializer.Layers);
+
+				const FVoxelChunk::FTransformData TransformData = Chunks[Index].MakeTransformData();
+				Chunks[Index].Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+				{
+					const FVector WorldPosition = FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+					for (const FVector& ArtifactLocation : Initializer.ArtifactLocations)
+					{
+						static constexpr double MaxDistanceToArtifact = 50.0;
+						if ((ArtifactLocation - WorldPosition).SizeSquared() < (MaxDistanceToArtifact * MaxDistanceToArtifact))
+						{
+							Voxel.LocalMaterial = 0b111;
+						}
+					}
+				});
 			});
 		}
 		else
