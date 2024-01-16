@@ -10,6 +10,8 @@
 
 class ADrJonesCharacter;
 
+DECLARE_DELEGATE_OneParam(FOnArtifactAttached, AArtifact*)
+
 USTRUCT(BlueprintType)
 struct FProceduralArtifactData
 {
@@ -46,7 +48,8 @@ public:
 
 	virtual UMeshComponent* GetMeshComponent() const override { return ArtifactMeshComponent; }
 	void SetupArtifact(const FArtifactData& ArtifactData);
-	
+	void Clear();
+
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))
 	FName ArtifactID = NAME_None;
@@ -83,7 +86,11 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMaterialInstanceDynamic> ArtifactDynamicMaterial;
-
+	
+	FOnArtifactAttached OnArtifactPickup;
+	
+	bool bArtifactCleared = false;
+	
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMeshComponent> ArtifactMeshComponent;

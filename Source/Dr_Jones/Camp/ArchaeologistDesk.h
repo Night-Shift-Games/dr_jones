@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CampEntity.h"
+#include "Items/Artifacts/Artifact.h"
 #include "SharedComponents/InteractableComponent.h"
 #include "ArchaeologistDesk.generated.h"
 
@@ -15,6 +16,9 @@ class DR_JONES_API AArchaeologistDesk : public ACampEntity
 public:
 	AArchaeologistDesk();
 	virtual void BeginPlay() override;
+
+	void AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Player);
+	void RemoveArtifact(AArtifact* Artifact);
 	
 	UFUNCTION()
 	void OnInteract(ADrJonesCharacter* Player);
@@ -28,4 +32,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> ChairMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AArtifact> ArtifactOnDesk;
 };

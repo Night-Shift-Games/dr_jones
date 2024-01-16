@@ -65,6 +65,7 @@ void AArtifact::PickUp(ADrJonesCharacter* Taker)
 	if (UInventoryComponent* Inventory = Taker->GetInventory(); Inventory && Inventory->CanPickUpItem())
 	{
 		Inventory->AddArtifact(*this);
+		OnArtifactPickup.ExecuteIfBound(this);
 		OnArtifactPickedUp(Taker);
 	}
 }
@@ -82,6 +83,16 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	ArtifactRarity = ArtifactData.Rarity;
 	// TODO: Artifact Wear should be rand based on Age.
 	ArtifactWear = ArtifactData.Wear;
+}
+
+void AArtifact::Clear()
+{
+	if (bArtifactCleared)
+	{
+		return;
+	}
+	bArtifactCleared = true;
+	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Artifact Cleared!"));
 }
 
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)
