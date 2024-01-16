@@ -7,6 +7,7 @@
 #include "Player/WidgetManager.h"
 #include "ReactionComponent.h"
 #include "Utilities.h"
+#include "Items/Letter.h"
 
 void UInventoryComponent::BeginPlay()
 {
@@ -134,7 +135,7 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 		return nullptr;;
 	}
 	
-	if (ItemInHand->IsA<AArtifact>())
+	if (ItemInHand->IsA<AArtifact>() || ItemInHand->IsA<ALetter>())
 	{
 		ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		ItemInHand->SetupItemGroundProperties();

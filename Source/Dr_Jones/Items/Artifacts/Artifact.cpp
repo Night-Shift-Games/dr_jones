@@ -4,7 +4,9 @@
 
 #include "ArtifactDatabase.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
+#include "Quest/QuestSystem.h"
 #include "SharedComponents/InteractableComponent.h"
+#include "World/Illuminati.h"
 
 AArtifact::AArtifact()
 {
@@ -67,6 +69,12 @@ void AArtifact::PickUp(ADrJonesCharacter* Taker)
 		Inventory->AddArtifact(*this);
 		OnArtifactPickup.ExecuteIfBound(this);
 		OnArtifactPickedUp(Taker);
+
+		UQuestSystemComponent* QuestSystem = AIlluminati::GetQuestSystemInstance(this);
+		check(QuestSystem);
+		UArtifactCollectedQuestMessage* ArtifactCollectedMessage = NewObject<UArtifactCollectedQuestMessage>();
+		ArtifactCollectedMessage->Artifact = this;
+		QuestSystem->SendQuestMessage(ArtifactCollectedMessage);
 	}
 }
 

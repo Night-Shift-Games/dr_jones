@@ -36,7 +36,10 @@ public:
 	void RemoveTool(ATool& ToolToRemove);
 
 	void ChangeActiveItem(float Value);
+
+	UFUNCTION(BlueprintCallable)
 	void SetActiveItem(AItem* NewActiveItem);
+
 	void AttachItemToHand(AItem& ItemToAttach);
 	AItem* DetachActiveItemFromHand();
 

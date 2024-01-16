@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ArtifactDatabase.h"
 #include "Items/Item.h"
+#include "Quest/QuestSystem.h"
 
 #include "Artifact.generated.h"
 
@@ -24,6 +25,16 @@ struct FProceduralArtifactData
 	// Procedural destruction influence
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Artifact", meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
 	float GeometryDamage = 0.0f;
+};
+
+UCLASS(Blueprintable)
+class UArtifactCollectedQuestMessage : public UObject, public IQuestMessageInterface
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<AArtifact> Artifact;
 };
 
 UCLASS(Blueprintable)
@@ -86,7 +97,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMaterialInstanceDynamic> ArtifactDynamicMaterial;
-	
+
 	FOnArtifactAttached OnArtifactPickup;
 	
 	bool bArtifactCleared = false;

@@ -172,7 +172,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UQuestSystemComponent> OwningQuestSystem;
 
-	mutable int32 InternalQuestIndex = 0;
+	mutable int32 InternalQuestIndex = TNumericLimits<int32>::Max();
 
 	friend class UQuestSystemComponent;
 };

@@ -105,11 +105,13 @@ void UQuestChain::SetupNextQuest()
 
 void UQuestChain::InitializeChain(UQuestSystemComponent* QuestSystemComponent)
 {
+	check(InternalQuestIndex == TNumericLimits<int32>::Max());
 	checkf(!OwningQuestSystem, TEXT("Quest Chain has already been initialized."));
 	checkf(HasAnyQuest(), TEXT("Quest Chain has no quests."));
 
 	OwningQuestSystem = QuestSystemComponent;
 
+	InternalQuestIndex = -1;
 	SetupNextQuest();
 }
 
