@@ -8,6 +8,7 @@
 #include "DynamicMesh/MeshNormals.h"
 #include "DynamicMesh/Operations/MergeCoincidentMeshEdges.h"
 #include "GameFramework/Character.h"
+#include "Items/Artifacts/Artifact.h"
 #include "Kismet/GameplayStatics.h"
 
 FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridVisualizer* InComponent) :
@@ -274,6 +275,24 @@ void UVoxelGrid::BeginPlay()
 		Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
 	}
 
+	FCollisionObjectQueryParams QueryParams;
+	QueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+
+	TArray<FOverlapResult> Overlaps;
+	GetWorld()->OverlapMultiByObjectType(Overlaps,
+		Initializer.Transform.GetLocation(),
+		Initializer.Transform.GetRotation(),
+		QueryParams,
+		FCollisionShape::MakeBox(Extents));
+
+	for (const FOverlapResult& Overlap : Overlaps)
+	{
+		if (const AArtifact* Artifact = Cast<AArtifact>(Overlap.GetActor()))
+		{
+			Initializer.ArtifactLocations.Add(Artifact->GetActorLocation());
+		}
+	}
+
 	check(InternalVoxelGrid);
 	InternalVoxelGrid->Initialize(Initializer);
 }
@@ -348,9 +367,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 
 				{
 					// TODO: Optimize: do this earlier => This thing takes like 90% of the whole edit mesh
-					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_MergeEdges, FColorList::DustyRose)
-					UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
-					MergeEdges.Apply();
+					// SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_MergeEdges, FColorList::DustyRose)
+					// UE::Geometry::FMergeCoincidentMeshEdges MergeEdges(&EditMesh);
+					// MergeEdges.Apply();
 				}
 
 				{

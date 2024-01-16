@@ -295,6 +295,7 @@ namespace NSVE
 		// TODO: Make some fill initializer
 		float FillSurfaceZ_WS;
 		TArray<FVoxelLayer> Layers;
+		TArray<FVector> ArtifactLocations;
 	};
 
 	// Structure that stores voxels in a grid of separate chunks to optimize the usage

@@ -91,8 +91,14 @@ void ADigSite::BeginPlay()
 	TArray<UMaterialInterface*> MaterialSet;
 	for (auto It = VoxelGrid->GeneratedLayers.CreateConstIterator(); It; ++It)
 	{
+		if (It.GetIndex() >= 7)
+		{
+			break;
+		}
 		MaterialSet.Add(It->Material);
 	}
+	MaterialSet.SetNumZeroed(8);
+	MaterialSet.Insert(VoxelGrid->ArtifactHintMaterial, 7);
 	DynamicMeshComponent->ConfigureMaterialSet(MaterialSet);
 }
 
