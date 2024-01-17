@@ -200,7 +200,7 @@ namespace NSVE
 					const FVector WorldPosition = FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
 					for (const FVector& ArtifactLocation : Initializer.ArtifactLocations)
 					{
-						static constexpr double MaxDistanceToArtifact = 50.0;
+						static constexpr double MaxDistanceToArtifact = 100.0;
 						if ((ArtifactLocation - WorldPosition).SizeSquared() < (MaxDistanceToArtifact * MaxDistanceToArtifact))
 						{
 							Voxel.LocalMaterial = 0b111;
