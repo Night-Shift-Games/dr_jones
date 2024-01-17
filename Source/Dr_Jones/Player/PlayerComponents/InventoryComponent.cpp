@@ -76,7 +76,7 @@ void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
 
 void UInventoryComponent::ChangeActiveItem(float Value)
 {
-	if (Value == 0 || Tools.Num() < 2)
+	if (Value == 0 || Tools.IsEmpty())
 	{
 		return;
 	}
