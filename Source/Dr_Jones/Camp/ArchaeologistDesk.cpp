@@ -27,9 +27,14 @@ void AArchaeologistDesk::AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Pla
 	ArtifactOnDesk = Artifact;
 	Player->GetInventory()->DetachActiveItemFromHand();
 	FVector SocketPlace = DeskMesh->GetSocketLocation(TEXT("ArtifactSocket"));
+
+	double ZOffset = ArtifactOnDesk->GetMeshComponent()->GetLocalBounds().BoxExtent.Z;
+	FVector Origin = ArtifactOnDesk->GetMeshComponent()->GetLocalBounds().Origin;
+	ZOffset = Origin.Z - ZOffset;
+	
 	SocketPlace = Utilities::FindGround(*this, SocketPlace + FVector (0, 0, 20), {ArtifactOnDesk});
 	ArtifactOnDesk->AttachToComponent(DeskMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("ArtifactSocket"));
-	ArtifactOnDesk->SetActorLocation(SocketPlace);
+	ArtifactOnDesk->SetActorLocation(SocketPlace - FVector(0,0, ZOffset));
 	ArtifactOnDesk->GetMeshComponent()->SetVisibility(true);
 	ArtifactOnDesk->OnArtifactPickup.BindUObject(this, &AArchaeologistDesk::RemoveArtifact);
 }

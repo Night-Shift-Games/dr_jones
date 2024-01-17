@@ -142,8 +142,13 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 		TArray<AActor*> ActorsToIgnore = {Owner, ItemInHand};
 		Algo::Copy(Tools, ActorsToIgnore);
 		Algo::Copy(Owner->Children, ActorsToIgnore);
-		const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
-		ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator::ZeroRotator);
+		const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);\
+
+		double ZOffset = ItemInHand->GetMeshComponent()->GetLocalBounds().BoxExtent.Z;
+		FVector Origin = ItemInHand->GetMeshComponent()->GetLocalBounds().Origin;
+		ZOffset = Origin.Z - ZOffset;
+		
+		ItemInHand->SetActorLocationAndRotation(GroundLocation - FVector(0.0,0.0, ZOffset), FRotator(0, GetOwner()->GetActorRotation().Yaw,0));
 	}
 	
 	AItem* ReturnValue = ItemInHand;
