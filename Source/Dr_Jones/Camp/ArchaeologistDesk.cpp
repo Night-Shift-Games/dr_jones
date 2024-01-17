@@ -5,6 +5,7 @@
 
 #include "Utilities.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
+#include "World/Illuminati.h"
 
 
 AArchaeologistDesk::AArchaeologistDesk()
@@ -59,5 +60,10 @@ void AArchaeologistDesk::OnInteract(ADrJonesCharacter* Player)
 	else if (ArtifactOnDesk)
 	{
 		ArtifactOnDesk->Clear();
+
+		AIlluminati::SendQuestMessage<UArtifactCleanedQuestMessage>(this, [this](UArtifactCleanedQuestMessage* Message)
+		{
+			Message->Artifact = ArtifactOnDesk;
+		});
 	}
 }

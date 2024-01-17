@@ -8,6 +8,16 @@
 #include "SharedComponents/InteractableComponent.h"
 #include "ArchaeologistDesk.generated.h"
 
+UCLASS(Blueprintable)
+class UArtifactCleanedQuestMessage : public UObject, public IQuestMessageInterface
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<AArtifact> Artifact;
+};
+
 UCLASS()
 class DR_JONES_API AArchaeologistDesk : public ACampEntity
 {

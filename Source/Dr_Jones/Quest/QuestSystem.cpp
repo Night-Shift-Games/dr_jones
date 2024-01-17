@@ -156,6 +156,8 @@ void UQuestSystemComponent::AddQuestChainByObject(UQuestChain* QuestChain)
 
 		QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest Chain \"%s\" has been removed from pending quest chains array."),
 			*QuestChain->GetName());
+
+		OnQuestChainCompleted.Broadcast(QuestChain);
 	});
 }
 
@@ -241,14 +243,16 @@ void UQuestSystemComponent::InitializePendingQuest(UQuest& Quest)
 	{
 		PendingQuests.Remove(Handle);
 
+		UQuest* FoundQuest = QuestRegistry.FindChecked(Handle);
+		check(FoundQuest);
+
 		if (QuestSystemUtils::IsDebugEnabled())
 		{
-			const UQuest* FoundQuest = QuestRegistry.FindChecked(Handle);
-			check(FoundQuest);
-
 			QuestSystemUtils::LogDebug(TEXT("Quest \"%s\" (%s) has been removed from pending quests array."),
 				*FoundQuest->QuestDescription.DisplayName.ToString(), *FoundQuest->GetName());
 		}
+
+		OnGlobalQuestCompleted.Broadcast(FoundQuest);
 	});
 	Quest.InitializePending();
 

@@ -191,6 +191,9 @@ public:
 	
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestChainCompletedDelegate, UQuestChain*, QuestChain);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGlobalQuestCompletedDelegate, UQuest*, Quest);
+
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
 class DR_JONES_API UQuestSystemComponent : public UActorComponent
 {
@@ -215,6 +218,13 @@ protected:
 	FQuestHandle RegisterQuest(UQuest& Quest);
 	void InitializePendingQuest(UQuest& Quest);
 	UQuest* FindQuest(const FQuestHandle& Handle) const;
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnQuestChainCompletedDelegate OnQuestChainCompleted;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGlobalQuestCompletedDelegate OnGlobalQuestCompleted;
 
 private:
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Quest", meta = (AllowPrivateAccess = true))

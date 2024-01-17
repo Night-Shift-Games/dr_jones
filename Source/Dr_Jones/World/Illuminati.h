@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Clock.h"
+#include "Quest/QuestSystem.h"
 #include "UObject/Object.h"
 #include "UObject/WeakObjectPtr.h"
 
 #include "Illuminati.generated.h"
 
+class IQuestMessageInterface;
 class USoundCue;
 class UQuestSystemComponent;
 
@@ -150,6 +152,16 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Illuminati", meta = (WorldContext = "WorldContextObject"))
 	static UQuestSystemComponent* GetQuestSystemInstance(const UObject* WorldContextObject);
+
+	template <typename T, typename FFunc>
+	static void SendQuestMessage(const UObject* WorldContextObject, FFunc Initializer)
+	{
+		UQuestSystemComponent* QuestSystem = GetQuestSystemInstance(WorldContextObject);
+		check(QuestSystem);
+		T* ArtifactCleanedMessage = NewObject<T>();
+		Initializer(ArtifactCleanedMessage);
+		QuestSystem->SendQuestMessage(ArtifactCleanedMessage);
+	}
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Clock")

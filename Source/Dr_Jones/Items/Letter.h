@@ -18,7 +18,7 @@ public:
 	
 public:
 	// Content of the letter.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones", meta = (MultiLine))
 	FText LetterContent = FText::AsCultureInvariant(TEXT("None"));
 
 	// Widget component that is responsible for displaying UI.
