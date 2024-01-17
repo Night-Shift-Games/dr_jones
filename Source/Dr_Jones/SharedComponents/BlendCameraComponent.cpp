@@ -3,6 +3,8 @@
 #include "BlendCameraComponent.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Player/DrJonesCharacter.h"
+#include "Player/WidgetManager.h"
 
 UBlendCameraComponent::UBlendCameraComponent()
 {
@@ -34,7 +36,10 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 	}
 	
 	Controller->SetViewTargetWithBlend(NewViewTarget, 0.5f);
-
+	// TODO:
+	ADrJonesCharacter* Character = GetOwner<ADrJonesCharacter>();
+	Character->GetMesh()->SetVisibility(false);
+	
 	if (WidgetToFocus)
 	{
 		Controller->bShowMouseCursor = true;
@@ -44,6 +49,8 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 		InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
 		Controller->SetInputMode(InputMode);
 
+		Character->GetWidgetManager()->SetWidgetVisibility(WidgetClass, ESlateVisibility::Hidden);
+		
 		const UWorld* World = Controller->GetWorld();
 		ensureAlwaysMsgf(World, TEXT("Camera is not in the world!"));
 		UGameViewportClient* Viewport = World->GetGameViewport();
@@ -63,7 +70,11 @@ void UBlendCameraComponent::ResetViewTarget()
 	Controller->SetViewTargetWithBlend(MainViewTarget, 0.3f);
 
 	Controller->bShowMouseCursor = false;
-
+	// TODO:
+	ADrJonesCharacter* Character = GetOwner<ADrJonesCharacter>();
+	Character->GetMesh()->SetVisibility(true);
+	Character->GetWidgetManager()->SetWidgetVisibility(WidgetClass, ESlateVisibility::Visible);
+	
 	FInputModeGameOnly InputMode;
 	Controller->SetInputMode(InputMode);
 

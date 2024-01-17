@@ -4,6 +4,7 @@
 
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
+#include "UI/DrJonesWidgetBase.h"
 
 #include "BlendCameraComponent.generated.h"
 
@@ -27,5 +28,8 @@ public:
 	
 public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	TObjectPtr<AActor> MainViewTarget = nullptr;
+	TObjectPtr<AActor> MainViewTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UDrJonesWidgetBase> WidgetClass;
 };

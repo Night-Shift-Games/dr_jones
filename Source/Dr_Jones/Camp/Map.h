@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "CampEntity.h"
-#include "SharedComponents/BlendCameraComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 
 #include "Map.generated.h"
 
 class UCameraComponent;
 class UWidgetComponent;
+class UBlendCameraComponent;
 
 UCLASS()
 class DR_JONES_API AMap : public ACampEntity

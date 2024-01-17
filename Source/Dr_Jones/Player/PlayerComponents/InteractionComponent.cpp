@@ -2,6 +2,7 @@
 
 #include "Player/PlayerComponents/InteractionComponent.h"
 
+#include "Components/SlateWrapperTypes.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
 #include "SharedComponents/InteractableComponent.h"
@@ -49,14 +50,14 @@ void UInteractionComponent::UpdateInteractionWidget()
 {
 	if (!ActorToInteract || !IsInteractable(*ActorToInteract))
 	{
-		WidgetManager->HideWidget(InteractionUI);
+		WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Hidden);
 		return;
 	}
 	if (!WidgetManager->GetWidget(InteractionUI))
 	{
 		WidgetManager->AddWidget(InteractionUI);
 	}
-	WidgetManager->ShowWidget(InteractionUI);
+	WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Visible);
 }
 
 void UInteractionComponent::Interact()
