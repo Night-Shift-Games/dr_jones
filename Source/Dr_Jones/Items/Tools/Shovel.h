@@ -17,7 +17,10 @@ class DR_JONES_API AShovel : public ATool
 public:
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void FillShovel();
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
 	void EmptyShovel();
 
 	UFUNCTION()

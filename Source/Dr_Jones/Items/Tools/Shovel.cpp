@@ -129,7 +129,7 @@ void AShovel::Dig()
 	}
 	
 	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
-	FillShovel();
+
 }
 
 void AShovel::Dump()
@@ -152,26 +152,19 @@ void AShovel::Dump()
 		return;
 	}
 	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
-	EmptyShovel();
 }
 
 void AShovel::PrimaryAction()
 {
 	FTimerHandle& Handle = ActionComponent->AnimationTimer;
-
-	if (Handle.IsValid())
-	{
-		GEngine->AddOnScreenDebugMessage(10, 2, FColor::Red, __func__);
-		return;
-	}
-	PrimaryActionMontageBehavior();
+	
 	if (IsFilled())
 	{
-		GetWorldTimerManager().SetTimer(Handle, this, &AShovel::Dump, 1, false, 1);
+		Dump();
 	}
 	else
 	{
-		GetWorldTimerManager().SetTimer(Handle, this, &AShovel::Dig, 1, false, 1);
+		Dig();
 	}
 }
 
