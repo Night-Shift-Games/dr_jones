@@ -42,20 +42,20 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 	
 	if (WidgetToFocus)
 	{
-		Controller->bShowMouseCursor = true;
-
-		FInputModeGameAndUI InputMode;
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
-		Controller->SetInputMode(InputMode);
-
+		// Controller->bShowMouseCursor = true;
+		//
+		// FInputModeGameAndUI InputMode;
+		// InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		// InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
+		// Controller->SetInputMode(InputMode);
+		//
 		Character->GetWidgetManager()->SetWidgetVisibility(WidgetClass, ESlateVisibility::Hidden);
-		
-		const UWorld* World = Controller->GetWorld();
-		ensureAlwaysMsgf(World, TEXT("Camera is not in the world!"));
-		UGameViewportClient* Viewport = World->GetGameViewport();
-		check(Viewport);
-		Viewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
+		//
+		// const UWorld* World = Controller->GetWorld();
+		// ensureAlwaysMsgf(World, TEXT("Camera is not in the world!"));
+		// UGameViewportClient* Viewport = World->GetGameViewport();
+		// check(Viewport);
+		// Viewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
 	}
 }
 
