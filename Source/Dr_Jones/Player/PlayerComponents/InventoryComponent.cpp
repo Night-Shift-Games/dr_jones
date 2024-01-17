@@ -80,7 +80,7 @@ void UInventoryComponent::ChangeActiveItem(float Value)
 	{
 		return;
 	}
-	if (ItemInHand && ItemInHand->IsA<AArtifact>())
+	if (ItemInHand && !ItemInHand->IsA<ATool>())
 	{
 		return;
 	}
