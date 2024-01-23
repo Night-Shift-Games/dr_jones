@@ -24,11 +24,11 @@ public:
 	FName GetItemAttachmentSocket() const { return AttachmentSocket; }
 
 	void SetInteractionEnabled(bool bEnabled) const;
-	virtual void SetAttachmentPhysics();
-	virtual void SetGroundPhysics();
+	virtual void SetHandAttachmentPhysics();
+	virtual void SetWorldPhysics();
 
 	void SetupItemInHandProperties();
-	void SetupItemGroundProperties();
+	void SetupItemWorldProperties();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")

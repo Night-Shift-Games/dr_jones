@@ -61,6 +61,15 @@ namespace Utilities
 		return Index;
 	}
 
+	double GetMeshZOffset(const AActor& Actor)
+	{
+		const UMeshComponent* Mesh = Actor.FindComponentByClass<UMeshComponent>();
+		double ZOffset = Mesh->GetLocalBounds().BoxExtent.Z;
+		const FVector Origin = Mesh->GetLocalBounds().Origin;
+		ZOffset = Origin.Z - ZOffset;
+		return ZOffset;
+	}
+	
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject)
 	{
 		const ADrJonesCharacter& PlayerCharacter = GetPlayerCharacter(WorldContextObject);

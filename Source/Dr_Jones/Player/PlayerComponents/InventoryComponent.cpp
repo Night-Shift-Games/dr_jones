@@ -138,17 +138,16 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 	if (ItemInHand->IsA<AArtifact>() || ItemInHand->IsA<ALetter>())
 	{
 		ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		ItemInHand->SetupItemGroundProperties();
+		ItemInHand->SetupItemWorldProperties();
+
 		TArray<AActor*> ActorsToIgnore = {Owner, ItemInHand};
 		Algo::Copy(Tools, ActorsToIgnore);
 		Algo::Copy(Owner->Children, ActorsToIgnore);
-		const FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);\
 
-		double ZOffset = ItemInHand->GetMeshComponent()->GetLocalBounds().BoxExtent.Z;
-		FVector Origin = ItemInHand->GetMeshComponent()->GetLocalBounds().Origin;
-		ZOffset = Origin.Z - ZOffset;
+		FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
+		GroundLocation.Z -= Utilities::GetMeshZOffset(*ItemInHand);
 		
-		ItemInHand->SetActorLocationAndRotation(GroundLocation - FVector(0.0,0.0, ZOffset), FRotator(0, GetOwner()->GetActorRotation().Yaw,0));
+		ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator(0, GetOwner()->GetActorRotation().Yaw,0));
 	}
 	
 	AItem* ReturnValue = ItemInHand;

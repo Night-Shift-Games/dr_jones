@@ -17,7 +17,7 @@ void AItem::SetInteractionEnabled(bool bEnabled) const
 	InteractableComponent->SetInteractionEnabled(bEnabled);
 }
 
-void AItem::SetAttachmentPhysics()
+void AItem::SetHandAttachmentPhysics()
 {
 	RootComponent->SetMobility(EComponentMobility::Movable);
 	if (UMeshComponent* Mesh = GetMeshComponent())
@@ -28,7 +28,7 @@ void AItem::SetAttachmentPhysics()
 	}
 }
 
-void AItem::SetGroundPhysics()
+void AItem::SetWorldPhysics()
 {
 	RootComponent->SetMobility(EComponentMobility::Movable);
 	if (UMeshComponent* Mesh = GetMeshComponent())
@@ -42,13 +42,13 @@ void AItem::SetGroundPhysics()
 void AItem::SetupItemInHandProperties()
 {
 	SetInteractionEnabled(false);
-	SetAttachmentPhysics();
-	// By default we should hide mesh in hand if it's not active.
 	GetMeshComponent()->SetVisibility(false);
+	SetHandAttachmentPhysics();
 }
 
-void AItem::SetupItemGroundProperties()
+void AItem::SetupItemWorldProperties()
 {
 	SetInteractionEnabled(true);
-	SetGroundPhysics();
+	GetMeshComponent()->SetVisibility(true);
+	SetWorldPhysics();
 }

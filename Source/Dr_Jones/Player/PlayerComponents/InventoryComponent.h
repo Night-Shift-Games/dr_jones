@@ -41,6 +41,7 @@ public:
 	void SetActiveItem(AItem* NewActiveItem);
 
 	void AttachItemToHand(AItem& ItemToAttach);
+	double GetMeshZOffset(const AActor& Actor);
 	AItem* DetachActiveItemFromHand();
 
 	bool CanPickUpItem() const;
