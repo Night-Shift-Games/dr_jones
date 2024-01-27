@@ -59,4 +59,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static FHitResult GetHitResultOfPlayerSight(float Reach = 400.f)
 	{ return ADrJonesCharacter::GetPlayerLookingAt(Reach); }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
+	static UWidgetManager* GetWidgetManager(const UObject* WorldContextObject)
+	{ return WorldContextObject ? &Utilities::GetWidgetManager(*WorldContextObject) : nullptr; }
 };
