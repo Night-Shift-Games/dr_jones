@@ -25,15 +25,16 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	check(Owner.IsValid());
 	
-	FindActorToInteract();
+	SelectedInteractiveComponent = FetchInteractiveComponent();
 
-	if (ActorToInteract == PreviousActorToInteract)
+	if (SelectedInteractiveComponent == PreviousSelectedInteractiveActor)
 	{
 		return;
 	}
-	UpdateInteractionWidget();
 	
-	PreviousActorToInteract = ActorToInteract;
+	UpdateInteractionUI();
+	
+	PreviousSelectedInteractiveActor = SelectedInteractiveComponent;
 }
 
 void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
@@ -41,19 +42,35 @@ void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
 	InputComponent->BindAction("Interact", IE_Pressed, this, &UInteractionComponent::Interact);
 }
 
-void UInteractionComponent::FindActorToInteract()
+UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 {
-	AActor* Candidate = Owner->GetPlayerLookingAt(InteractionRange).GetActor();
-	ActorToInteract = Candidate && IsInteractable(*Candidate) ? Candidate : nullptr;
+	UInteractableComponent* InteractableComponent = nullptr;
+	if (const USceneComponent* FoundSceneComponent = Owner->GetPlayerLookingAt(InteractionRange).GetComponent())
+	{
+		InteractableComponent = GetAttachedInteractableComponent(*FoundSceneComponent);
+		if (InteractableComponent)
+		{
+			return InteractableComponent;
+		}
+	}
+	if (const AActor* Actor = Owner->GetPlayerLookingAt(InteractionRange).GetActor())
+	{
+		InteractableComponent = Actor->FindComponentByClass<UInteractableComponent>();
+		if (InteractableComponent && Actor->GetRootComponent() == InteractableComponent->GetAttachParent())
+		{
+			return InteractableComponent;
+		}
+	}
+	return InteractableComponent;
 }
 
-void UInteractionComponent::UpdateInteractionWidget()
+void UInteractionComponent::UpdateInteractionUI()
 {
-	if (PreviousActorToInteract && ActorToInteract != PreviousActorToInteract)
+	if (PreviousSelectedInteractiveActor && SelectedInteractiveComponent != PreviousSelectedInteractiveActor)
 	{
-		PreviousActorToInteract->FindComponentByClass<UMeshComponent>()->SetCustomDepthStencilValue(0);
+		PreviousSelectedInteractiveActor->SetRenderPostProcessInteractionOutline(false);
 	}
-	if (!ActorToInteract || !IsInteractable(*ActorToInteract))
+	if (!SelectedInteractiveComponent)
 	{
 		WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Hidden);
 		return;
@@ -63,26 +80,18 @@ void UInteractionComponent::UpdateInteractionWidget()
 		WidgetManager->AddWidget(InteractionUI);
 	}
 	WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Visible);
-	if (UMeshComponent* ActorMesh =	ActorToInteract->FindComponentByClass<UMeshComponent>())
-	{
-		ActorMesh->SetRenderCustomDepth(true);
-		ActorMesh->SetCustomDepthStencilValue(1);
-	}
+
+	SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
 }
 
 void UInteractionComponent::Interact()
 {
-	if (!ActorToInteract)
+	if (!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled())
 	{
 		return;
 	}
-
-	UInteractableComponent* Interactable = ActorToInteract->FindComponentByClass<UInteractableComponent>();
-	if (!Interactable || !Interactable->IsInteractionEnabled())
-	{
-		return;
-	}
-	Interactable->Interact(Owner.Get());
+	
+	SelectedInteractiveComponent->Interact(Owner.Get());
 }
 
 /*static*/ bool UInteractionComponent::IsInteractable(const AActor& ActorToCheck)
@@ -90,3 +99,25 @@ void UInteractionComponent::Interact()
 	const UInteractableComponent* InteractableComponent = ActorToCheck.FindComponentByClass<UInteractableComponent>();
 	return IsValid(InteractableComponent) && InteractableComponent->IsInteractionEnabled();
 }
+
+bool UInteractionComponent::IsInteractable(const UMeshComponent& ComponentToCheck)
+{
+	return IsValid(GetAttachedInteractableComponent(ComponentToCheck));
+}
+
+UInteractableComponent* UInteractionComponent::GetAttachedInteractableComponent(
+	const USceneComponent& ComponentToCheck)
+{
+	TArray<USceneComponent*> Children;
+	ComponentToCheck.GetChildrenComponents(false, Children);
+	for (const auto Child : Children)
+	{
+		if (Child->IsA<UInteractableComponent>())
+		{
+			return Cast<UInteractableComponent> (Child);
+		}
+	}
+	return nullptr;
+}
+
+

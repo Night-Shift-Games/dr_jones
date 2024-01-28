@@ -11,7 +11,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteract, ADrJonesCharacter*, Player);
 
 UCLASS( ClassGroup = "Shared Components", meta=(BlueprintSpawnableComponent) )
-class DR_JONES_API UInteractableComponent : public UActorComponent
+class DR_JONES_API UInteractableComponent : public USceneComponent
 {
 	GENERATED_BODY()
 	
@@ -23,6 +23,9 @@ public:
 
 	void SetInteractionEnabled(bool bEnabled) { bEnabledInteraction = bEnabled; }
 	bool IsInteractionEnabled() const { return bEnabledInteraction; }
+
+	UMeshComponent* GetOwnerMesh() const;
+	void SetRenderPostProcessInteractionOutline(bool bRender) const;
 	
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
@@ -30,5 +33,5 @@ public:
 	
 private:
 	bool bEnabledInteraction = true;
-		
+	bool bIsActorInteraction = false;
 };

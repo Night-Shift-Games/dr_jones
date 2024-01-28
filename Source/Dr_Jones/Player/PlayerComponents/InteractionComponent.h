@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "SharedComponents/InteractableComponent.h"
 
 #include "InteractionComponent.generated.h"
 
@@ -32,11 +33,14 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void FindActorToInteract();
-	void UpdateInteractionWidget();
+	UInteractableComponent* FetchInteractiveComponent() const;
+	void UpdateInteractionUI();
 	
 	void Interact();
 	static bool IsInteractable(const AActor& ActorToCheck);
+	static bool IsInteractable(const UMeshComponent& ComponentToCheck);
+
+	static UInteractableComponent* GetAttachedInteractableComponent(const USceneComponent& ComponentToCheck);
 
 protected:
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
@@ -49,8 +53,8 @@ protected:
 	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
 	
 	UPROPERTY(Transient)
-	TObjectPtr<AActor> ActorToInteract;
+	TObjectPtr<UInteractableComponent> SelectedInteractiveComponent;
 
 	UPROPERTY(Transient)
-	TObjectPtr<AActor> PreviousActorToInteract;
+	TObjectPtr<UInteractableComponent> PreviousSelectedInteractiveActor;
 };

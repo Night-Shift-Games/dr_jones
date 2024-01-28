@@ -13,3 +13,22 @@ void UInteractableComponent::Interact(ADrJonesCharacter* Player)
 	
 	InteractDelegate.Broadcast(Player);
 }
+
+UMeshComponent* UInteractableComponent::GetOwnerMesh() const
+{
+	USceneComponent* ParentSceneComponent = GetAttachParent();
+	if (ParentSceneComponent && ParentSceneComponent->GetOwner() != GetOwner())
+	{
+		ParentSceneComponent = nullptr;
+	}
+	return ParentSceneComponent ? Cast<UMeshComponent>(ParentSceneComponent) : GetOwner()->FindComponentByClass<UMeshComponent>();
+}
+
+void UInteractableComponent::SetRenderPostProcessInteractionOutline(bool bRender) const
+{
+	if (UMeshComponent* MeshComponent = GetOwnerMesh())
+	{
+		MeshComponent->SetRenderCustomDepth(true);
+		MeshComponent->SetCustomDepthStencilValue(bRender ? 1 : 0);
+	}
+}

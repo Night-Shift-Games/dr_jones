@@ -1,12 +1,10 @@
 // Property of Night Shift Games, all rights reserved.
 
-
 #include "ArchaeologistDesk.h"
 
-#include "Utilities.h"
 #include "Player/PlayerComponents/InventoryComponent.h"
+#include "Utilities.h"
 #include "World/Illuminati.h"
-
 
 AArchaeologistDesk::AArchaeologistDesk()
 {
@@ -15,6 +13,7 @@ AArchaeologistDesk::AArchaeologistDesk()
 	PrimaryActorTick.bCanEverTick = false;
 	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("Interactable Component"));
 	InteractableComponent->InteractDelegate.AddDynamic(this, &AArchaeologistDesk::OnInteract);
+	InteractableComponent->SetupAttachment(DeskMesh);
 }
 
 void AArchaeologistDesk::BeginPlay()
