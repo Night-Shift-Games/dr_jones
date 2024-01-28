@@ -92,6 +92,12 @@ void UInventoryComponent::ChangeActiveItem(float Value)
 	}
 }
 
+void UInventoryComponent::SetActiveItemByClass(TSubclassOf<AItem> ItemClass)
+{
+	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	SetActiveItem(*FoundItem);
+}
+
 void UInventoryComponent::SetActiveItem(AItem* NewActiveItem)
 {
 	if (NewActiveItem == ItemInHand)

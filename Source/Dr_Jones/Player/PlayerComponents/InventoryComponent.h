@@ -38,10 +38,13 @@ public:
 	void ChangeActiveItem(float Value);
 
 	UFUNCTION(BlueprintCallable)
+	void SetActiveItemByClass(TSubclassOf<AItem> ItemClass);
+	
+	UFUNCTION(BlueprintCallable)
 	void SetActiveItem(AItem* NewActiveItem);
 
 	void AttachItemToHand(AItem& ItemToAttach);
-	double GetMeshZOffset(const AActor& Actor);
+
 	AItem* DetachActiveItemFromHand();
 
 	bool CanPickUpItem() const;
