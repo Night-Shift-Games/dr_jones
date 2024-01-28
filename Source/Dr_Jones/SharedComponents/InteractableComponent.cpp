@@ -14,6 +14,13 @@ void UInteractableComponent::Interact(ADrJonesCharacter* Player)
 	InteractDelegate.Broadcast(Player);
 }
 
+void UInteractableComponent::AltInteract(ADrJonesCharacter* Player)
+{
+	checkf(Player, TEXT("Player is missing"));
+	
+	AltInteractDelegate.Broadcast(Player);
+}
+
 UMeshComponent* UInteractableComponent::GetOwnerMesh() const
 {
 	USceneComponent* ParentSceneComponent = GetAttachParent();

@@ -40,6 +40,7 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
 {
 	InputComponent->BindAction("Interact", IE_Pressed, this, &UInteractionComponent::Interact);
+	InputComponent->BindAction("AltInteract", IE_Pressed, this, &UInteractionComponent::AltInteract);
 }
 
 UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
@@ -92,6 +93,16 @@ void UInteractionComponent::Interact()
 	}
 	
 	SelectedInteractiveComponent->Interact(Owner.Get());
+}
+
+void UInteractionComponent::AltInteract()
+{
+	if (!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled())
+	{
+		return;
+	}
+	
+	SelectedInteractiveComponent->AltInteract(Owner.Get());
 }
 
 /*static*/ bool UInteractionComponent::IsInteractable(const AActor& ActorToCheck)

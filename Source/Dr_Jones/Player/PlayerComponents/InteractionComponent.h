@@ -27,6 +27,7 @@ class DR_JONES_API UInteractionComponent : public UActorComponent
 	
 public:	
 	UInteractionComponent();
+
 	void SetupPlayerInput(UInputComponent* InputComponent);
 
 protected:
@@ -37,11 +38,16 @@ protected:
 	void UpdateInteractionUI();
 	
 	void Interact();
+	void AltInteract();
+	
 	static bool IsInteractable(const AActor& ActorToCheck);
 	static bool IsInteractable(const UMeshComponent& ComponentToCheck);
 
 	static UInteractableComponent* GetAttachedInteractableComponent(const USceneComponent& ComponentToCheck);
 
+	UFUNCTION(BlueprintPure)
+	UInteractableComponent* GetSelectedInteractiveComponent() const { return SelectedInteractiveComponent; }
+	
 protected:
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
 	TWeakObjectPtr<UWidgetManager> WidgetManager;
@@ -52,7 +58,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
 	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
 	
-	UPROPERTY(Transient)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UInteractableComponent> SelectedInteractiveComponent;
 
 	UPROPERTY(Transient)

@@ -21,6 +21,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Interact(ADrJonesCharacter* Player);
 
+	UFUNCTION(BlueprintCallable)
+	void AltInteract(ADrJonesCharacter* Player);
+
 	void SetInteractionEnabled(bool bEnabled) { bEnabledInteraction = bEnabled; }
 	bool IsInteractionEnabled() const { return bEnabledInteraction; }
 
@@ -30,6 +33,9 @@ public:
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteract InteractDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	FOnInteract AltInteractDelegate;
 	
 private:
 	bool bEnabledInteraction = true;
