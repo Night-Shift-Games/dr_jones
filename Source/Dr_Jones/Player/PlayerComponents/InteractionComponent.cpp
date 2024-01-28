@@ -31,8 +31,9 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	{
 		return;
 	}
-	PreviousActorToInteract = ActorToInteract;
 	UpdateInteractionWidget();
+	
+	PreviousActorToInteract = ActorToInteract;
 }
 
 void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
@@ -48,6 +49,10 @@ void UInteractionComponent::FindActorToInteract()
 
 void UInteractionComponent::UpdateInteractionWidget()
 {
+	if (PreviousActorToInteract && ActorToInteract != PreviousActorToInteract)
+	{
+		PreviousActorToInteract->FindComponentByClass<UMeshComponent>()->SetCustomDepthStencilValue(0);
+	}
 	if (!ActorToInteract || !IsInteractable(*ActorToInteract))
 	{
 		WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Hidden);
@@ -58,6 +63,11 @@ void UInteractionComponent::UpdateInteractionWidget()
 		WidgetManager->AddWidget(InteractionUI);
 	}
 	WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Visible);
+	if (UMeshComponent* ActorMesh =	ActorToInteract->FindComponentByClass<UMeshComponent>())
+	{
+		ActorMesh->SetRenderCustomDepth(true);
+		ActorMesh->SetCustomDepthStencilValue(1);
+	}
 }
 
 void UInteractionComponent::Interact()
