@@ -4,6 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "DrJonesCharacter.h"
+#include "Framework/Application/NavigationConfig.h"
 #include "UI/DrJonesWidgetBase.h"
 
 void UWidgetManager::BeginPlay()
@@ -16,6 +17,9 @@ void UWidgetManager::BeginPlay()
 		AddWidget(KV);
 		ShowWidget(KV);
 	}
+	// Disables switching focuses by using "Tab" key.
+	FNavigationConfig& NavigationConfig = *FSlateApplication::Get().GetNavigationConfig();
+	NavigationConfig.bTabNavigation = false;
 }
 
 void UWidgetManager::AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
