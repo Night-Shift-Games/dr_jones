@@ -6,19 +6,18 @@
 #include "Components/WidgetComponent.h"
 #include "SharedComponents/BlendCameraComponent.h"
 
-AMap::AMap()
+AMap::AMap() : Super()
 {
-	PrimaryActorTick.bCanEverTick = false;
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
-	
-	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("Interactable Component"));
 
 	MapWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WorldWidget"));
 	MapWidgetComponent->SetupAttachment(StaticMeshComponent);
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(StaticMeshComponent);
+
+	InteractableComponent->SetupAttachment(StaticMeshComponent);
 }
 
 void AMap::BeginPlay()

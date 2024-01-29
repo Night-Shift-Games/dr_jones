@@ -7,6 +7,8 @@
 
 #include "CampEntity.generated.h"
 
+class UInteractableComponent;
+
 UCLASS()
 class DR_JONES_API ACampEntity : public AActor
 {
@@ -14,4 +16,8 @@ class DR_JONES_API ACampEntity : public AActor
 
 public:
 	ACampEntity();
+	
+public:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UInteractableComponent> InteractableComponent;
 };

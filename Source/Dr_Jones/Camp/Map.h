@@ -42,9 +42,6 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInteractableComponent> InteractableComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> MapWidgetComponent;
 
 	UPROPERTY(Transient)

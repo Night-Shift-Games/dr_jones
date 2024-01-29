@@ -6,18 +6,16 @@
 #include "Player/PlayerComponents/InventoryComponent.h"
 #include "Player/PlayerComponents/ReputationComponent.h"
 
-AArtifactCrate::AArtifactCrate()
+AArtifactCrate::AArtifactCrate() : Super()
 {
 	CrateStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Artifact Crate Static Mesh"));
 	RootComponent = CrateStaticMesh;
-	PrimaryActorTick.bCanEverTick = false;
-	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("Interactable Component"));
-	InteractableComponent->InteractDelegate.AddDynamic(this, &AArtifactCrate::OnInteract);
 }
 
 void AArtifactCrate::BeginPlay()
 {
 	Super::BeginPlay();
+	InteractableComponent->InteractDelegate.AddDynamic(this, &AArtifactCrate::OnInteract);
 }
 
 void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)

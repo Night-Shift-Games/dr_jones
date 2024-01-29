@@ -26,7 +26,7 @@ class DR_JONES_API AArchaeologistDesk : public ACampEntity
 public:
 	AArchaeologistDesk();
 	virtual void BeginPlay() override;
-
+	
 	void AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Player);
 	void RemoveArtifact(AArtifact* Artifact);
 	
@@ -34,9 +34,6 @@ public:
 	void OnInteract(ADrJonesCharacter* Player);
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UInteractableComponent> InteractableComponent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> DeskMesh;
 

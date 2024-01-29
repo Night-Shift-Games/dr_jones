@@ -38,9 +38,6 @@ public:
 	void CloseWidget();
 	
 public:
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UInteractableComponent> InteractableComponent;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<TObjectPtr<AArtifact>> Artifacts;
 

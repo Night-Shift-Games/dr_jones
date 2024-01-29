@@ -6,35 +6,34 @@
 #include "Utilities.h"
 #include "World/Illuminati.h"
 
-AArchaeologistDesk::AArchaeologistDesk()
+AArchaeologistDesk::AArchaeologistDesk() : Super()
 {
 	DeskMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Artifact Crate Static Mesh"));
 	RootComponent = DeskMesh;
-	PrimaryActorTick.bCanEverTick = false;
-	InteractableComponent = CreateDefaultSubobject<UInteractableComponent>(TEXT("Interactable Component"));
-	InteractableComponent->InteractDelegate.AddDynamic(this, &AArchaeologistDesk::OnInteract);
 	InteractableComponent->SetupAttachment(DeskMesh);
 }
 
 void AArchaeologistDesk::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	InteractableComponent->InteractDelegate.AddDynamic(this, &AArchaeologistDesk::OnInteract);
 }
 
 void AArchaeologistDesk::AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Player)
 {
+	if (!Artifact)
+	{
+		return;
+	}
 	ArtifactOnDesk = Artifact;
 	Player->GetInventory()->DetachActiveItemFromHand();
-	FVector SocketPlace = DeskMesh->GetSocketLocation(TEXT("ArtifactSocket"));
 
-	double ZOffset = ArtifactOnDesk->GetMeshComponent()->GetLocalBounds().BoxExtent.Z;
-	FVector Origin = ArtifactOnDesk->GetMeshComponent()->GetLocalBounds().Origin;
-	ZOffset = Origin.Z - ZOffset;
-	
+	FVector SocketPlace = DeskMesh->GetSocketLocation(TEXT("ArtifactSocket"));
+	const double ZOffset = Utilities::GetMeshZOffset(*ArtifactOnDesk);
 	SocketPlace = Utilities::FindGround(*this, SocketPlace + FVector (0, 0, 20), {ArtifactOnDesk});
 	ArtifactOnDesk->AttachToComponent(DeskMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("ArtifactSocket"));
 	ArtifactOnDesk->SetActorLocation(SocketPlace - FVector(0,0, ZOffset));
+
 	ArtifactOnDesk->GetMeshComponent()->SetVisibility(true);
 	ArtifactOnDesk->OnArtifactPickup.BindUObject(this, &AArchaeologistDesk::RemoveArtifact);
 }
