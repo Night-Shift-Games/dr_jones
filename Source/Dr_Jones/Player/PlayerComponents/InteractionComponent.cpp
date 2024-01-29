@@ -45,6 +45,10 @@ void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
 
 UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 {
+	if (SelectedInteractiveComponent && SelectedInteractiveComponent->IsInteractionInProgress())
+	{
+		return SelectedInteractiveComponent;
+	}
 	UInteractableComponent* InteractableComponent = nullptr;
 	if (const USceneComponent* FoundSceneComponent = Owner->GetPlayerLookingAt(InteractionRange).GetComponent())
 	{

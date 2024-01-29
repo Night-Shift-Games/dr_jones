@@ -7,17 +7,27 @@
 
 #include "CampEntity.generated.h"
 
+class ADrJonesCharacter;
 class UInteractableComponent;
 
-UCLASS()
+UCLASS(HideCategories = (Mobile))
 class DR_JONES_API ACampEntity : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	ACampEntity();
+	virtual void BeginPlay() override;
+
+	UFUNCTION(Blueprintable)
+	void Grab(ADrJonesCharacter* Grabber);
+
+	void HoldActor();
 	
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones|Interaction", meta = (NoResetToDefault))
 	TObjectPtr<UInteractableComponent> InteractableComponent;
+
+	FTimerHandle GrabTimer;
+	bool bGrabbed = false;
 };

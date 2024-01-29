@@ -29,15 +29,18 @@ public:
 
 	UMeshComponent* GetOwnerMesh() const;
 	void SetRenderPostProcessInteractionOutline(bool bRender) const;
-	
+	bool IsInteractionInProgress() const { return bInteractionInProgress; }
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteract InteractDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteract AltInteractDelegate;
+
+	bool bInteractionInProgress = false;
 	
 private:
 	bool bEnabledInteraction = true;
-	bool bIsActorInteraction = false;
+	
 };
