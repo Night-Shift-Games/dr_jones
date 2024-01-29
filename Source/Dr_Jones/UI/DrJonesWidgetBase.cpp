@@ -1,17 +1,5 @@
 #include "DrJonesWidgetBase.h"
 
-bool UDrJonesWidgetBase::Initialize()
-{
-	if (HasAnyFlags(RF_ClassDefaultObject))
-	{
-		return false;
-	}
-	
-	LowLevelRename(GetClass()->GetFName());
-	
-	return Super::Initialize();
-}
-
 UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
 	if (!WidgetClass)
@@ -23,10 +11,19 @@ UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidge
 	{
 		return Widget;
 	}
-	if (UWidget* FoundWidget = GetWidgetFromName(WidgetClass->GetFName()))
+
+	const UWorld* World = GetWorld();
+	for (TObjectIterator<UUserWidget> Itr; Itr; ++Itr )
 	{
-		Widget = Cast<UDrJonesWidgetBase>(FoundWidget);
+		UUserWidget* LiveWidget = *Itr;
+		
+		if (LiveWidget->GetWorld() != World || !LiveWidget->GetClass()->IsChildOf(WidgetClass))
+		{
+			continue;
+		}
+		Widget = Cast<UDrJonesWidgetBase>(LiveWidget);
 		ChildWidgets.Emplace(WidgetClass, Widget);
+		break;
 	}
 	return Widget;
 }
