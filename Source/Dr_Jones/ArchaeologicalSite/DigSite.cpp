@@ -78,7 +78,11 @@ void ADigSite::UpdateMesh(bool bAsync)
 		DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
 		DynamicMeshComponent->UpdateCollision(true);
 	};
-	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true);
+	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
+#if WITH_EDITORONLY_DATA
+		, VoxelGrid->GridVisualizer->SurfaceNetsDebugContext
+#endif
+	);
 }
 
 void ADigSite::BeginPlay()

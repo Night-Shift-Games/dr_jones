@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SurfaceNets_Triangulation.h"
 #include "Components/ActorComponent.h"
 #include "VoxelEngine.h"
 
@@ -43,6 +44,11 @@ private:
 	TArray<FVoxelSceneData> Voxels;
 	NSVE::FVoxelChunk::FTransformData TransformData;
 	bool bDrawDebug;
+	bool bDrawSNCells;
+	bool bDrawSurfacePoints;
+	bool bDrawVoxels;
+	TArray<NS::SurfaceNets::Debug::FSurfacePointVis> SurfacePoints;
+	int32 CurrentChunkIndex;
 };
 
 UCLASS()
@@ -54,9 +60,11 @@ public:
 	UVoxelGridVisualizer();
 
 	UVoxelGrid* GetVoxelGrid() const;
-	NSVE::FVoxelChunk* GetCurrentChunk() const;
+	TPair<int32, NSVE::FVoxelChunk*> GetCurrentChunk() const;
 
 	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+
+	TSharedPtr<NS::SurfaceNets::Debug::FDebugContext> SurfaceNetsDebugContext;
 
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -85,12 +93,6 @@ public:
 	UVoxelGrid();
 
 	NSVE::FVoxelGrid& GetInternal() const { check(InternalVoxelGrid.IsValid()); return *InternalVoxelGrid.Get(); }
-
-	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
-	void GenerateMesh(UDynamicMesh* DynamicMesh);
-
-	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
-	void GenerateMeshForComponent(UDynamicMeshComponent* DynamicMeshComponent);
 
 protected:
 	virtual void BeginPlay() override;
@@ -124,7 +126,7 @@ class DR_JONES_API UVoxelEngineUtilities : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static void TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount, TFunction<void()> OnCompleted, bool bAsync = true);
+	static void TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount, TFunction<void()> OnCompleted, bool bAsync = true, const TSharedPtr<NS::SurfaceNets::Debug::FDebugContext>& DebugContext = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
 	static void TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount);
