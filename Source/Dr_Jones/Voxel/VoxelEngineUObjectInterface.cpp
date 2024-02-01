@@ -362,7 +362,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 					for (const FTriangle& Triangle : CombinedTriangles)
 					{
 						const int32 TriangleID = EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
-						if (!ensure(TriangleID >= 0))
+						// NOTE: With surface nets, non-manifold triangles are to be expected,
+						// but of course, Unreal's dynamic mesh shows them a middle finger and doesn't add them at all.
+						if (!ensureMsgf(TriangleID >= 0, TEXT("Non-manifold or invalid triangle detected during EditMesh.")))
 						{
 							continue;
 						}

@@ -8,6 +8,12 @@ DECLARE_STATS_GROUP(TEXT("VoxelEngine"), STATGROUP_VoxelEngine, STATCAT_Advanced
 
 namespace NSVE
 {
+	inline TAutoConsoleVariable CVar_ParallelChunkIteration(
+		TEXT("NS.VE.ParallelChunkIteration"),
+		true,
+		TEXT("Voxel Engine - enable parallel chunk iteration (using parallel-for)."),
+		ECVF_Default);
+
 	// Utility functions used in the voxel engine
 	namespace Utils
 	{
@@ -333,10 +339,11 @@ namespace NSVE
 		{
 			FVoxelChunk* ChunksData = Chunks.GetData();
 			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
+			const bool bParallel = CVar_ParallelChunkIteration.GetValueOnAnyThread();
 			ParallelForTemplate(ChunkCount, [this, ForEachChunk, ChunksData](int32 Index)
 			{
 				ForEachChunk(ChunksData[Index], Index);
-			});
+			}, bParallel ? EParallelForFlags::None : EParallelForFlags::ForceSingleThread);
 		}
 
 		template <typename FFunc>

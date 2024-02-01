@@ -109,7 +109,7 @@ namespace NS::SurfaceNets
 	{
 		check(IsCellIntersectingSurface(Cell));
 		// TODO: When we have SDF-like thing, this needs to be changed to an edge intersection based average
-		FVector AveragePosition;
+		FVector AveragePosition = FVector::ZeroVector;
 		for (int32 CI = 0; CI < 8; ++CI)
 		{
 			AveragePosition += Cell.Positions[CI];
@@ -231,17 +231,15 @@ namespace NS::SurfaceNets
 		};
 
 		const FVoxelChunk::FTransformData TransformData = VoxelChunk.MakeTransformData();
-		const FIntVector ChunkCoords = VoxelGrid.IndexToCoords(ChunkIndex);
 		constexpr int32 CellCount = (FVoxelChunk::Resolution + 1) * (FVoxelChunk::Resolution + 1) * (FVoxelChunk::Resolution + 1);
 
 		TArray<FCell> Cells;
 		TArray<FSurfacePoint> SurfacePoints;
 		TMap<FIntVector, int32> CoordsToSurfacePointIndexMap;
 
-		Cells.SetNum(CellCount);
+		Cells.SetNumZeroed(CellCount);
 		SurfacePoints.Reserve(CellCount);
-
-		const FIntVector GridDimensionsInVoxels = VoxelGrid.GetDimensionsInVoxels();
+		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
 		int32 CellIndex = 0;
 		FIntVector VoxelCoords;
