@@ -383,7 +383,7 @@ namespace NS::SurfaceNets
 
 		FCriticalSection TransactionGuard;
 
-		VoxelGrid.IterateChunks([&](const FVoxelChunk& Chunk, int32 ChunkIndex)
+		VoxelGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 ChunkIndex)
 		{
 			TArray<FVector> Vertices;
 			TArray<FIndex3i> Triangles;
