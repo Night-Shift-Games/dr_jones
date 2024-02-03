@@ -64,11 +64,4 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
-
-	// TODO: AnimationComponent
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FX|Sound")
-	TObjectPtr<USoundBase> DigSound;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FX|Anim")
-	TObjectPtr<UAnimMontage> DigAnim;
 };
