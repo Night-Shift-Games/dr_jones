@@ -13,15 +13,15 @@ UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidge
 	}
 
 	const UWorld* World = GetWorld();
-	for (TObjectIterator<UUserWidget> Itr; Itr; ++Itr )
+	for (TObjectIterator<UDrJonesWidgetBase> Itr; Itr; ++Itr )
 	{
-		UUserWidget* LiveWidget = *Itr;
+		UDrJonesWidgetBase* LiveWidget = *Itr;
 		
 		if (LiveWidget->GetWorld() != World || !LiveWidget->GetClass()->IsChildOf(WidgetClass))
 		{
 			continue;
 		}
-		Widget = Cast<UDrJonesWidgetBase>(LiveWidget);
+		Widget = LiveWidget; 
 		ChildWidgets.Emplace(WidgetClass, Widget);
 		break;
 	}
