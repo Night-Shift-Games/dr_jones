@@ -7,15 +7,15 @@
 
 #include "DrJonesCharacter.generated.h"
 
-class UReputationComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 
 class AItem;
 class UBlendCameraComponent;
-class UInteractionComponent;
-class UReactionComponent;
-class UInventoryComponent;
 class UCharacterAnimationComponent;
+class UInteractionComponent;
+class UInventoryComponent;
+class UReactionComponent;
+class UReputationComponent;
 class UWidgetManager;
 
 UCLASS(Blueprintable)

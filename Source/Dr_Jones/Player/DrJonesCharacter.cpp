@@ -3,13 +3,14 @@
 #include "DrJonesCharacter.h"
 
 #include "Animation/CharacterAnimationComponent.h"
+#include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "PlayerComponents/InventoryComponent.h"
 #include "PlayerComponents/InteractionComponent.h"
+#include "PlayerComponents/InventoryComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
 #include "PlayerComponents/ReputationComponent.h"
-#include "WidgetManager.h"
 #include "SharedComponents/BlendCameraComponent.h"
+#include "WidgetManager.h"
 
 ADrJonesCharacter::ADrJonesCharacter()
 {
