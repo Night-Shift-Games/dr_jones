@@ -12,7 +12,8 @@ public class Dr_Jones : ModuleRules
 		{
 			"Core", 
 			"CoreUObject", 
-			"Engine", 
+			"Engine",
+			"EnhancedInput",
 			"InputCore", 
 			"ProceduralMeshComponent", 
 			"UMG", 
