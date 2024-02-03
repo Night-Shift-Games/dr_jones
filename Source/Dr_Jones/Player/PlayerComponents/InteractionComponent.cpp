@@ -2,6 +2,7 @@
 
 #include "Player/PlayerComponents/InteractionComponent.h"
 
+#include "EnhancedInputComponent.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
@@ -37,10 +38,10 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	PreviousSelectedInteractiveActor = SelectedInteractiveComponent;
 }
 
-void UInteractionComponent::SetupPlayerInput(UInputComponent* InputComponent)
+void UInteractionComponent::SetupPlayerInput(UEnhancedInputComponent* InputComponent)
 {
-	InputComponent->BindAction("Interact", IE_Pressed, this, &UInteractionComponent::Interact);
-	InputComponent->BindAction("AltInteract", IE_Pressed, this, &UInteractionComponent::AltInteract);
+	InputComponent->BindAction(InteractionAction, ETriggerEvent::Triggered, this, &UInteractionComponent::Interact);
+	InputComponent->BindAction(AlternativeInteractionAction, ETriggerEvent::Triggered, this, &UInteractionComponent::AltInteract);
 }
 
 UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const

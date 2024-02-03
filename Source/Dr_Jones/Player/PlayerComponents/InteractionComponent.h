@@ -10,6 +10,7 @@
 
 class ADrJonesCharacter;
 class UDrJonesWidgetBase;
+class UInputAction;
 class UWidgetManager;
 
 static TAutoConsoleVariable<bool> CVarInteraction(
@@ -28,7 +29,7 @@ class DR_JONES_API UInteractionComponent : public UActorComponent
 public:	
 	UInteractionComponent();
 
-	void SetupPlayerInput(UInputComponent* InputComponent);
+	void SetupPlayerInput(UEnhancedInputComponent* InputComponent);
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +58,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
 	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
+
+	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	TObjectPtr<UInputAction> InteractionAction;
+
+	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	TObjectPtr<UInputAction> AlternativeInteractionAction;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UInteractableComponent> SelectedInteractiveComponent;

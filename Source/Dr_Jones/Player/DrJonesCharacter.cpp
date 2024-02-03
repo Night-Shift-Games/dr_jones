@@ -27,6 +27,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADrJonesCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADrJonesCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
@@ -34,7 +35,13 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InventoryComponent->SetupPlayerInput(PlayerInputComponent);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
-	InteractionComponent->SetupPlayerInput(PlayerInputComponent);
+	
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (!EnhancedInputComponent)
+	{
+		return;
+	}
+	InteractionComponent->SetupPlayerInput(EnhancedInputComponent);
 }
 
 void ADrJonesCharacter::MoveForward(float AxisValue)
