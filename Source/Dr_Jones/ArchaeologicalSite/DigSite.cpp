@@ -123,7 +123,7 @@ void ADigSite::DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Locati
 	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
 	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 	{
-		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+		const FVector WorldPosition = NSVE::FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
 		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
 		check((bIsInRadius & 1) == bIsInRadius);
 
@@ -136,7 +136,7 @@ void ADigSite::UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Loca
 	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
 	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 	{
-		const FVector WorldPosition = NSVE::FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+		const FVector WorldPosition = NSVE::FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
 		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
 		check((bIsInRadius & 1) == bIsInRadius);
 

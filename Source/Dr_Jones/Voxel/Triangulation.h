@@ -243,7 +243,7 @@ namespace NSVE::Triangulation
 							continue;
 						}
 						GridCell.Values[Corner] = Voxel->bSolid ? -1.0f : 1.0f;
-						GridCell.Positions[Corner] = FVoxelChunk::GridPositionToWorld_Static(GridCellCornerCoords[Corner], TransformData);
+						GridCell.Positions[Corner] = FVoxelChunk::CoordsToWorld_Static(GridCellCornerCoords[Corner], TransformData);
 						check(Voxel->LocalMaterial < 8);
 						MaterialIndexOccurrences[Voxel->LocalMaterial] += 1;
 					}

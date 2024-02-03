@@ -104,7 +104,7 @@ namespace NSVE
 		Voxels.Clear();
 		Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		{
-			const FVector WorldPosition = GridPositionToWorld_Static(Coords, TransformData);
+			const FVector WorldPosition = CoordsToWorld_Static(Coords, TransformData);
 			Voxel.bSolid = WorldPosition.Z <= SurfaceZ_WS;
 			Voxel.LocalMaterial = 0;
 		});
@@ -126,7 +126,7 @@ namespace NSVE
 		{
 			Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 			{
-				const FVector WorldPosition = GridPositionToWorld_Static(Coords, TransformData);
+				const FVector WorldPosition = CoordsToWorld_Static(Coords, TransformData);
 				if (WorldPosition.Z <= Layer.PlaneMaxZ)
 				{
 					Voxel.bSolid = true;
@@ -148,7 +148,7 @@ namespace NSVE
 
 		Voxels.Iterate([&TransformData](const FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		{
-			DrawDebugPoint(GWorld, GridPositionToWorld_Static(Coords, TransformData), 4.0f, Voxel.bSolid ? FColor::Green : FColor::Red);
+			DrawDebugPoint(GWorld, CoordsToWorld_Static(Coords, TransformData), 4.0f, Voxel.bSolid ? FColor::Green : FColor::Red);
 		});
 	}
 #endif
@@ -180,7 +180,7 @@ namespace NSVE
 			{
 				for (int32 X = 0; X < DimensionsInChunks.X; ++X)
 				{
-					FVoxelChunkBounds Bounds = CalcChunkWorldBoundsFromGridPosition(FIntVector{X, Y, Z});
+					FVoxelChunkBounds Bounds = CalcChunkWorldBoundsFromGridCoords(FIntVector{X, Y, Z});
 					FVoxelChunk& Chunk = Chunks.Emplace_GetRef(Bounds);
 				}
 			}
@@ -197,7 +197,7 @@ namespace NSVE
 				const FVoxelChunk::FTransformData TransformData = Chunks[Index].MakeTransformData();
 				Chunks[Index].Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 				{
-					const FVector WorldPosition = FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+					const FVector WorldPosition = FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
 					for (const FVector& ArtifactLocation : Initializer.ArtifactLocations)
 					{
 						static constexpr double MaxDistanceToArtifact = 100.0;
@@ -224,7 +224,7 @@ namespace NSVE
 	{
 		SCOPED_NAMED_EVENT(VoxelEngine_VoxelGrid_DrawDebugChunks, FColorList::Red)
 
-		const FIntVector GridPosition = CalcGridPositionFromLocalPosition(PositionInside);
+		const FIntVector GridPosition = CalcGridCoordsFromLocalPosition(PositionInside);
 		GEngine->AddOnScreenDebugMessage(213769420, 2.0f, FColor::Yellow, FString::Printf(TEXT("Voxel Grid Location: %s"), *GridPosition.ToString()));
 
 		for (auto It = Chunks.CreateConstIterator(); It; ++It)

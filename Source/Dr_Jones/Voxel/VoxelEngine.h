@@ -8,6 +8,20 @@ DECLARE_STATS_GROUP(TEXT("VoxelEngine"), STATGROUP_VoxelEngine, STATCAT_Advanced
 
 namespace NSVE
 {
+	// Global compile-time data used by the voxel engine
+	struct FVoxelEngineConfig
+	{
+		// Size of the chunk in UU. Every chunk is a cube
+		static constexpr double ChunkSize = 200.0;
+		static constexpr double HalfChunkSize = ChunkSize / 2.0;
+
+		// How many voxels are in each chunk (in one dimension)
+		static constexpr int32 ChunkResolution = 1 << 4;
+
+		// Whether to support multi-threaded parallel iteration of chunks (FVoxelGrid::IterateChunks_Parallel)
+		static constexpr bool bEnableParallelChunkIteration = true;
+	};
+
 	inline TAutoConsoleVariable CVar_ParallelChunkIteration(
 		TEXT("NS.VE.ParallelChunkIteration"),
 		true,
@@ -78,23 +92,6 @@ namespace NSVE
 		};
 	};
 
-	// Global compile-time data used by the voxel engine
-	struct FVoxelEngineConfig
-	{
-		// Size of the chunk in UU. Every chunk is a cube
-		static constexpr double ChunkSize = 200.0;
-		static constexpr double HalfChunkSize = ChunkSize / 2.0;
-
-		// How many voxels are in each chunk (in one dimension)
-		static constexpr int32 ChunkResolution = 1 << 4;
-
-		// Max count of voxels in a single voxel chunk
-		static constexpr int32 ChunkMaxVoxelCount = ChunkResolution * ChunkResolution * ChunkResolution;
-
-		// Max size of raw allocated data of a single voxel chunk
-		static constexpr int32 ChunkMaxSizeInBytes = ChunkMaxVoxelCount * sizeof(FVoxel);
-	};
-
 	inline constexpr size_t Alignment = std::hardware_constructive_interference_size;
 
 	// Inline array of voxels with utility operations
@@ -102,8 +99,18 @@ namespace NSVE
 	{
 	public:
 		using FElement = FVoxel;
+
 		static constexpr size_t ElementSize = sizeof(FElement);
-		static constexpr int32 ElementCount = FVoxelEngineConfig::ChunkMaxVoxelCount;
+
+		static constexpr int32 Resolution = FVoxelEngineConfig::ChunkResolution;
+
+		// Max count of voxels in a single voxel array
+		static constexpr int32 ElementCount = Resolution * Resolution * Resolution;
+
+		// Max size of raw allocated data of a single voxel array
+		static constexpr int32 MaxSizeInBytes = ElementCount * ElementSize;
+
+		static inline const FIntVector Dimensions = FIntVector(Resolution);
 
 		TStaticArray<FElement, ElementCount> Voxels;
 
@@ -128,12 +135,19 @@ namespace NSVE
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxels, FColorList::MandarianOrange)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxels"), STAT_VoxelEngine_FVoxelArray_IterateVoxels, STATGROUP_VoxelEngine)
 
-			for (int32 Index = 0; Index < ElementCount; ++Index)
+			FIntVector Coords;
+			int32 Index = 0;
+			for (Coords.Z = 0; Coords.Z < Resolution; ++Coords.Z)
 			{
-				check(IsValidIndex(Index));
-				FIntVector Coords = IndexToCoords(Index);
-				FElement& Voxel = Voxels[Index];
-				IterateFunc(Voxel, Index, Coords);
+				for (Coords.Y = 0; Coords.Y < Resolution; ++Coords.Y)
+				{
+					for (Coords.X = 0; Coords.X < Resolution; ++Coords.X, ++Index)
+					{
+						check(IsValidIndex(Index));
+						FElement& Voxel = Voxels[Index];
+						IterateFunc(Voxel, Index, Coords);
+					}
+				}
 			}
 		}
 
@@ -144,17 +158,24 @@ namespace NSVE
 			SCOPED_NAMED_EVENT(VoxelEngine_VoxelArray_IterateVoxels, FColorList::MandarianOrange)
 			DECLARE_SCOPE_CYCLE_COUNTER(TEXT("VoxelEngine::FVoxelArray::IterateVoxels"), STAT_VoxelEngine_FVoxelArray_IterateVoxels, STATGROUP_VoxelEngine)
 
-			for (int32 Index = 0; Index < ElementCount; ++Index)
+			FIntVector Coords;
+			int32 Index = 0;
+			for (Coords.Z = 0; Coords.Z < Resolution; ++Coords.Z)
 			{
-				check(IsValidIndex(Index));
-				FIntVector Coords = IndexToCoords(Index);
-				const FElement& Voxel = Voxels[Index];
-				IterateFunc(Voxel, Index, Coords);
+				for (Coords.Y = 0; Coords.Y < Resolution; ++Coords.Y)
+				{
+					for (Coords.X = 0; Coords.X < Resolution; ++Coords.X, ++Index)
+					{
+						check(IsValidIndex(Index));
+						const FElement& Voxel = Voxels[Index];
+						IterateFunc(Voxel, Index, Coords);
+					}
+				}
 			}
 		}
 
 		// Iterate through all voxels using a function with signature void(FVoxel& Voxel, int32 Index)
-		// Version without precalculated coords
+		// Version without coords
 		template <typename Func>
 		void IterateFast(Func IterateFunc)
 		{
@@ -170,7 +191,7 @@ namespace NSVE
 		}
 
 		// Iterate through all voxels using a function with signature void(const FVoxel& Voxel, int32 Index)
-		// Version without precalculated coords
+		// Version without coords
 		template <typename Func>
 		void IterateFast(Func IterateFunc) const
 		{
@@ -208,7 +229,7 @@ namespace NSVE
 		FVoxelArray& Difference(const FVoxelArray& OtherArray);
 		FVoxelArray& Intersect(const FVoxelArray& OtherArray);
 
-		static FIntVector3 GetDimensions() { return FIntVector3(FVoxelEngineConfig::ChunkResolution); }
+		static const FIntVector3& GetDimensions() { return Dimensions; }
 
 		static constexpr bool IsValidIndex(int32 Index);
 
@@ -260,7 +281,7 @@ namespace NSVE
 	class DR_JONES_API alignas(Alignment) FVoxelChunk
 	{
 	public:
-		static constexpr int32 Resolution = FVoxelEngineConfig::ChunkResolution;
+		static constexpr int32 Resolution = FVoxelArray::Resolution;
 
 		FVoxelChunkBounds Bounds;
 		FVoxelArray Voxels;
@@ -282,11 +303,11 @@ namespace NSVE
 
 		FTransformData MakeTransformData() const;
 
-		FVector GridPositionToWorld(const FIntVector& LocalPosition) const;
-		static FVector GridPositionToWorld_Static(const FIntVector& LocalPosition, const FTransformData& TransformData);
+		FVector CoordsToWorld(const FIntVector& Coords) const;
+		static FVector CoordsToWorld_Static(const FIntVector& Coords, const FTransformData& TransformData);
 
-		FIntVector WorldPositionToGrid(const FVector& WorldPosition) const;
-		static FIntVector WorldPositionToGrid_Static(const FVector& WorldPosition, const FTransformData& TransformData);
+		FIntVector WorldToCoords(const FVector& WorldPosition) const;
+		static FIntVector WorldToCoords(const FVector& WorldPosition, const FTransformData& TransformData);
 
 		static FIntVector IndexToCoords(int32 Index);
 		static int32 CoordsToIndex(const FIntVector& Coords);
@@ -302,12 +323,14 @@ namespace NSVE
 	{
 		FTransform Transform;
 		FBoxSphereBounds Bounds;
-		// TODO: Make some fill initializer
+
+		// TODO: Move the fill logic outside of VoxelEngine.h
 		float FillSurfaceZ_WS;
 		TArray<FVoxelLayer> Layers;
 		TArray<FVector> ArtifactLocations;
 	};
 
+	// Persistent global address of a specific voxel in the *whole* voxel grid
 	struct FVoxelAddress
 	{
 		// Coords of a chunk in the whole grid
@@ -337,13 +360,21 @@ namespace NSVE
 		template <typename FFunc>
 		void IterateChunks_Parallel(FFunc ForEachChunk)
 		{
-			FVoxelChunk* ChunksData = Chunks.GetData();
-			const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
-			const bool bParallel = CVar_ParallelChunkIteration.GetValueOnAnyThread();
-			ParallelForTemplate(ChunkCount, [this, ForEachChunk, ChunksData](int32 Index)
+			if constexpr (FVoxelEngineConfig::bEnableParallelChunkIteration)
 			{
-				ForEachChunk(ChunksData[Index], Index);
-			}, bParallel ? EParallelForFlags::None : EParallelForFlags::ForceSingleThread);
+				FVoxelChunk* ChunksData = Chunks.GetData();
+				const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
+				const bool bParallel = CVar_ParallelChunkIteration.GetValueOnAnyThread();
+				const EParallelForFlags Flags = bParallel ? EParallelForFlags::None : EParallelForFlags::ForceSingleThread;
+				ParallelForTemplate(ChunkCount, [this, ForEachChunk, ChunksData](int32 Index)
+				{
+					ForEachChunk(ChunksData[Index], Index);
+				}, Flags);
+			}
+			else
+			{
+				IterateChunks(ForEachChunk);
+			}
 		}
 
 		template <typename FFunc>
@@ -359,11 +390,11 @@ namespace NSVE
 		}
 
 		FVoxelChunkBounds CalcChunkWorldBoundsFromIndex(int32 Index) const;
-		FVoxelChunkBounds CalcChunkWorldBoundsFromGridPosition(const FIntVector& GridPosition) const;
+		FVoxelChunkBounds CalcChunkWorldBoundsFromGridCoords(const FIntVector& GridCoords) const;
 
 		int32 CalcChunkIndexFromWorldPosition(const FVector& WorldLocation) const;
 		int32 CalcChunkIndexFromLocalPosition(const FVector& LocalPosition) const;
-		FIntVector CalcGridPositionFromLocalPosition(const FVector& LocalPosition) const;
+		FIntVector CalcGridCoordsFromLocalPosition(const FVector& LocalPosition) const;
 
 		FIntVector IndexToCoords(int32 Index) const;
 		int32 CoordsToIndex(const FIntVector& Coords) const;
@@ -422,8 +453,8 @@ namespace NSVE
 
 		Iterate([&Offset](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 		{
-			static constexpr int32 LowBound = FVoxelEngineConfig::ChunkResolution * 1 / 3;
-			static constexpr int32 HighBound = FVoxelEngineConfig::ChunkResolution * 2 / 3;
+			static constexpr int32 LowBound = Resolution * 1 / 3;
+			static constexpr int32 HighBound = Resolution * 2 / 3;
 			Voxel.bSolid =
 				Coords.X - Offset.X > LowBound && Coords.X - Offset.X < HighBound &&
 				Coords.Y - Offset.Y > LowBound && Coords.Y - Offset.Y < HighBound &&
@@ -492,12 +523,12 @@ namespace NSVE
 
 	FORCEINLINE constexpr FIntVector FVoxelArray::IndexToCoords(int32 Index)
 	{
-		return Utils::IndexToInlineGridPosition(Index, FVoxelEngineConfig::ChunkResolution);
+		return Utils::IndexToInlineGridPosition(Index, Resolution);
 	}
 
 	FORCEINLINE constexpr int32 FVoxelArray::CoordsToIndex(const FIntVector& Coords)
 	{
-		return Utils::InlineGridPositionToIndex(Coords, FVoxelEngineConfig::ChunkResolution);
+		return Utils::InlineGridPositionToIndex(Coords, Resolution);
 	}
 
 	FORCEINLINE FVoxelArray::FElement& FVoxelArray::operator[](size_t Index)
@@ -540,29 +571,29 @@ namespace NSVE
 		FTransformData TransformData;
 		TransformData.RootCenter = Bounds.Origin;
 		TransformData.RootExtent = Bounds.Extent;
-		TransformData.VoxelSize = (TransformData.RootExtent * 2.0) / FVoxelEngineConfig::ChunkResolution;
+		TransformData.VoxelSize = (TransformData.RootExtent * 2.0) / Resolution;
 		return TransformData;
 	}
 
-	FORCEINLINE FVector FVoxelChunk::GridPositionToWorld(const FIntVector& LocalPosition) const
+	FORCEINLINE FVector FVoxelChunk::CoordsToWorld(const FIntVector& Coords) const
 	{
-		return GridPositionToWorld_Static(LocalPosition, MakeTransformData());
+		return CoordsToWorld_Static(Coords, MakeTransformData());
 	}
 
-	FORCEINLINE FVector FVoxelChunk::GridPositionToWorld_Static(const FIntVector& LocalPosition, const FTransformData& TransformData)
+	FORCEINLINE FVector FVoxelChunk::CoordsToWorld_Static(const FIntVector& Coords, const FTransformData& TransformData)
 	{
-		const FVector WorldPositionNoOffset = FVector(LocalPosition.X, LocalPosition.Y, LocalPosition.Z) * TransformData.VoxelSize;
+		const FVector WorldPositionNoOffset = FVector(Coords.X, Coords.Y, Coords.Z) * TransformData.VoxelSize;
 		const FVector Offset = -FVector(TransformData.RootExtent - TransformData.VoxelSize / 2.0);
 		const FVector Location = TransformData.RootCenter + WorldPositionNoOffset + Offset;
 		return Location;
 	}
 
-	FORCEINLINE FIntVector FVoxelChunk::WorldPositionToGrid(const FVector& WorldPosition) const
+	FORCEINLINE FIntVector FVoxelChunk::WorldToCoords(const FVector& WorldPosition) const
 	{
-		return WorldPositionToGrid_Static(WorldPosition, MakeTransformData());
+		return WorldToCoords(WorldPosition, MakeTransformData());
 	}
 
-	FORCEINLINE FIntVector FVoxelChunk::WorldPositionToGrid_Static(const FVector& WorldPosition, const FTransformData& TransformData)
+	FORCEINLINE FIntVector FVoxelChunk::WorldToCoords(const FVector& WorldPosition, const FTransformData& TransformData)
 	{
 		const FVector LocalPosition = WorldPosition - (TransformData.RootCenter - TransformData.RootExtent);
 		const FIntVector GridPosition = FIntVector(LocalPosition / TransformData.VoxelSize);
@@ -591,12 +622,12 @@ namespace NSVE
 	FORCEINLINE FVoxelChunkBounds FVoxelGrid::CalcChunkWorldBoundsFromIndex(int32 Index) const
 	{
 		const FIntVector LocalPosition = IndexToCoords(Index);
-		return CalcChunkWorldBoundsFromGridPosition(LocalPosition);
+		return CalcChunkWorldBoundsFromGridCoords(LocalPosition);
 	}
 
-	FORCEINLINE FVoxelChunkBounds FVoxelGrid::CalcChunkWorldBoundsFromGridPosition(const FIntVector& GridPosition) const
+	FORCEINLINE FVoxelChunkBounds FVoxelGrid::CalcChunkWorldBoundsFromGridCoords(const FIntVector& GridCoords) const
 	{
-		const FVector RelativePosition = FVector(GridPosition * FVoxelEngineConfig::ChunkSize) + FVoxelEngineConfig::HalfChunkSize - Extent;
+		const FVector RelativePosition = FVector(GridCoords * FVoxelEngineConfig::ChunkSize) + FVoxelEngineConfig::HalfChunkSize - Extent;
 		const FVector ChunkOrigin = Transform.TransformPosition(RelativePosition);
 		return FVoxelChunkBounds{ ChunkOrigin, FVoxelEngineConfig::HalfChunkSize };
 	}
@@ -627,11 +658,11 @@ namespace NSVE
 
 	FORCEINLINE int32 FVoxelGrid::CalcChunkIndexFromLocalPosition(const FVector& LocalPosition) const
 	{
-		const FIntVector GridPosition = CalcGridPositionFromLocalPosition(LocalPosition);
+		const FIntVector GridPosition = CalcGridCoordsFromLocalPosition(LocalPosition);
 		return CoordsToIndex(GridPosition);
 	}
 
-	FORCEINLINE FIntVector FVoxelGrid::CalcGridPositionFromLocalPosition(const FVector& LocalPosition) const
+	FORCEINLINE FIntVector FVoxelGrid::CalcGridCoordsFromLocalPosition(const FVector& LocalPosition) const
 	{
 		return FIntVector((LocalPosition + Extent).BoundToBox(FVector::ZeroVector, Extent * 2) / FVoxelEngineConfig::ChunkSize);
 	}
@@ -652,9 +683,8 @@ namespace NSVE
 
 	FORCEINLINE FVoxelChunk& FVoxelGrid::GetChunkRefByIndex(int32 Index)
 	{
-		FVoxelChunk* Chunk = GetChunkByIndex(Index);
-		check(Chunk);
-		return *Chunk;
+		checkf(Chunks.IsValidIndex(Index), TEXT("A chunk with index %i does not exist."), Index);
+		return Chunks[Index];
 	}
 
 	FORCEINLINE const FVoxelChunk& FVoxelGrid::GetChunkRefByIndex(int32 Index) const
@@ -665,14 +695,14 @@ namespace NSVE
 	FORCEINLINE FVoxelAddress FVoxelGrid::CalcVoxelAddressFromGlobalCoords(const FIntVector& GlobalCoords)
 	{
 		FVoxelAddress Address;
-		Address.ChunkCoords = GlobalCoords / FVoxelEngineConfig::ChunkResolution;
-		Address.VoxelCoords = GlobalCoords % FVoxelEngineConfig::ChunkResolution;
+		Address.ChunkCoords = GlobalCoords / FVoxelChunk::Resolution;
+		Address.VoxelCoords = GlobalCoords % FVoxelChunk::Resolution;
 		return Address;
 	}
 
 	FORCEINLINE FIntVector FVoxelGrid::CalcGlobalCoordsFromVoxelAddress(const FVoxelAddress& VoxelAddress)
 	{
-		return VoxelAddress.ChunkCoords * FVoxelEngineConfig::ChunkResolution + VoxelAddress.VoxelCoords;
+		return VoxelAddress.ChunkCoords * FVoxelChunk::Resolution + VoxelAddress.VoxelCoords;
 	}
 
 	FORCEINLINE FVoxelAddress FVoxelGrid::CalcVoxelAddressFromGlobalCoordsChecked(const FIntVector& GlobalCoords) const
@@ -693,9 +723,9 @@ namespace NSVE
 		check(GlobalCoords.X >= 0);
 		check(GlobalCoords.Y >= 0);
 		check(GlobalCoords.Z >= 0);
-		check(GlobalCoords.X < GetDimensionsInChunks().X * FVoxelEngineConfig::ChunkResolution);
-		check(GlobalCoords.Y < GetDimensionsInChunks().Y * FVoxelEngineConfig::ChunkResolution);
-		check(GlobalCoords.Z < GetDimensionsInChunks().Z * FVoxelEngineConfig::ChunkResolution);
+		check(GlobalCoords.X < GetDimensionsInChunks().X * FVoxelChunk::Resolution);
+		check(GlobalCoords.Y < GetDimensionsInChunks().Y * FVoxelChunk::Resolution);
+		check(GlobalCoords.Z < GetDimensionsInChunks().Z * FVoxelChunk::Resolution);
 		return GlobalCoords;
 	}
 }

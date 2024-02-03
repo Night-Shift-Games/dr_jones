@@ -39,7 +39,7 @@ FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridV
 
 		Chunk->Voxels.Iterate([this](const FVoxel& Voxel, int32 Index, const FIntVector3& Coords)
 		{
-			const FVector Location = FVoxelChunk::GridPositionToWorld_Static(Coords, TransformData);
+			const FVector Location = FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
 			FVoxelSceneData& VoxelSceneData = Voxels.Emplace_GetRef();
 			VoxelSceneData.Location = Location;
 			VoxelSceneData.bSolid = Voxel.bSolid;

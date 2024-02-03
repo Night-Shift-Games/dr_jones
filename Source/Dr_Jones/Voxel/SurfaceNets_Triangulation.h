@@ -44,19 +44,6 @@ namespace NS::SurfaceNets
 			FCriticalSection SurfacePointsMutex;
 		};
 
-		inline void DrawSurfaceNetsDebug(const FDebugContext& DebugContext)
-		{
-			check(IsInGameThread());
-			if (CVar_SurfacePoints.GetValueOnGameThread())
-			{
-				for (const FSurfacePointVis& Vis : DebugContext.SurfacePoints)
-				{
-					DrawDebugPoint(GWorld, Vis.Location, 5.0f, FColor::Red, false, 10.0f, SDPG_World);
-					DrawDebugString(GWorld, Vis.Location, FString::FromInt(Vis.Index), nullptr, FColor::Red, 10.0f, false, 1.0f);
-				}
-			}
-		}
-
 		inline void ClearDebugContext(FDebugContext& DebugContext)
 		{
 			DebugContext.SurfacePoints.Reset();
@@ -126,13 +113,13 @@ namespace NS::SurfaceNets
 		const FIntVector& VoxelCoords,
 		FCell& OutCell)
 	{
-		// check(Chunk.AreCoordsValid(VoxelCoords));
 		for (int32 CI = 0; CI < 8; ++CI)
 		{
 			FIntVector CornerCoords;
 			CornerCoords.X = VoxelCoords.X + !!(CI & 1 << 0);
 			CornerCoords.Y = VoxelCoords.Y + !!(CI & 1 << 1);
 			CornerCoords.Z = VoxelCoords.Z + !!(CI & 1 << 2);
+			// Corner coords may be outside the current chunk
 			const bool bXOut = CornerCoords.X >= FVoxelChunk::Resolution;
 			const bool bYOut = CornerCoords.Y >= FVoxelChunk::Resolution;
 			const bool bZOut = CornerCoords.Z >= FVoxelChunk::Resolution;
@@ -142,7 +129,7 @@ namespace NS::SurfaceNets
 			if (!bIsCornerOutsideChunk)
 			{
 				ActualChunk = &Chunk;
-				OutCell.Positions[CI] = FVoxelChunk::GridPositionToWorld_Static(CornerCoords, ChunkTransformData);
+				OutCell.Positions[CI] = FVoxelChunk::CoordsToWorld_Static(CornerCoords, ChunkTransformData);
 			}
 			else
 			{
@@ -159,7 +146,7 @@ namespace NS::SurfaceNets
 				check(ActualChunk);
 
 				CornerCoords %= FVoxelChunk::Resolution;
-				OutCell.Positions[CI] = FVoxelChunk::GridPositionToWorld_Static(CornerCoords, ActualChunk->MakeTransformData());
+				OutCell.Positions[CI] = FVoxelChunk::CoordsToWorld_Static(CornerCoords, ActualChunk->MakeTransformData());
 			}
 
 			// TODO: There should probably be more SDF-like info in the voxels than just one bSolid flag
@@ -243,6 +230,7 @@ namespace NS::SurfaceNets
 
 		int32 CellIndex = 0;
 		FIntVector VoxelCoords;
+		// NOTE: One more cell per dimension is needed for creating quads at chunk's borders
 		for (VoxelCoords.Z = 0; VoxelCoords.Z < FVoxelChunk::Resolution + 1; ++VoxelCoords.Z)
 		{
 			for (VoxelCoords.Y = 0; VoxelCoords.Y < FVoxelChunk::Resolution + 1; ++VoxelCoords.Y)
