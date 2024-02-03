@@ -339,6 +339,14 @@ namespace NSVE
 		FIntVector VoxelCoords;
 	};
 
+	inline FVoxelAddress MakeVoxelAddress(const FIntVector& ChunkCoords, const FIntVector& VoxelCoords)
+	{
+		FVoxelAddress Address;
+		Address.ChunkCoords = ChunkCoords;
+		Address.VoxelCoords = VoxelCoords;
+		return Address;
+	}
+
 	// Structure that stores voxels in a grid of separate chunks to optimize the usage
 	class DR_JONES_API FVoxelGrid
 	{
@@ -411,6 +419,9 @@ namespace NSVE
 
 		FVoxelAddress CalcVoxelAddressFromGlobalCoordsChecked(const FIntVector& GlobalCoords) const;
 		FIntVector CalcGlobalCoordsFromVoxelAddressChecked(const FVoxelAddress& VoxelAddress) const;
+
+		FVoxel* ResolveAddress(const FVoxelAddress& VoxelAddress);
+		const FVoxel* ResolveAddress(const FVoxelAddress& VoxelAddress) const;
 
 #if ENABLE_VOXEL_ENGINE_DEBUG
 		void DrawDebugChunks(const UWorld& World,

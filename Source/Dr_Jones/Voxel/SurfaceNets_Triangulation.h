@@ -68,6 +68,51 @@ namespace NS::SurfaceNets
 		Corner_XYZ  = 0b111,
 	};
 
+	// An SDF that allows for triangulating the whole chunk using surface nets without querying the voxel grid.
+	struct FExtendedSDF
+	{
+		static constexpr int32 Resolution = FVoxelChunk::Resolution + 4;
+		TStaticArray<float, Resolution * Resolution * Resolution> SDF;
+
+		inline float GetByVoxelCoords(const FIntVector& VoxelCoords) const
+		{
+			// SDF's coords start at -1 in relation to its chunk.
+			// This is needed to make convolution by a 3x3x3 kernel possible.
+			const int32 X = VoxelCoords.X + 1;
+			const int32 Y = VoxelCoords.Y + 1;
+			const int32 Z = VoxelCoords.Z + 1;
+			check(X >= 0 && X < Resolution);
+			check(Y >= 0 && Y < Resolution);
+			check(Z >= 0 && Z < Resolution);
+			const int32 Index = Z * Resolution * Resolution + Y * Resolution + X + 1;
+			return SDF[Index];
+		}
+	};
+
+	inline TUniquePtr<FExtendedSDF> GenerateChunkExtendedSDF(const FVoxelGrid& Grid, int32 ChunkIndex)
+	{
+		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_GenerateChunkExtendedSDF, FColorList::NeonPink)
+
+		const FIntVector BaseGlobalCoords = Grid.CalcGlobalCoordsFromVoxelAddressChecked(MakeVoxelAddress(Grid.IndexToCoords(ChunkIndex), FIntVector{}));
+		TUniquePtr<FExtendedSDF> ExtendedSDF = MakeUnique<FExtendedSDF>();
+		FIntVector LocalVoxelCoords;
+		int32 SDFIndex = 0;
+		for (LocalVoxelCoords.Z = -1; LocalVoxelCoords.Z < FExtendedSDF::Resolution - 1; ++LocalVoxelCoords.Z)
+		{
+			for (LocalVoxelCoords.Y = -1; LocalVoxelCoords.Y < FExtendedSDF::Resolution - 1; ++LocalVoxelCoords.Y)
+			{
+				for (LocalVoxelCoords.X = -1; LocalVoxelCoords.X < FExtendedSDF::Resolution - 1; ++LocalVoxelCoords.X, ++SDFIndex)
+				{
+					const FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
+					const FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
+					const FVoxel* Voxel = Grid.ResolveAddress(VoxelAddress);
+					ExtendedSDF->SDF[SDFIndex] = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
+				}
+			}
+		}
+		return ExtendedSDF;
+	}
+
 	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB, bool* bOutCornerBInside)
 	{
 		check(CornerA < 8 && CornerB < 8);
@@ -111,6 +156,7 @@ namespace NS::SurfaceNets
 		int32 ChunkIndex,
 		const FVoxelChunk::FTransformData& ChunkTransformData,
 		const FIntVector& VoxelCoords,
+		const FExtendedSDF& ExtendedSDF,
 		FCell& OutCell)
 	{
 		for (int32 CI = 0; CI < 8; ++CI)
@@ -119,6 +165,18 @@ namespace NS::SurfaceNets
 			CornerCoords.X = VoxelCoords.X + !!(CI & 1 << 0);
 			CornerCoords.Y = VoxelCoords.Y + !!(CI & 1 << 1);
 			CornerCoords.Z = VoxelCoords.Z + !!(CI & 1 << 2);
+
+			const float Value = ExtendedSDF.GetByVoxelCoords(CornerCoords);
+			if (FMath::IsNaN(Value))
+			{
+				return false;
+			}
+
+			OutCell.Values[CI] = Value;
+			OutCell.Positions[CI] = FVoxelChunk::CoordsToWorld_Static(CornerCoords, ChunkTransformData);
+
+			continue;
+
 			// Corner coords may be outside the current chunk
 			const bool bXOut = CornerCoords.X >= FVoxelChunk::Resolution;
 			const bool bYOut = CornerCoords.Y >= FVoxelChunk::Resolution;
@@ -228,6 +286,8 @@ namespace NS::SurfaceNets
 		SurfacePoints.Reserve(CellCount);
 		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
+		const TUniquePtr<FExtendedSDF> ExtendedSDF = GenerateChunkExtendedSDF(VoxelGrid, ChunkIndex);
+
 		int32 CellIndex = 0;
 		FIntVector VoxelCoords;
 		// NOTE: One more cell per dimension is needed for creating quads at chunk's borders
@@ -238,7 +298,7 @@ namespace NS::SurfaceNets
 				for (VoxelCoords.X = 0; VoxelCoords.X < FVoxelChunk::Resolution + 1; ++VoxelCoords.X, ++CellIndex)
 				{
 					FCell& Cell = Cells[CellIndex];
-					if (!MakeCellAtVoxel(VoxelGrid, VoxelChunk, ChunkIndex, TransformData, VoxelCoords, Cell))
+					if (!MakeCellAtVoxel(VoxelGrid, VoxelChunk, ChunkIndex, TransformData, VoxelCoords, *ExtendedSDF, Cell))
 					{
 						continue;
 					}

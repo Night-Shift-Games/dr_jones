@@ -219,6 +219,27 @@ namespace NSVE
 		}
 	}
 
+	FVoxel* FVoxelGrid::ResolveAddress(const FVoxelAddress& VoxelAddress)
+	{
+		if (!AreCoordsValid(VoxelAddress.ChunkCoords))
+		{
+			return nullptr;
+		}
+
+		FVoxelChunk& Chunk = GetChunkRefByIndex(CoordsToIndex(VoxelAddress.ChunkCoords));
+		if (!Chunk.AreCoordsValid(VoxelAddress.VoxelCoords))
+		{
+			return nullptr;
+		}
+
+		return &Chunk.Voxels[Chunk.CoordsToIndex(VoxelAddress.VoxelCoords)];
+	}
+
+	const FVoxel* FVoxelGrid::ResolveAddress(const FVoxelAddress& VoxelAddress) const
+	{
+		return const_cast<FVoxelGrid*>(this)->ResolveAddress(VoxelAddress);
+	}
+
 #if ENABLE_VOXEL_ENGINE_DEBUG
 	void FVoxelGrid::DrawDebugChunks(const UWorld& World, const FVector& PositionInside, bool bPersistentLines, float LifeTime, uint8 DepthPriority, float Thickness) const
 	{
