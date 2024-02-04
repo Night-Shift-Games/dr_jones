@@ -141,6 +141,35 @@ namespace NS::SurfaceNets
 				}
 			}
 		}
+
+		template <typename FFunc>
+		void Iterate_Static(FFunc ForEach)
+		{
+			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Iterate, FColorList::MediumGoldenrod)
+
+			int32 Index = 0;
+			FIntVector Coords;
+			for (Coords.Z = 0; Coords.Z < Resolution; ++Coords.Z)
+			{
+				for (Coords.Y = 0; Coords.Y < Resolution; ++Coords.Y)
+				{
+					for (Coords.X = 0; Coords.X < Resolution; ++Coords.X, ++Index)
+					{
+						ForEach(Index, Coords);
+					}
+				}
+			}
+		}
+
+		void Reset()
+		{
+			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Reset, FColorList::DarkOrchid)
+
+			for (int32 Index = 0; Index < SDF.Num(); ++Index)
+			{
+				SDF[Index] = NAN;
+			}
+		}
 	};
 
 	inline TUniquePtr<FExtendedSDF> GenerateChunkExtendedSDF(const FVoxelGrid& Grid, int32 ChunkIndex)
@@ -190,41 +219,68 @@ namespace NS::SurfaceNets
 	}
 
 	template <typename FSeparableKernel>
-	void ConvolveSDF(FExtendedSDF& ExtendedSDF)
+	void ConvolveSDF(TUniquePtr<FExtendedSDF>& ExtendedSDF)
 	{
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ConvolveSDF, FColorList::NeonBlue)
+
+		TUniquePtr<FExtendedSDF> ConvolvedSDF = MakeUnique<FExtendedSDF>();
+		ConvolvedSDF->Reset();
 
 		auto Clamp = [](int32 Coord) { return FMath::Clamp(Coord, 0, FExtendedSDF::Resolution - 1); };
 
 		// X pass
-		ExtendedSDF.Iterate([&](float& Value, int32 Index, const FIntVector& Coords)
+		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
+			if (FMath::IsNaN(Value))
+			{
+				ConvolvedSDF->SDF[Index] = NAN;
+				return;
+			}
+
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[0] * ExtendedSDF.Get({ Clamp(Coords.X - 1), Coords.Y, Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[1] * ExtendedSDF.SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[2] * ExtendedSDF.Get({ Clamp(Coords.X + 1), Coords.Y, Coords.Z }));
-			Value = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[0] * ExtendedSDF->Get({ Clamp(Coords.X - 1), Coords.Y, Coords.Z }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[1] * ExtendedSDF->SDF[Index]);
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[2] * ExtendedSDF->Get({ Clamp(Coords.X + 1), Coords.Y, Coords.Z }));
+			ConvolvedSDF->SDF[Index] = ConvolvedValue;
 		});
+
+		Swap(ConvolvedSDF, ExtendedSDF);
 
 		// Y pass
-		ExtendedSDF.Iterate([&](float& Value, int32 Index, const FIntVector& Coords)
+		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
+			if (FMath::IsNaN(Value))
+			{
+				ConvolvedSDF->SDF[Index] = NAN;
+				return;
+			}
+
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[0] * ExtendedSDF.Get({ Coords.X, Clamp(Coords.Y - 1), Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[1] * ExtendedSDF.SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[2] * ExtendedSDF.Get({ Coords.X, Clamp(Coords.Y + 1), Coords.Z }));
-			Value = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[0] * ExtendedSDF->Get({ Coords.X, Clamp(Coords.Y - 1), Coords.Z }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[1] * ExtendedSDF->SDF[Index]);
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[2] * ExtendedSDF->Get({ Coords.X, Clamp(Coords.Y + 1), Coords.Z }));
+			ConvolvedSDF->SDF[Index] = ConvolvedValue;
 		});
 
+		Swap(ConvolvedSDF, ExtendedSDF);
+
 		// Z pass
-		ExtendedSDF.Iterate([&](float& Value, int32 Index, const FIntVector& Coords)
+		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
+			if (FMath::IsNaN(Value))
+			{
+				ConvolvedSDF->SDF[Index] = NAN;
+				return;
+			}
+
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[0] * ExtendedSDF.Get({ Coords.X, Coords.Y, Clamp(Coords.Z - 1) }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[1] * ExtendedSDF.SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[2] * ExtendedSDF.Get({ Coords.X, Coords.Y, Clamp(Coords.Z + 1) }));
-			Value = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[0] * ExtendedSDF->Get({ Coords.X, Coords.Y, Clamp(Coords.Z - 1) }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[1] * ExtendedSDF->SDF[Index]);
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[2] * ExtendedSDF->Get({ Coords.X, Coords.Y, Clamp(Coords.Z + 1) }));
+			ConvolvedSDF->SDF[Index] = ConvolvedValue;
 		});
+
+		ExtendedSDF = MoveTemp(ConvolvedSDF);
 	}
 
 	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB, bool* bOutCornerBInside)
@@ -368,8 +424,8 @@ namespace NS::SurfaceNets
 		SurfacePoints.Reserve(CellCount);
 		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
-		const TUniquePtr<FExtendedSDF> ExtendedSDF = GenerateChunkExtendedSDF(VoxelGrid, ChunkIndex);
-		ConvolveSDF<FGaussianKernel3D>(*ExtendedSDF);
+		TUniquePtr<FExtendedSDF> ExtendedSDF = GenerateChunkExtendedSDF(VoxelGrid, ChunkIndex);
+		ConvolveSDF<FGaussianKernel3D>(ExtendedSDF);
 
 		{
 			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelChunk_MakeCells, FColorList::GreenYellow)
