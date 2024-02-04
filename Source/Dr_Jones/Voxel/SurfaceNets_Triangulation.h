@@ -10,6 +10,18 @@ namespace NS::SurfaceNets
 	using namespace NSVE;
 	using namespace UE::Geometry;
 
+	inline TAutoConsoleVariable CVar_Convolution(
+		TEXT("NS.VE.SurfaceNets.Convolution"),
+		true,
+		TEXT("Voxel Engine Surface Nets - enable SDF convolution before triangulation."),
+		ECVF_Cheat);
+
+	inline TAutoConsoleVariable CVar_EdgeAverage(
+		TEXT("NS.VE.SurfaceNets.EdgeAverage"),
+		true,
+		TEXT("Voxel Engine Surface Nets - enable surface point position averaging using edge intersections with the iso-surface."),
+		ECVF_Cheat);
+
 	namespace Debug
 	{
 		inline TAutoConsoleVariable CVar_SurfacePoints(
@@ -283,15 +295,21 @@ namespace NS::SurfaceNets
 		ExtendedSDF = MoveTemp(ConvolvedSDF);
 	}
 
-	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB, bool* bOutCornerBInside)
+	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB, bool& bOutCornerBInside)
 	{
 		check(CornerA < 8 && CornerB < 8);
 		const bool bIntersects = Cell.Values[CornerA] > 0.0f != Cell.Values[CornerB] > 0.0f;
-		if (bIntersects && bOutCornerBInside)
+		if (bIntersects)
 		{
-			*bOutCornerBInside = Cell.Values[CornerB] <= 0.0f;
+			bOutCornerBInside = Cell.Values[CornerB] <= 0.0f;
 		}
 		return bIntersects;
+	}
+
+	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB)
+	{
+		check(CornerA < 8 && CornerB < 8);
+		return Cell.Values[CornerA] > 0.0f != Cell.Values[CornerB] > 0.0f;
 	}
 
 	inline bool IsCellIntersectingSurface(const FCell& Cell)
@@ -311,20 +329,33 @@ namespace NS::SurfaceNets
 	{
 		check(IsCellIntersectingSurface(Cell));
 
-		FVector AveragePosition = FVector::ZeroVector;
-		int32 IntersectingEdges = 0;
-		for (int32 Edge = 0; Edge < 12; ++Edge)
+		if (LIKELY(CVar_EdgeAverage.GetValueOnAnyThread()))
 		{
-			const ECorner (&EdgeCorners)[2] = CellEdges[Edge];
-			if (IsCellEdgeIntersectingSurface(Cell, EdgeCorners[0], EdgeCorners[1], nullptr))
+			FVector AveragePosition = FVector::ZeroVector;
+			int32 IntersectingEdges = 0;
+			for (int32 Edge = 0; Edge < 12; ++Edge)
 			{
-				const float Alpha = -Cell.Values[EdgeCorners[0]] / (Cell.Values[EdgeCorners[1]] - Cell.Values[EdgeCorners[0]]);
-				AveragePosition += FMath::Lerp(Cell.Positions[EdgeCorners[0]], Cell.Positions[EdgeCorners[1]], Alpha);
-				++IntersectingEdges;
+				const ECorner (&EdgeCorners)[2] = CellEdges[Edge];
+				if (IsCellEdgeIntersectingSurface(Cell, EdgeCorners[0], EdgeCorners[1]))
+				{
+					const float Alpha = -Cell.Values[EdgeCorners[0]] / (Cell.Values[EdgeCorners[1]] - Cell.Values[EdgeCorners[0]]);
+					AveragePosition += FMath::Lerp(Cell.Positions[EdgeCorners[0]], Cell.Positions[EdgeCorners[1]], Alpha);
+					++IntersectingEdges;
+				}
 			}
+			AveragePosition /= static_cast<FVector::FReal>(IntersectingEdges);
+			return AveragePosition;
 		}
-		AveragePosition /= static_cast<FVector::FReal>(IntersectingEdges);
-		return AveragePosition;
+		else
+		{
+			FVector AveragePosition = FVector::ZeroVector;
+			for (int32 CI = 0; CI < 8; ++CI)
+			{
+				AveragePosition += Cell.Positions[CI];
+			}
+			AveragePosition /= 8.0;
+			return AveragePosition;
+		}
 	}
 
 	inline bool MakeCellAtVoxel(
@@ -425,7 +456,10 @@ namespace NS::SurfaceNets
 		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
 		TUniquePtr<FExtendedSDF> ExtendedSDF = GenerateChunkExtendedSDF(VoxelGrid, ChunkIndex);
-		ConvolveSDF<FGaussianKernel3D>(ExtendedSDF);
+		if (LIKELY(CVar_Convolution.GetValueOnAnyThread()))
+		{
+			ConvolveSDF<FGaussianKernel3D>(ExtendedSDF);
+		}
 
 		{
 			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelChunk_MakeCells, FColorList::GreenYellow)
@@ -482,7 +516,7 @@ namespace NS::SurfaceNets
 				uint8 EdgeIntersections = 0;
 
 				// YZ Edge - X Axis
-				if (IsCellEdgeIntersectingSurface(Cell, Corner_YZ, Corner_XYZ, &bXYZCornerInside))
+				if (IsCellEdgeIntersectingSurface(Cell, Corner_YZ, Corner_XYZ, bXYZCornerInside))
 				{
 					EdgeIntersections |= 1 << 0;
 
@@ -500,7 +534,7 @@ namespace NS::SurfaceNets
 				}
 
 				// XZ Edge - Y Axis
-				if (IsCellEdgeIntersectingSurface(Cell, Corner_XZ, Corner_XYZ, &bXYZCornerInside))
+				if (IsCellEdgeIntersectingSurface(Cell, Corner_XZ, Corner_XYZ, bXYZCornerInside))
 				{
 					EdgeIntersections |= 1 << 1;
 
@@ -518,7 +552,7 @@ namespace NS::SurfaceNets
 				}
 
 				// XY Edge - Z Axis
-				if (IsCellEdgeIntersectingSurface(Cell, Corner_XY, Corner_XYZ, &bXYZCornerInside))
+				if (IsCellEdgeIntersectingSurface(Cell, Corner_XY, Corner_XYZ, bXYZCornerInside))
 				{
 					EdgeIntersections |= 1 << 2;
 
