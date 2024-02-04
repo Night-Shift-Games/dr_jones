@@ -76,6 +76,20 @@ namespace NSVE
 			Index += Position.Z * UniformGridSize * UniformGridSize;
 			return Index;
 		}
+
+		[[nodiscard]] FORCEINLINE constexpr bool IsInlineGridPositionValid(const FIntVector& Position, const FIntVector& GridDimensions)
+		{
+			return Position.X >= 0 && Position.X < GridDimensions.X &&
+				Position.Y >= 0 && Position.Y < GridDimensions.Y &&
+				Position.Z >= 0 && Position.Z < GridDimensions.Z;
+		}
+
+		[[nodiscard]] FORCEINLINE constexpr bool IsInlineGridPositionValid(const FIntVector& Position, int32 UniformGridSize)
+		{
+			return Position.X >= 0 && Position.X < UniformGridSize &&
+				Position.Y >= 0 && Position.Y < UniformGridSize &&
+				Position.Z >= 0 && Position.Z < UniformGridSize;
+		}
 	};
 
 	// Raw packed data of a single voxel

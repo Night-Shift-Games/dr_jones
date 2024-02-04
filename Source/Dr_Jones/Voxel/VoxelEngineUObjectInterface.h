@@ -45,6 +45,8 @@ private:
 	NSVE::FVoxelChunk::FTransformData TransformData;
 	bool bDrawDebug;
 	bool bDrawSNCells;
+	bool bDrawSNCellIntersections;
+	bool bDrawSNCellSDF;
 	bool bDrawSurfacePoints;
 	bool bDrawVoxels;
 	TArray<NS::SurfaceNets::Debug::FSurfacePointVis> SurfacePoints;

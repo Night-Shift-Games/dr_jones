@@ -17,6 +17,8 @@ FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridV
 	SurfacePoints(InComponent->SurfaceNetsDebugContext->SurfacePoints),
 	bDrawSurfacePoints(NS::SurfaceNets::Debug::CVar_SurfacePoints.GetValueOnGameThread()),
 	bDrawSNCells(NS::SurfaceNets::Debug::CVar_Cells.GetValueOnGameThread()),
+	bDrawSNCellIntersections(NS::SurfaceNets::Debug::CVar_Cells_Intersections.GetValueOnGameThread()),
+	bDrawSNCellSDF(NS::SurfaceNets::Debug::CVar_Cells_SDFValues.GetValueOnGameThread()),
 	bDrawVoxels(CVarVisualizeVoxelGrid.GetValueOnGameThread()),
 	CurrentChunkIndex(-1),
 #if WITH_EDITORONLY_DATA
@@ -102,25 +104,28 @@ void FVoxelGridVisualizerSceneProxy::GetDynamicMeshElements(const TArray<const F
 					const FVector LocalMax = FVector((Vis.CellCoords.X + 1) * TransformData.VoxelSize, (Vis.CellCoords.Y + 1) * TransformData.VoxelSize, (Vis.CellCoords.Z + 1) * TransformData.VoxelSize);
 					const FBox CellBox(BaseLocation + LocalMin, BaseLocation + LocalMax);
 					DrawWireBox(PDI, CellBox, FColor::White, SDPG_World, 2.0f, 0, true);
-					if (Vis.EdgeIntersections & 1 << 0)
+					if (bDrawSNCellIntersections)
 					{
-						const FVector Start = BaseLocation + FVector{ LocalMin.X, LocalMax.Y, LocalMax.Z };
-						const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
-						PDI->DrawLine(Start, End, FColor::Red, SDPG_World, 4.0f, 1.0f, true);
+						if (Vis.EdgeIntersections & 1 << 0)
+						{
+							const FVector Start = BaseLocation + FVector{ LocalMin.X, LocalMax.Y, LocalMax.Z };
+							const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
+							PDI->DrawLine(Start, End, FColor::Red, SDPG_World, 4.0f, 1.0f, true);
+						}
+						if (Vis.EdgeIntersections & 1 << 1)
+						{
+							const FVector Start = BaseLocation + FVector{ LocalMax.X, LocalMin.Y, LocalMax.Z };
+							const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
+							PDI->DrawLine(Start, End, FColor::Green, SDPG_World, 4.0f, 1.0f, true);
+						}
+						if (Vis.EdgeIntersections & 1 << 2)
+						{
+							const FVector Start = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMin.Z };
+							const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
+							PDI->DrawLine(Start, End, FColor::Blue, SDPG_World, 4.0f, 1.0f, true);
+						}
 					}
-					if (Vis.EdgeIntersections & 1 << 1)
-					{
-						const FVector Start = BaseLocation + FVector{ LocalMax.X, LocalMin.Y, LocalMax.Z };
-						const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
-						PDI->DrawLine(Start, End, FColor::Green, SDPG_World, 4.0f, 1.0f, true);
-					}
-					if (Vis.EdgeIntersections & 1 << 2)
-					{
-						const FVector Start = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMin.Z };
-						const FVector End   = BaseLocation + FVector{ LocalMax.X, LocalMax.Y, LocalMax.Z };
-						PDI->DrawLine(Start, End, FColor::Blue, SDPG_World, 4.0f, 1.0f, true);
-					}
-					if (!Voxels.IsEmpty() && Vis.CellCoords.GetMax() < NSVE::FVoxelChunk::Resolution)
+					if (bDrawSNCellSDF && !Voxels.IsEmpty() && Vis.CellCoords.GetMax() < NSVE::FVoxelChunk::Resolution)
 					{
 						for (int32 CI = 0; CI < 8; ++CI)
 						{
