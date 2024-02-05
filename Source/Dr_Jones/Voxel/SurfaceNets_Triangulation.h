@@ -155,7 +155,7 @@ namespace NS::SurfaceNets
 		}
 
 		template <typename FFunc>
-		void Iterate_Static(FFunc ForEach)
+		static void Iterate_Static(FFunc ForEach)
 		{
 			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Iterate, FColorList::MediumGoldenrod)
 
