@@ -196,8 +196,8 @@ namespace NS::SurfaceNets
 
 		FORCEINLINE static constexpr int32 Num() { return NumElements; }
 
-		FORCEINLINE float& operator[](size_t Index) { return Array[Index]; }
-		FORCEINLINE const float& operator[](size_t Index) const { return Array[Index]; }
+		FORCEINLINE FElement& operator[](size_t Index) { return Array[Index]; }
+		FORCEINLINE const FElement& operator[](size_t Index) const { return Array[Index]; }
 	};
 
 	// Two samples at the end of each axis are needed for the quad generation.
