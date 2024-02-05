@@ -95,12 +95,14 @@ namespace NSVE
 	// Raw packed data of a single voxel
 	struct FVoxel
 	{
+		static constexpr int32 BitsForMaterialID = 3;
+		static constexpr int32 MaterialIDNum = 2 << (BitsForMaterialID - 1);
 		union
 		{
 			struct
 			{
 				uint8 bSolid : 1;
-				uint8 LocalMaterial : 3; // 8 materials per chunk (or maybe even per level) should be enough
+				uint8 LocalMaterial : BitsForMaterialID; // 8 materials per chunk (or maybe even per level) should be enough
 			};
 			uint8 Data;
 		};

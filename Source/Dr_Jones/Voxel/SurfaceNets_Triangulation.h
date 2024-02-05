@@ -107,38 +107,43 @@ namespace NS::SurfaceNets
 		{ Corner_XY,   Corner_XYZ },
 	};
 
-	// An SDF that allows for triangulating the whole chunk using surface nets without querying the voxel grid.
-	struct alignas(Alignment) FExtendedSDF
+	// A generic 3D field
+	template <typename T, int32 Res>
+	struct alignas(Alignment) TField3D
 	{
-		// Two samples at the end of each axis are needed for the quad generation.
-		// Two additional samples on each side are needed for convolution.
-		static constexpr int32 Resolution = FVoxelChunk::Resolution + 6;
-		TStaticArray<float, Resolution * Resolution * Resolution> SDF;
+		using FElement = T;
+		static constexpr int32 Resolution = Res;
+		static_assert(Resolution > 0);
 
-		float Get(const FIntVector& Coords) const
+		static constexpr int32 NumElements = Resolution * Resolution * Resolution;
+		TStaticArray<FElement, NumElements> Array;
+
+		FElement& Get(int32 Index)
 		{
-			check(Utils::IsInlineGridPositionValid(Coords, Resolution));
-			return SDF[Utils::InlineGridPositionToIndex(Coords, Resolution)];
+			check(Index >= 0 && Index < NumElements);
+			return Array[Index];
 		}
 
-		float GetByVoxelCoords(const FIntVector& VoxelCoords) const
+		const FElement& Get(int32 Index) const
 		{
-			// SDF's coords start at -2 in relation to its chunk.
-			// This is needed to make convolution by a 3x3x3 kernel possible.
-			const int32 X = VoxelCoords.X + 2;
-			const int32 Y = VoxelCoords.Y + 2;
-			const int32 Z = VoxelCoords.Z + 2;
-			check(X >= 0 && X < Resolution);
-			check(Y >= 0 && Y < Resolution);
-			check(Z >= 0 && Z < Resolution);
-			const int32 Index = Z * Resolution * Resolution + Y * Resolution + X;
-			return SDF[Index];
+			return const_cast<TField3D*>(this)->Get(Index);
+		}
+
+		FElement& Get(const FIntVector& Coords)
+		{
+			check(Utils::IsInlineGridPositionValid(Coords, Resolution));
+			return Array[Utils::InlineGridPositionToIndex(Coords, Resolution)];
+		}
+
+		const FElement& Get(const FIntVector& Coords) const
+		{
+			return const_cast<TField3D*>(this)->Get(Coords);
 		}
 
 		template <typename FFunc>
 		void Iterate(FFunc ForEach)
 		{
-			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Iterate, FColorList::MediumGoldenrod)
+			SCOPED_NAMED_EVENT(NSVE_Field3D_Iterate, FColorList::MediumGoldenrod)
 
 			int32 Index = 0;
 			FIntVector Coords;
@@ -148,16 +153,22 @@ namespace NS::SurfaceNets
 				{
 					for (Coords.X = 0; Coords.X < Resolution; ++Coords.X, ++Index)
 					{
-						ForEach(SDF[Index], Index, Coords);
+						ForEach(Array[Index], Index, Coords);
 					}
 				}
 			}
 		}
 
 		template <typename FFunc>
+		void Iterate(FFunc ForEach) const
+		{
+			return const_cast<TField3D*>(this)->Iterate(ForEach);
+		}
+
+		template <typename FFunc>
 		static void Iterate_Static(FFunc ForEach)
 		{
-			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Iterate, FColorList::MediumGoldenrod)
+			SCOPED_NAMED_EVENT(NSVE_Field3D_Iterate, FColorList::MediumGoldenrod)
 
 			int32 Index = 0;
 			FIntVector Coords;
@@ -173,40 +184,64 @@ namespace NS::SurfaceNets
 			}
 		}
 
-		void Reset()
+		void Fill(const FElement& Value)
 		{
-			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ExtendedSDF_Reset, FColorList::DarkOrchid)
+			SCOPED_NAMED_EVENT(NSVE_Field3D_Fill, FColorList::DarkOrchid)
 
-			for (int32 Index = 0; Index < SDF.Num(); ++Index)
+			for (int32 Index = 0; Index < NumElements; ++Index)
 			{
-				SDF[Index] = NAN;
+				Array[Index] = Value;
 			}
 		}
+
+		FORCEINLINE static constexpr int32 Num() { return NumElements; }
+
+		FORCEINLINE float& operator[](size_t Index) { return Array[Index]; }
+		FORCEINLINE const float& operator[](size_t Index) const { return Array[Index]; }
 	};
 
-	inline TUniquePtr<FExtendedSDF> GenerateChunkExtendedSDF(const FVoxelGrid& Grid, int32 ChunkIndex)
+	// Two samples at the end of each axis are needed for the quad generation.
+	// Two additional samples on each side are needed for convolution.
+	static constexpr int32 ChunkFieldResolution = FVoxelChunk::Resolution + 6;
+
+	// A field that allows for triangulating the whole chunk using surface nets without querying the voxel grid.
+	struct alignas(Alignment) FSurfaceNetsChunkField : TField3D<float, ChunkFieldResolution> { };
+
+	template <typename T, int32 Res>
+	float FieldGetByVoxelCoords(const TField3D<T, Res>& Field, const FIntVector& VoxelCoords)
 	{
-		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_GenerateChunkExtendedSDF, FColorList::NeonPink)
+		// Field's coords start at -2 in relation to its chunk.
+		// This is needed to make convolution by a 3x3x3 kernel seamless.
+		FIntVector FieldCoords;
+		FieldCoords.X = VoxelCoords.X + 2;
+		FieldCoords.Y = VoxelCoords.Y + 2;
+		FieldCoords.Z = VoxelCoords.Z + 2;
+		return Field.Get(FieldCoords);
+	}
+
+	inline TUniquePtr<FSurfaceNetsChunkField> GenerateChunkField(const FVoxelGrid& Grid, int32 ChunkIndex)
+	{
+		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_GenerateChunkField, FColorList::NeonPink)
 
 		const FIntVector BaseGlobalCoords = Grid.CalcGlobalCoordsFromVoxelAddressChecked(MakeVoxelAddress(Grid.IndexToCoords(ChunkIndex), FIntVector{}));
-		TUniquePtr<FExtendedSDF> ExtendedSDF = TUniquePtr<FExtendedSDF>(new FExtendedSDF);
+		TUniquePtr<FSurfaceNetsChunkField> ChunkField = MakeUnique<FSurfaceNetsChunkField>();
 		FIntVector LocalVoxelCoords;
-		int32 SDFIndex = 0;
-		for (LocalVoxelCoords.Z = -2; LocalVoxelCoords.Z < FExtendedSDF::Resolution - 2; ++LocalVoxelCoords.Z)
+		int32 FieldIndex = 0;
+		for (LocalVoxelCoords.Z = -2; LocalVoxelCoords.Z < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.Z)
 		{
-			for (LocalVoxelCoords.Y = -2; LocalVoxelCoords.Y < FExtendedSDF::Resolution - 2; ++LocalVoxelCoords.Y)
+			for (LocalVoxelCoords.Y = -2; LocalVoxelCoords.Y < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.Y)
 			{
-				for (LocalVoxelCoords.X = -2; LocalVoxelCoords.X < FExtendedSDF::Resolution - 2; ++LocalVoxelCoords.X, ++SDFIndex)
+				for (LocalVoxelCoords.X = -2; LocalVoxelCoords.X < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.X, ++FieldIndex)
 				{
-					check(SDFIndex >= 0 && SDFIndex < ExtendedSDF->SDF.Num());
+					check(FieldIndex >= 0 && FieldIndex < ChunkField->Num());
 					const FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
 					const FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
 					const FVoxel* Voxel = Grid.ResolveAddress(VoxelAddress);
-					ExtendedSDF->SDF[SDFIndex] = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
+					ChunkField->Get(FieldIndex) = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
 				}
 			}
 		}
-		return ExtendedSDF;
+		return ChunkField;
 	}
 
 	/**
@@ -231,68 +266,68 @@ namespace NS::SurfaceNets
 	}
 
 	template <typename FSeparableKernel>
-	void ConvolveSDF(TUniquePtr<FExtendedSDF>& ExtendedSDF)
+	void ConvolveField(TUniquePtr<FSurfaceNetsChunkField>& Field)
 	{
-		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ConvolveSDF, FColorList::NeonBlue)
+		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ConvolveField, FColorList::NeonBlue)
 
-		TUniquePtr<FExtendedSDF> ConvolvedSDF = MakeUnique<FExtendedSDF>();
-		ConvolvedSDF->Reset();
+		TUniquePtr<FSurfaceNetsChunkField> ConvolvedField = MakeUnique<FSurfaceNetsChunkField>();
+		ConvolvedField->Fill(NAN);
 
-		auto Clamp = [](int32 Coord) { return FMath::Clamp(Coord, 0, FExtendedSDF::Resolution - 1); };
+		auto Clamp = [](int32 Coord) { return FMath::Clamp(Coord, 0, FSurfaceNetsChunkField::Resolution - 1); };
 
 		// X pass
-		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
 			if (FMath::IsNaN(Value))
 			{
-				ConvolvedSDF->SDF[Index] = NAN;
+				ConvolvedField->Get(Index) = NAN;
 				return;
 			}
 
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[0] * ExtendedSDF->Get({ Clamp(Coords.X - 1), Coords.Y, Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[1] * ExtendedSDF->SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[2] * ExtendedSDF->Get({ Clamp(Coords.X + 1), Coords.Y, Coords.Z }));
-			ConvolvedSDF->SDF[Index] = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[0] * Field->Get({ Clamp(Coords.X - 1), Coords.Y, Coords.Z }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[1] * Field->Get(Index));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[2] * Field->Get({ Clamp(Coords.X + 1), Coords.Y, Coords.Z }));
+			ConvolvedField->Get(Index) = ConvolvedValue;
 		});
 
-		Swap(ConvolvedSDF, ExtendedSDF);
+		Swap(ConvolvedField, Field);
 
 		// Y pass
-		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
 			if (FMath::IsNaN(Value))
 			{
-				ConvolvedSDF->SDF[Index] = NAN;
+				ConvolvedField->Get(Index) = NAN;
 				return;
 			}
 
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[0] * ExtendedSDF->Get({ Coords.X, Clamp(Coords.Y - 1), Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[1] * ExtendedSDF->SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[2] * ExtendedSDF->Get({ Coords.X, Clamp(Coords.Y + 1), Coords.Z }));
-			ConvolvedSDF->SDF[Index] = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[0] * Field->Get({ Coords.X, Clamp(Coords.Y - 1), Coords.Z }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[1] * Field->Get(Index));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[2] * Field->Get({ Coords.X, Clamp(Coords.Y + 1), Coords.Z }));
+			ConvolvedField->Get(Index) = ConvolvedValue;
 		});
 
-		Swap(ConvolvedSDF, ExtendedSDF);
+		Swap(ConvolvedField, Field);
 
 		// Z pass
-		ExtendedSDF->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
 		{
 			if (FMath::IsNaN(Value))
 			{
-				ConvolvedSDF->SDF[Index] = NAN;
+				ConvolvedField->Get(Index) = NAN;
 				return;
 			}
 
 			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[0] * ExtendedSDF->Get({ Coords.X, Coords.Y, Clamp(Coords.Z - 1) }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[1] * ExtendedSDF->SDF[Index]);
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[2] * ExtendedSDF->Get({ Coords.X, Coords.Y, Clamp(Coords.Z + 1) }));
-			ConvolvedSDF->SDF[Index] = ConvolvedValue;
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[0] * Field->Get({ Coords.X, Coords.Y, Clamp(Coords.Z - 1) }));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[1] * Field->Get(Index));
+			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[2] * Field->Get({ Coords.X, Coords.Y, Clamp(Coords.Z + 1) }));
+			ConvolvedField->Get(Index) = ConvolvedValue;
 		});
 
-		ExtendedSDF = MoveTemp(ConvolvedSDF);
+		Field = MoveTemp(ConvolvedField);
 	}
 
 	inline bool IsCellEdgeIntersectingSurface(const FCell& Cell, ECorner CornerA, ECorner CornerB, bool& bOutCornerBInside)
@@ -361,7 +396,7 @@ namespace NS::SurfaceNets
 	inline bool MakeCellAtVoxel(
 		const FVoxelChunk::FTransformData& ChunkTransformData,
 		const FIntVector& VoxelCoords,
-		const FExtendedSDF& ExtendedSDF,
+		const FSurfaceNetsChunkField& ChunkField,
 		FCell& OutCell)
 	{
 		for (int32 CI = 0; CI < 8; ++CI)
@@ -371,7 +406,7 @@ namespace NS::SurfaceNets
 			CornerCoords.Y = VoxelCoords.Y + !!(CI & 1 << 1);
 			CornerCoords.Z = VoxelCoords.Z + !!(CI & 1 << 2);
 
-			const float Value = ExtendedSDF.GetByVoxelCoords(CornerCoords);
+			const float Value = FieldGetByVoxelCoords(ChunkField, CornerCoords);
 			if (FMath::IsNaN(Value))
 			{
 				return false;
@@ -442,6 +477,7 @@ namespace NS::SurfaceNets
 			FVector Location;
 			FIntVector CellCoords;
 			int32 CellIndex;
+			float MaterialWeights[FVoxel::MaterialIDNum];
 		};
 
 		const FVoxelChunk::FTransformData TransformData = VoxelChunk.MakeTransformData();
@@ -455,10 +491,10 @@ namespace NS::SurfaceNets
 		SurfacePoints.Reserve(CellCount);
 		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
-		TUniquePtr<FExtendedSDF> ExtendedSDF = GenerateChunkExtendedSDF(VoxelGrid, ChunkIndex);
+		TUniquePtr<FSurfaceNetsChunkField> ChunkField = GenerateChunkField(VoxelGrid, ChunkIndex);
 		if (LIKELY(CVar_Convolution.GetValueOnAnyThread()))
 		{
-			ConvolveSDF<FGaussianKernel3D>(ExtendedSDF);
+			ConvolveField<FGaussianKernel3D>(ChunkField);
 		}
 
 		{
@@ -474,7 +510,7 @@ namespace NS::SurfaceNets
 					for (VoxelCoords.X = 0; VoxelCoords.X < FVoxelChunk::Resolution + 1; ++VoxelCoords.X, ++CellIndex)
 					{
 						FCell& Cell = Cells[CellIndex];
-						if (!MakeCellAtVoxel(TransformData, VoxelCoords, *ExtendedSDF, Cell))
+						if (!MakeCellAtVoxel(TransformData, VoxelCoords, *ChunkField, Cell))
 						{
 							continue;
 						}
@@ -489,6 +525,10 @@ namespace NS::SurfaceNets
 						SurfacePointRef.Location = FindSurfacePointInCell(Cell);
 						SurfacePointRef.CellCoords = VoxelCoords;
 						SurfacePointRef.CellIndex = CellIndex;
+						for (int32 MaterialID = 0; MaterialID < FVoxel::MaterialIDNum; ++MaterialID)
+						{
+							SurfacePointRef.MaterialWeights[MaterialID] = 0.0f;
+						}
 					}
 				}
 			}
