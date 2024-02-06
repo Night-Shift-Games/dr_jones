@@ -23,7 +23,8 @@ void AShovel::FillShovel()
 	{
 		DirtComponent = NewObject<UStaticMeshComponent>(GetRootComponent(), UStaticMeshComponent::StaticClass());
 		DirtComponent->RegisterComponent();
-		DirtComponent->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
+		UMeshComponent* MainMesh = FindComponentByClass<UMeshComponent>();
+		DirtComponent->AttachToComponent(MainMesh ? MainMesh : GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform, FName("ShovelInput"));
 		DirtComponent->SetStaticMesh(ShovelDirt);
 		DirtComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
