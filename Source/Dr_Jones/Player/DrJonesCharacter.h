@@ -12,11 +12,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseItem);
 class AItem;
 class UBlendCameraComponent;
 class UCharacterAnimationComponent;
+class UInputAction;
 class UInteractionComponent;
 class UInventoryComponent;
 class UReactionComponent;
 class UReputationComponent;
 class UWidgetManager;
+struct FInputActionValue;
 
 UCLASS(Blueprintable)
 class DR_JONES_API ADrJonesCharacter : public ACharacter
@@ -25,6 +27,7 @@ class DR_JONES_API ADrJonesCharacter : public ACharacter
 	
 public:
 	ADrJonesCharacter();
+	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
@@ -37,11 +40,8 @@ public:
 	static void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 
 private:
-	// Input Component
-	void MoveForward(float AxisValue);
-	void MoveRight(float AxisValue);
-	void Turn(float AxisValue);
-	void LookUp(float AxisValue);
+	void Move(const FInputActionValue& InputActionValue);
+	void Look(const FInputActionValue& InputActionValue);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
@@ -64,4 +64,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCharacterAnimationComponent> CharacterAnimationComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> MoveAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> LookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> JumpAction;
 };

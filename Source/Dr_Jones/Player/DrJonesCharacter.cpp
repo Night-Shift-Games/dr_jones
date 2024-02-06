@@ -4,6 +4,8 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "EnhancedInputComponent.h"
+#include "InputAction.h"
+#include "InputActionValue.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/InventoryComponent.h"
@@ -28,11 +30,7 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
-	PlayerInputComponent->BindAxis("MoveForward", this, &ADrJonesCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ADrJonesCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("Turn", this, &ADrJonesCharacter::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this, &ADrJonesCharacter::LookUp);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
 	InventoryComponent->SetupPlayerInput(PlayerInputComponent);
 	ReactionComponent->SetupPlayerInput(PlayerInputComponent);
 	
@@ -41,27 +39,36 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		return;
 	}
+	
+	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADrJonesCharacter::Move);
+	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADrJonesCharacter::Look);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+	
 	InteractionComponent->SetupPlayerInput(EnhancedInputComponent);
 }
 
-void ADrJonesCharacter::MoveForward(float AxisValue)
+void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)
 {
-	AddMovementInput(GetActorForwardVector(), AxisValue, false);
+	const FVector2D Vector = InputActionValue.Get<FVector2D>();
+	if (Vector.X != 0)
+	{
+		AddMovementInput(GetActorForwardVector(), Vector.X);
+	}
+	if (Vector.Y != 0)
+	{
+		AddMovementInput(GetActorRightVector(), Vector.Y);
+	}
 }
 
-void ADrJonesCharacter::MoveRight(float AxisValue)
+void ADrJonesCharacter::Look(const FInputActionValue& InputActionValue)
 {
-	AddMovementInput(GetActorRightVector(), AxisValue, false);
-}
-
-void ADrJonesCharacter::Turn(float AxisValue)
-{
-	AddControllerYawInput(AxisValue);
-}
-
-void ADrJonesCharacter::LookUp(float AxisValue)
-{
-	AddControllerPitchInput(AxisValue);
+	const FVector2D Vector = InputActionValue.Get<FVector2D>();
+	if (Vector.Length() == 0)
+	{
+		return;
+	}
+	AddControllerYawInput(Vector.X);
+	AddControllerPitchInput(Vector.Y);
 }
 
 /*static*/ FHitResult ADrJonesCharacter::GetPlayerLookingAt(const float Reach)
