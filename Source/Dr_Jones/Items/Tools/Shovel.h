@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Tool.h"
 
 #include "Shovel.generated.h"
@@ -44,10 +42,7 @@ public:
 	void MontageCompletedEvent(bool bInterrupted);
 
 private:
-	void DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const;
-
 	bool TraceDig(FHitResult& OutHit) const;
-
 	bool TraceForDesiredDigLocation(FHitResult& OutHit) const;
 
 public:

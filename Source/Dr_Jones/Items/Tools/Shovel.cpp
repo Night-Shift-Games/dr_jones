@@ -2,12 +2,11 @@
 
 #include "Shovel.h"
 
-#include "Utilities.h"
 #include "Animation/CharacterAnimationComponent.h"
-#include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
-#include "Player/DrJonesCharacter.h"
 #include "SharedComponents/ActionComponent.h"
+#include "Utilities.h"
+#include "Player/DrJonesCharacter.h"
 
 void AShovel::BeginPlay()
 {
@@ -122,15 +121,6 @@ void AShovel::Dig()
 	{
 		return;
 	}
-	
-	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
-	if (!ExcavationSegment)
-	{
-		return;
-	}
-	
-	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
-
 }
 
 void AShovel::Dump()
@@ -146,13 +136,6 @@ void AShovel::Dump()
 	{
 		return;
 	}
-	
-	UExcavationSegment* ExcavationSegment = Cast<UExcavationSegment>(Hit.GetComponent());
-	if (!ExcavationSegment)
-	{
-		return;
-	}
-	DigInExcavationSite(*ExcavationSegment, Hit.ImpactPoint);
 }
 
 void AShovel::PrimaryAction()
@@ -176,22 +159,6 @@ void AShovel::MontageCompletedEvent(bool bInterrupted)
 		return;
 	}
 	OwningPlayer->CharacterAnimationComponent->OnMontageCompleted.RemoveDynamic(this, &AShovel::MontageCompletedEvent);
-}
-
-void AShovel::DigInExcavationSite(UExcavationSegment& ExcavationSegment, const FVector& Location) const
-{
-	// TODO: Shovel shouldn't know anything about excavation segments.
-
-	checkf(OwningPlayer, TEXT("The Shovel %s is not owned by any player."), *this->GetName());
-
-	const FVector DigDir = FVector(0, 0, -ShovelStrength + (2 * ShovelStrength * static_cast<int>(IsFilled())));
-
-	ExcavationSegment.Dig(FTransform(OwningPlayer->GetActorRotation(), FVector(0, 0, 0) - (ExcavationSegment.GetComponentLocation() - Location), OwningPlayer->GetActorScale3D()), DigDir);
-	for (UExcavationSegment* Neighbor : ExcavationSegment.Neighbors)
-	{
-		checkf(Neighbor, TEXT("Neighboring excavation segment is null"));
-		Neighbor->Dig(FTransform(OwningPlayer->GetActorRotation(), FVector(0, 0, 0) - (Neighbor->GetComponentLocation() - Location), OwningPlayer->GetActorScale3D()), DigDir);
-	}
 }
 
 bool AShovel::TraceDig(FHitResult& OutHit) const

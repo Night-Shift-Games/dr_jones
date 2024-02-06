@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ExcavationSegment.h"
 #include "Components/DynamicMeshComponent.h"
 
 #include "DigSite.generated.h"
