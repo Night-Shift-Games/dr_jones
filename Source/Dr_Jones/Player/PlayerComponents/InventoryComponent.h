@@ -22,34 +22,31 @@ class DR_JONES_API UInventoryComponent : public UActorComponent
 	
 public:
 	virtual void BeginPlay() override;
-	void SetupPlayerInput(UInputComponent* InputComponent);
+	void SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent);
 
 	UFUNCTION(BlueprintPure)
 	AItem* GetItemInHand() const { return ItemInHand; }
 
 	UFUNCTION(BlueprintPure)
 	TArray<ATool*> GetTools() const {return Tools; }
-	
-	void AddArtifact(AArtifact& ArtifactToAdd);
-
-	void AddTool(ATool& ToolToAdd);
-	void RemoveTool(ATool& ToolToRemove);
-
-	void ChangeActiveItem(float Value);
 
 	UFUNCTION(BlueprintCallable)
 	void SetActiveItemByClass(TSubclassOf<AItem> ItemClass);
 	
 	UFUNCTION(BlueprintCallable)
 	void SetActiveItem(AItem* NewActiveItem);
-
+	
+	void AddArtifact(AArtifact& ArtifactToAdd);
+	void AddTool(ATool& ToolToAdd);
+	void RemoveTool(ATool& ToolToRemove);
+	
+	void ChangeActiveItem(const FInputActionValue& InputActionValue);
 	void AttachItemToHand(AItem& ItemToAttach);
-
 	AItem* DetachActiveItemFromHand();
-
+	
 	bool CanPickUpItem() const;
 	
-	void OpenInventory(bool bOpen = true) const;
+	void OpenInventory(const FInputActionValue& InputActionValue);
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;
@@ -66,6 +63,15 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TObjectPtr<AItem> ItemInHand;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ChangeItemAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> OpenEquipmentAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> DetachItemAction;
 	
 private:
 	UPROPERTY(Transient)

@@ -2,6 +2,7 @@
 
 #include "InventoryComponent.h"
 
+#include "EnhancedInputComponent.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "Items/Tools/Tool.h"
 #include "Player/WidgetManager.h"
@@ -25,27 +26,16 @@ void UInventoryComponent::BeginPlay()
 	}
 }
 
-void UInventoryComponent::SetupPlayerInput(UInputComponent* InputComponent)
+void UInventoryComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
 {
-	InputComponent->BindAxis(TEXT("Scroll"), this, &UInventoryComponent::ChangeActiveItem);
-	FInputActionBinding OpenInventoryMenu(TEXT("Inventory"), IE_Pressed);
-	OpenInventoryMenu.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
-	{
-		OpenInventory(true);
-	});
-	FInputActionBinding CloseInventoryMenu(TEXT("Inventory"), IE_Released);
-	CloseInventoryMenu.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
-	{
-		OpenInventory(false);
-	});
+	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UInventoryComponent::ChangeActiveItem);
+	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UInventoryComponent::OpenInventory);
 	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
 	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
 	{
 		DetachActiveItemFromHand();
 	});
-	InputComponent->AddActionBinding(OpenInventoryMenu);
-	InputComponent->AddActionBinding(CloseInventoryMenu);
-	InputComponent->AddActionBinding(CancelHold);
+	EnhancedInputComponent->AddActionBinding(CancelHold);
 }
 
 void UInventoryComponent::AddArtifact(AArtifact& ArtifactToAdd)
@@ -74,8 +64,9 @@ void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
 	Tools.Remove(&ToolToRemove);
 }
 
-void UInventoryComponent::ChangeActiveItem(float Value)
+void UInventoryComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
 {
+	const float Value = InputActionValue.Get<float>();
 	if (Value == 0 || Tools.IsEmpty())
 	{
 		return;
@@ -167,8 +158,9 @@ bool UInventoryComponent::CanPickUpItem() const
 	return !ItemInHand || ItemInHand && !ItemInHand->IsA<AArtifact>();
 }
 
-void UInventoryComponent::OpenInventory(bool bOpen) const
+void UInventoryComponent::OpenInventory(const FInputActionValue& InputActionValue)
 {
+	const bool bOpen = InputActionValue.Get<bool>();
 	if (!InventoryMenu)
 	{
 		return;
