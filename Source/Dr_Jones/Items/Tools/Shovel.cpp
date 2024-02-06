@@ -2,11 +2,11 @@
 
 #include "Shovel.h"
 
+#include "Utilities.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "ArchaeologicalSite/ExcavationSegment.h"
 #include "Components/ShapeComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/PlayerComponents/InventoryComponent.h"
 #include "SharedComponents/ActionComponent.h"
 
 void AShovel::BeginPlay()
@@ -140,7 +140,7 @@ void AShovel::Dump()
 		return;
 	}
 
-	const FHitResult Hit = OwningPlayer->GetPlayerLookingAt(150.0f);
+	const FHitResult Hit = Utilities::GetPlayerLookingAt(150.0f);
 	if (!Hit.bBlockingHit)
 	{
 		return;
@@ -220,7 +220,7 @@ bool AShovel::TraceDig(FHitResult& OutHit) const
 
 bool AShovel::TraceForDesiredDigLocation(FHitResult& OutHit) const
 {
-	OutHit = OwningPlayer->GetPlayerLookingAt(ShovelReach);
+	OutHit = Utilities::GetPlayerLookingAt(ShovelReach);
 	return OutHit.bBlockingHit;
 }
 

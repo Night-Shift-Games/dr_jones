@@ -3,6 +3,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
+#include "Player/PlayerComponents/InteractionComponent.h"
 
 namespace Utilities
 {
@@ -80,4 +81,57 @@ namespace Utilities
 	{
 		return GetWidgetManager(WorldContextObject).GetWidget(WidgetClass);
 	}
+
+	FHitResult GetPlayerLookingAt(const float Reach)
+	{
+		// TODO: Add WCO
+		UWorld* World = GWorld;
+		if (!World)
+		{
+			return {};
+		}
+		const APlayerController* Controller = UGameplayStatics::GetPlayerController(World, 0);
+
+		int32 ViewportX, ViewportY;
+		Controller->GetViewportSize(ViewportX, ViewportY);
+		FVector2D ScreenCenter = FVector2D(ViewportX / 2.0, ViewportY / 2.0);
+
+		FVector WorldLocation, WorldDirection;
+		if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
+		{
+			return {};
+		}
+
+		FVector LineEnd = WorldLocation + WorldDirection * Reach;
+		FHitResult Hit;
+	
+		World->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECC_Visibility);
+
+		if (!Hit.bBlockingHit)
+		{
+			Hit.Location = LineEnd;
+		}
+#if ENABLE_DRAW_DEBUG
+		Utilities::DrawInteractionDebugInfo(WorldLocation, LineEnd, Hit);
+#endif
+	
+		return Hit;
+	}
+
+#if ENABLE_DRAW_DEBUG
+	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit)
+	{
+		if (CVarInteraction.GetValueOnAnyThread() == 0)
+		{
+			return;
+		}
+		DrawDebugLine(GWorld, WorldLocation, LineEnd, FColor::Red, false, 0, 0, 1);
+		FString Debug = FString(TEXT("Pointed Actor: "));
+		if (const AActor* Actor = Hit.GetActor())
+		{
+			Debug += Actor->GetName();
+		}
+		GEngine->AddOnScreenDebugMessage(420, 10, FColor::Green, Debug);
+	}
+#endif
 }

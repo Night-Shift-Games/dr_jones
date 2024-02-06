@@ -33,11 +33,6 @@ public:
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
 	UInventoryComponent* GetInventory() const { return InventoryComponent; }
 	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
-	
-	UFUNCTION(BlueprintPure)
-	static FHitResult GetPlayerLookingAt(const float Reach);
-
-	static void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 
 private:
 	void Move(const FInputActionValue& InputActionValue);

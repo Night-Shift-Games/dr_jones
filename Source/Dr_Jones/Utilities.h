@@ -1,10 +1,11 @@
 ﻿#pragma once
+
 #include "Player/DrJonesCharacter.h"
 #include "UI/DrJonesWidgetBase.h"
 
-class ADrJonesCharacter;
-
 #include "Utilities.generated.h"
+
+class ADrJonesCharacter;
 
 namespace Utilities
 {
@@ -17,6 +18,8 @@ namespace Utilities
 	double GetMeshZOffset(const AActor& Actor);
 	UDrJonesWidgetBase* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
+	FHitResult GetPlayerLookingAt(const float Reach);
+	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 	
 	template <class TWidgetClass>
 	TWidgetClass* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
@@ -58,7 +61,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static FHitResult GetHitResultOfPlayerSight(float Reach = 400.f)
-	{ return ADrJonesCharacter::GetPlayerLookingAt(Reach); }
+	{ return Utilities::GetPlayerLookingAt(Reach); }
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static UWidgetManager* GetWidgetManager(const UObject* WorldContextObject)

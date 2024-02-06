@@ -40,7 +40,7 @@ void ACampEntity::HoldActor()
 {
 	const ADrJonesCharacter& Player = Utilities::GetPlayerCharacter(*this);
 
-	const FHitResult PlayerHitResult = Player.GetPlayerLookingAt(200.f);
+	const FHitResult PlayerHitResult = Utilities::GetPlayerLookingAt(200.f);
 	const FVector FoundLocation = Utilities::FindGround(*this, PlayerHitResult.Location + FVector(0.0, 0.0, 20.0), { this });
 	SetActorLocation(FoundLocation, false);
 

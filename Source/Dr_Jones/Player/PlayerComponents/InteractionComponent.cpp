@@ -3,6 +3,7 @@
 #include "Player/PlayerComponents/InteractionComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "Utilities.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
@@ -51,7 +52,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 		return SelectedInteractiveComponent;
 	}
 	UInteractableComponent* InteractableComponent = nullptr;
-	if (const USceneComponent* FoundSceneComponent = Owner->GetPlayerLookingAt(InteractionRange).GetComponent())
+	if (const USceneComponent* FoundSceneComponent = Utilities::GetPlayerLookingAt(InteractionRange).GetComponent())
 	{
 		InteractableComponent = GetAttachedInteractableComponent(*FoundSceneComponent);
 		if (InteractableComponent)
@@ -59,7 +60,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 			return InteractableComponent;
 		}
 	}
-	if (const AActor* Actor = Owner->GetPlayerLookingAt(InteractionRange).GetActor())
+	if (const AActor* Actor = Utilities::GetPlayerLookingAt(InteractionRange).GetActor())
 	{
 		InteractableComponent = Actor->FindComponentByClass<UInteractableComponent>();
 		if (InteractableComponent && Actor->GetRootComponent() == InteractableComponent->GetAttachParent())
