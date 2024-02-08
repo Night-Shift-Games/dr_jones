@@ -11,7 +11,7 @@
 AArtifact::AArtifact()
 {
 	ArtifactMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArtifactMesh"));
-	ArtifactMeshComponent->SetupAttachment(RootComponent);
+	SetRootComponent(ArtifactMeshComponent);
 
 	if (ArtifactStaticMesh)
 	{

@@ -4,15 +4,18 @@
 
 #include "Dr_Jones.h"
 #include "Utilities.h"
+#include "Items/Artifacts/Artifact.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
 ADigSite::ADigSite()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
+	
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	DynamicMeshComponent = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMesh"));
 	DynamicMeshComponent->SetupAttachment(RootComponent);
-
+	
 	VoxelGrid = CreateDefaultSubobject<UVoxelGrid>(TEXT("VoxelGrid"));
 }
 
@@ -104,6 +107,8 @@ void ADigSite::BeginPlay()
 	MaterialSet.SetNumZeroed(8);
 	MaterialSet.Insert(VoxelGrid->ArtifactHintMaterial, 7);
 	DynamicMeshComponent->ConfigureMaterialSet(MaterialSet);
+	
+	SpawnArtifacts();
 }
 
 void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
@@ -142,6 +147,21 @@ void ADigSite::UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Loca
 
 		Voxel.bSolid |= bIsInRadius;
 	});
+}
+
+void ADigSite::SpawnArtifacts()
+{
+	if (Artifacts.IsEmpty())
+	{
+		return;
+	}
+	for (int i = 0; i <= ArtifactSpawnRate; i++)
+	{
+		UClass* ArtifactClass = Artifacts[FMath::RandRange(0, Artifacts.Num() - 1)];
+		const FVector ArtifactSpawner = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation() + FVector(0.0,0.0,-80.0), FVector(500.0, 500.0, 50.0));
+		AArtifact* SpawnedArtifact = GWorld->SpawnActor<AArtifact>(ArtifactClass);
+		SpawnedArtifact->SetActorLocationAndRotation(ArtifactSpawner, FRotator(FMath::RandRange(0.0, 360.0)));
+	}
 }
 
 
