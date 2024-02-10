@@ -22,9 +22,13 @@ public:
 	void AddWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void ShowWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void HideWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
-	void SetWidgetVisibility(TSubclassOf<UDrJonesWidgetBase> WidgetClass, ESlateVisibility Visibility) const;
 	void RemoveWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	void RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget, TOptional<float> AxisValue) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetWidgetVisibility(TSubclassOf<UDrJonesWidgetBase> WidgetClass, ESlateVisibility Visibility) const;
+
+	UFUNCTION(BlueprintCallable)
 	UDrJonesWidgetBase* GetWidget(const TSubclassOf<UDrJonesWidgetBase> WidgetClass) const;
 	
 public:
