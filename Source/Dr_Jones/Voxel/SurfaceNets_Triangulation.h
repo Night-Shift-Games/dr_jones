@@ -205,126 +205,275 @@ namespace NS::SurfaceNets
 	static constexpr int32 ChunkFieldResolution = FVoxelChunk::Resolution + 6;
 
 	// A field that allows for triangulating the whole chunk using surface nets without querying the voxel grid.
-	struct alignas(Alignment) FSurfaceNetsChunkField : TField3D<float, ChunkFieldResolution> { };
-
-	template <typename T, int32 Res>
-	float FieldGetByVoxelCoords(const TField3D<T, Res>& Field, const FIntVector& VoxelCoords)
+	struct alignas(Alignment) FSurfaceNetsChunkField : TField3D<float, ChunkFieldResolution>
 	{
-		// Field's coords start at -2 in relation to its chunk.
-		// This is needed to make convolution by a 3x3x3 kernel seamless.
+		static constexpr float NoneValue = NAN;
+		static constexpr float ZeroValue = 0.0f;
+
+		static bool IsValueNone(float Value)
+		{
+			return FMath::IsNaN(Value);
+		}
+	};
+
+	// Used as an element in the material weight field
+	struct FMaterialWeights
+	{
+		static constexpr int32 Num = FVoxel::MaterialIDNum;
+		float Weights[Num];
+
+		// ConvolveField interface:
+
+		FORCEINLINE friend FMaterialWeights operator*(float Value, const FMaterialWeights& Weights)
+		{
+			// return Weights;
+			FMaterialWeights MaterialWeights;
+			for (int32 I = 0; I < Num; ++I)
+			{
+				MaterialWeights.Weights[I] = Value * Weights.Weights[I];
+			}
+			return MaterialWeights;
+		}
+
+		FORCEINLINE FMaterialWeights& operator+=(const FMaterialWeights& Other)
+		{
+			for (int32 I = 0; I < Num; ++I)
+			{
+				Weights[I] += Other.Weights[I];
+			}
+			return *this;
+		}
+
+		// ConvolveField interface End
+
+		FORCEINLINE static FMaterialWeights MakeNoneMaterialWeights()
+		{
+			FMaterialWeights MaterialWeights;
+			for (uint32 I = 0; I < Num; ++I)
+			{
+				MaterialWeights.Weights[I] = NAN;
+			}
+			return MaterialWeights;
+		}
+
+		FORCEINLINE static FMaterialWeights MakeZeroMaterialWeights()
+		{
+			FMaterialWeights MaterialWeights;
+			for (uint32 I = 0; I < Num; ++I)
+			{
+				MaterialWeights.Weights[I] = 0.0f;
+			}
+			return MaterialWeights;
+		}
+	};
+
+	// Two additional samples on each side are needed for convolution.
+	static constexpr int32 ChunkMaterialFieldResolution = FVoxelChunk::Resolution + 4;
+
+	// Voxel material index field representation - for later convolution & better blending
+	struct alignas(Alignment) FChunkMaterialField : TField3D<FMaterialWeights, ChunkMaterialFieldResolution>
+	{
+		inline static const FMaterialWeights NoneValue = FMaterialWeights::MakeNoneMaterialWeights();
+		inline static const FMaterialWeights ZeroValue = FMaterialWeights::MakeZeroMaterialWeights();
+
+		static bool IsValueNone(const FMaterialWeights& Value)
+		{
+			const bool bNone = FMemory::Memcmp(&Value, &NoneValue, sizeof(FMaterialWeights)) == 0;
+			return bNone;
+		}
+	};
+
+	template <typename T, int32 Res, int32 ChunkOffset = 2>
+	T& FieldGetByVoxelCoords(TField3D<T, Res>& Field, const FIntVector& VoxelCoords)
+	{
+		// Field's coords start at -ChunkOffset in relation to its chunk.
+		// This is needed to make convolution by a specific kernel seamless.
 		FIntVector FieldCoords;
-		FieldCoords.X = VoxelCoords.X + 2;
-		FieldCoords.Y = VoxelCoords.Y + 2;
-		FieldCoords.Z = VoxelCoords.Z + 2;
+		FieldCoords.X = VoxelCoords.X + ChunkOffset;
+		FieldCoords.Y = VoxelCoords.Y + ChunkOffset;
+		FieldCoords.Z = VoxelCoords.Z + ChunkOffset;
 		return Field.Get(FieldCoords);
 	}
 
-	inline TUniquePtr<FSurfaceNetsChunkField> GenerateChunkField(const FVoxelGrid& Grid, int32 ChunkIndex)
+	template <typename T, int32 Res, int32 ChunkOffset = 2>
+	const T& FieldGetByVoxelCoords(const TField3D<T, Res>& Field, const FIntVector& VoxelCoords)
+	{
+		return FieldGetByVoxelCoords<T, Res, ChunkOffset>(const_cast<TField3D<T, Res>&>(Field), VoxelCoords);
+	}
+
+	struct FChunkFields
+	{
+		TUniquePtr<FSurfaceNetsChunkField> SurfaceNetsField;
+		TUniquePtr<FChunkMaterialField> MaterialField;
+	};
+
+	inline FChunkFields GenerateChunkFields(const FVoxelGrid& Grid, int32 ChunkIndex)
 	{
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_GenerateChunkField, FColorList::NeonPink)
 
+		FChunkFields ChunkFields;
 		const FIntVector BaseGlobalCoords = Grid.CalcGlobalCoordsFromVoxelAddressChecked(MakeVoxelAddress(Grid.IndexToCoords(ChunkIndex), FIntVector{}));
-		TUniquePtr<FSurfaceNetsChunkField> ChunkField = MakeUnique<FSurfaceNetsChunkField>();
+		ChunkFields.SurfaceNetsField = MakeUnique<FSurfaceNetsChunkField>();
+		ChunkFields.MaterialField = MakeUnique<FChunkMaterialField>();
+
 		FIntVector LocalVoxelCoords;
-		int32 FieldIndex = 0;
-		for (LocalVoxelCoords.Z = -2; LocalVoxelCoords.Z < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.Z)
+		int32 SurfaceNetsFieldIndex = 0;
+		int32 MaterialFieldIndex = 0;
+
+		for (LocalVoxelCoords.Z = -2; LocalVoxelCoords.Z + 2 < FSurfaceNetsChunkField::Resolution; ++LocalVoxelCoords.Z)
 		{
-			for (LocalVoxelCoords.Y = -2; LocalVoxelCoords.Y < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.Y)
+			for (LocalVoxelCoords.Y = -2; LocalVoxelCoords.Y + 2 < FSurfaceNetsChunkField::Resolution; ++LocalVoxelCoords.Y)
 			{
-				for (LocalVoxelCoords.X = -2; LocalVoxelCoords.X < FSurfaceNetsChunkField::Resolution - 2; ++LocalVoxelCoords.X, ++FieldIndex)
+				for (LocalVoxelCoords.X = -2; LocalVoxelCoords.X + 2 < FSurfaceNetsChunkField::Resolution; ++LocalVoxelCoords.X, ++SurfaceNetsFieldIndex)
 				{
-					check(FieldIndex >= 0 && FieldIndex < ChunkField->Num());
+					check(SurfaceNetsFieldIndex >= 0 && SurfaceNetsFieldIndex < ChunkFields.SurfaceNetsField->Num());
 					const FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
 					const FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
 					const FVoxel* Voxel = Grid.ResolveAddress(VoxelAddress);
-					ChunkField->Get(FieldIndex) = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
+					ChunkFields.SurfaceNetsField->Get(SurfaceNetsFieldIndex) = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
+
+					const bool bMaterialVoxel = LocalVoxelCoords.X + 2 < FChunkMaterialField::Resolution &&
+						LocalVoxelCoords.Y + 2 < FChunkMaterialField::Resolution &&
+						LocalVoxelCoords.Z + 2 < FChunkMaterialField::Resolution;
+
+					if (bMaterialVoxel)
+					{
+						FMaterialWeights& MaterialWeights = ChunkFields.MaterialField->Get(MaterialFieldIndex);
+						for (int32 MI = 0; MI < FMaterialWeights::Num; ++MI)
+						{
+							MaterialWeights.Weights[MI] = Voxel ? (Voxel->LocalMaterial == MI ? 1.0f : 0.0f) : 0.0f;
+						}
+						++MaterialFieldIndex;
+					}
 				}
 			}
 		}
-		return ChunkField;
+		return ChunkFields;
 	}
 
 	/**
 	 * Separable 3D gaussian kernel calculated using python:
+	 *
 	 *	def gaussian(x):
 	 *		return math.exp(-(x*x))
-	 *	kernel = [gaussian(-1), gaussian(0), gaussian(1)]
-	 *	kernel_sum = sum(kernel)
-	 *	kernel_norm = [x / kernel_sum for x in kernel]
+	 *
+	 *	def make_kernel():
+	 *		kernel = [gaussian(-1), gaussian(0), gaussian(1)]
+	 *		kernel_sum = sum(kernel)
+	 *		kernel_norm = [x / kernel_sum for x in kernel]
+	 *		return kernel_norm
 	 */
-	struct FGaussianKernel3D
+	struct FGaussianKernel3D_3x3x3
 	{
-		static constexpr float WeightsX[3] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
-		static constexpr float WeightsY[3] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
-		static constexpr float WeightsZ[3] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
+		static constexpr int32 Size = 3;
+		static constexpr float WeightsX[Size] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
+		static constexpr float WeightsY[Size] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
+		static constexpr float WeightsZ[Size] = { 0.21194155761708544f, 0.5761168847658291f, 0.21194155761708544f };
 	};
 
-	template <typename T>
-	T&& ForwardUnlessNaN(T&& Value, T&& Or = T{})
+	/**
+	 * Same as above, but with different coefficients:
+	 *
+	 *	def gaussian(x):
+	 *		return math.exp(-(x*x)/2.4)
+	 *
+	 *	def make_kernel():
+	 *		kernel = [gaussian(-2), gaussian(-1), gaussian(0), gaussian(1), gaussian(2)]
+	 *		kernel_sum = sum(kernel)
+	 *		kernel_norm = [x / kernel_sum for x in kernel]
+	 *		return kernel_norm
+	 */
+	struct FGaussianKernel3D_5x5x5
 	{
-		return FMath::IsNaN(Value) ? static_cast<T&&>(Or) : static_cast<T&&>(Value);
+		static constexpr int32 Size = 5;
+		static constexpr float WeightsX[Size] = { 0.0700516758899665f, 0.24450437360094404f, 0.37088790101817887f, 0.24450437360094404f, 0.0700516758899665f };
+		static constexpr float WeightsY[Size] = { 0.0700516758899665f, 0.24450437360094404f, 0.37088790101817887f, 0.24450437360094404f, 0.0700516758899665f };
+		static constexpr float WeightsZ[Size] = { 0.0700516758899665f, 0.24450437360094404f, 0.37088790101817887f, 0.24450437360094404f, 0.0700516758899665f };
+	};
+
+	template <typename FField, typename T>
+	T&& ForwardUnlessNone(T&& Value, T&& Or = T{})
+	{
+		const bool bIsNone = FField::IsValueNone(Value);
+		return bIsNone ? static_cast<T&&>(Or) : static_cast<T&&>(Value);
 	}
 
-	template <typename FSeparableKernel>
-	void ConvolveField(TUniquePtr<FSurfaceNetsChunkField>& Field)
+	template <typename FSeparableKernel, typename FField>
+	void ConvolveField(TUniquePtr<FField>& Field)
 	{
+		static constexpr int32 KernelSize = FSeparableKernel::Size;
+		static_assert(KernelSize >= 3 && KernelSize % 2 == 1);
+		static constexpr int32 KernelEnd = (KernelSize - 1) / 2;
+		static constexpr int32 KernelStart = -KernelEnd;
+
+		using FElement = typename FField::FElement;
+
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_ConvolveField, FColorList::NeonBlue)
 
-		TUniquePtr<FSurfaceNetsChunkField> ConvolvedField = MakeUnique<FSurfaceNetsChunkField>();
-		ConvolvedField->Fill(NAN);
+		TUniquePtr<FField> ConvolvedField = MakeUnique<FField>();
+		ConvolvedField->Fill(FField::NoneValue);
 
-		auto Clamp = [](int32 Coord) { return FMath::Clamp(Coord, 0, FSurfaceNetsChunkField::Resolution - 1); };
+		auto Clamp = [](int32 Coord) { return FMath::Clamp(Coord, 0, FField::Resolution - 1); };
 
 		// X pass
-		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](const FElement& Value, int32 Index, const FIntVector& Coords)
 		{
-			if (FMath::IsNaN(Value))
+			if (FField::IsValueNone(Value))
 			{
-				ConvolvedField->Get(Index) = NAN;
+				ConvolvedField->Get(Index) = FField::NoneValue;
 				return;
 			}
 
-			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[0] * Field->Get({ Clamp(Coords.X - 1), Coords.Y, Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[1] * Field->Get(Index));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsX[2] * Field->Get({ Clamp(Coords.X + 1), Coords.Y, Coords.Z }));
-			ConvolvedField->Get(Index) = ConvolvedValue;
+			FElement& ConvolvedValue = ConvolvedField->Get(Index);
+			ConvolvedValue = FField::ZeroValue;
+
+			int32 WeightIndex = 0;
+			for (int32 Offset = KernelStart; Offset <= KernelEnd; ++Offset, ++WeightIndex)
+			{
+				ConvolvedValue += ForwardUnlessNone<FField>(FSeparableKernel::WeightsX[WeightIndex] * Field->Get({ Clamp(Coords.X + Offset), Coords.Y, Coords.Z }));
+			}
 		});
 
 		Swap(ConvolvedField, Field);
 
 		// Y pass
-		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](const FElement& Value, int32 Index, const FIntVector& Coords)
 		{
-			if (FMath::IsNaN(Value))
+			if (FField::IsValueNone(Value))
 			{
-				ConvolvedField->Get(Index) = NAN;
+				ConvolvedField->Get(Index) = FField::NoneValue;
 				return;
 			}
 
-			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[0] * Field->Get({ Coords.X, Clamp(Coords.Y - 1), Coords.Z }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[1] * Field->Get(Index));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsY[2] * Field->Get({ Coords.X, Clamp(Coords.Y + 1), Coords.Z }));
-			ConvolvedField->Get(Index) = ConvolvedValue;
+			FElement& ConvolvedValue = ConvolvedField->Get(Index);
+			ConvolvedValue = FField::ZeroValue;
+
+			int32 WeightIndex = 0;
+			for (int32 Offset = KernelStart; Offset <= KernelEnd; ++Offset, ++WeightIndex)
+			{
+				ConvolvedValue += ForwardUnlessNone<FField>(FSeparableKernel::WeightsY[WeightIndex] * Field->Get({ Coords.X, Clamp(Coords.Y + Offset), Coords.Z }));
+			}
 		});
 
 		Swap(ConvolvedField, Field);
 
 		// Z pass
-		Field->Iterate([&](float Value, int32 Index, const FIntVector& Coords)
+		Field->Iterate([&](const FElement& Value, int32 Index, const FIntVector& Coords)
 		{
-			if (FMath::IsNaN(Value))
+			if (FField::IsValueNone(Value))
 			{
-				ConvolvedField->Get(Index) = NAN;
+				ConvolvedField->Get(Index) = FField::NoneValue;
 				return;
 			}
 
-			float ConvolvedValue = 0;
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[0] * Field->Get({ Coords.X, Coords.Y, Clamp(Coords.Z - 1) }));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[1] * Field->Get(Index));
-			ConvolvedValue += ForwardUnlessNaN(FSeparableKernel::WeightsZ[2] * Field->Get({ Coords.X, Coords.Y, Clamp(Coords.Z + 1) }));
-			ConvolvedField->Get(Index) = ConvolvedValue;
+			FElement& ConvolvedValue = ConvolvedField->Get(Index);
+			ConvolvedValue = FField::ZeroValue;
+
+			int32 WeightIndex = 0;
+			for (int32 Offset = KernelStart; Offset <= KernelEnd; ++Offset, ++WeightIndex)
+			{
+				ConvolvedValue += ForwardUnlessNone<FField>(FSeparableKernel::WeightsZ[WeightIndex] * Field->Get({ Coords.X, Coords.Y, Clamp(Coords.Z + Offset) }));
+			}
 		});
 
 		Field = MoveTemp(ConvolvedField);
@@ -468,6 +617,7 @@ namespace NS::SurfaceNets
 		int32 ChunkIndex,
 		TArray<FVector>& OutVertices,
 		TArray<FIndex3i>& OutTriangles,
+		TArray<FMaterialWeights>& OutMaterialWeights,
 		Debug::FDebugContext* DebugContext = nullptr)
 	{
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelChunk, FColorList::BrightGold)
@@ -477,7 +627,6 @@ namespace NS::SurfaceNets
 			FVector Location;
 			FIntVector CellCoords;
 			int32 CellIndex;
-			float MaterialWeights[FVoxel::MaterialIDNum];
 		};
 
 		const FVoxelChunk::FTransformData TransformData = VoxelChunk.MakeTransformData();
@@ -491,10 +640,11 @@ namespace NS::SurfaceNets
 		SurfacePoints.Reserve(CellCount);
 		CoordsToSurfacePointIndexMap.Reserve(CellCount);
 
-		TUniquePtr<FSurfaceNetsChunkField> ChunkField = GenerateChunkField(VoxelGrid, ChunkIndex);
+		FChunkFields ChunkFields = GenerateChunkFields(VoxelGrid, ChunkIndex);
 		if (LIKELY(CVar_Convolution.GetValueOnAnyThread()))
 		{
-			ConvolveField<FGaussianKernel3D>(ChunkField);
+			ConvolveField<FGaussianKernel3D_3x3x3>(ChunkFields.SurfaceNetsField);
+			ConvolveField<FGaussianKernel3D_5x5x5>(ChunkFields.MaterialField);
 		}
 
 		{
@@ -510,7 +660,7 @@ namespace NS::SurfaceNets
 					for (VoxelCoords.X = 0; VoxelCoords.X < FVoxelChunk::Resolution + 1; ++VoxelCoords.X, ++CellIndex)
 					{
 						FCell& Cell = Cells[CellIndex];
-						if (!MakeCellAtVoxel(TransformData, VoxelCoords, *ChunkField, Cell))
+						if (!MakeCellAtVoxel(TransformData, VoxelCoords, *ChunkFields.SurfaceNetsField, Cell))
 						{
 							continue;
 						}
@@ -525,10 +675,11 @@ namespace NS::SurfaceNets
 						SurfacePointRef.Location = FindSurfacePointInCell(Cell);
 						SurfacePointRef.CellCoords = VoxelCoords;
 						SurfacePointRef.CellIndex = CellIndex;
-						for (int32 MaterialID = 0; MaterialID < FVoxel::MaterialIDNum; ++MaterialID)
-						{
-							SurfacePointRef.MaterialWeights[MaterialID] = 0.0f;
-						}
+
+						OutVertices.Add(SurfacePointRef.Location);
+
+						const FMaterialWeights& MaterialWeights = FieldGetByVoxelCoords(*ChunkFields.MaterialField, VoxelCoords);
+						OutMaterialWeights.Add(MaterialWeights);
 					}
 				}
 			}
@@ -547,8 +698,6 @@ namespace NS::SurfaceNets
 				check(CellCoords.Y >= 0 && CellCoords.Y < FVoxelChunk::Resolution + 1);
 				check(CellCoords.Z >= 0 && CellCoords.Z < FVoxelChunk::Resolution + 1);
 				const int32 SurfacePointIndex = It.GetIndex();
-
-				OutVertices.Add(SurfacePoint.Location);
 
 				FCell& Cell = Cells[SurfacePoint.CellIndex];
 
@@ -635,6 +784,7 @@ namespace NS::SurfaceNets
 		const FVoxelGrid& VoxelGrid,
 		TArray<FVector>& OutVertices,
 		TArray<FIndex3i>& OutTriangles,
+		TArray<FMaterialWeights>& OutMaterialWeights,
 		Debug::FDebugContext* DebugContext = nullptr)
 	{
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelGrid, FColorList::Wheat)
@@ -654,12 +804,14 @@ namespace NS::SurfaceNets
 		{
 			TArray<FVector> Vertices;
 			TArray<FIndex3i> Triangles;
-			TriangulateVoxelChunk(VoxelGrid, Chunk, ChunkIndex, Vertices, Triangles, DebugContext);
+			TArray<FMaterialWeights> MaterialWeights;
+			TriangulateVoxelChunk(VoxelGrid, Chunk, ChunkIndex, Vertices, Triangles, MaterialWeights, DebugContext);
 
 			{
 				FScopeLock Lock(&TransactionGuard);
 
 				Algo::Copy(Vertices, OutVertices);
+				Algo::Copy(MaterialWeights, OutMaterialWeights);
 				Algo::Transform(Triangles, OutTriangles, [&](FIndex3i Triangle)
 				{
 					Triangle.A += CombinedVertexCount;

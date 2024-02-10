@@ -339,7 +339,10 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 
 	SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal, FColorList::Quartz)
 
-	auto EditDynamicMeshFn = [DynamicMesh, OnCompleted](const TArray<FVector>& CombinedVertices, const TArray<FTriangle>& CombinedTriangles)
+	auto EditDynamicMeshFn = [DynamicMesh, OnCompleted](
+		const TArray<FVector>& CombinedVertices,
+		const TArray<FTriangle>& CombinedTriangles,
+		const TArray<NS::SurfaceNets::FMaterialWeights>& CombinedMaterialWeights)
 	{
 		{
 			SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh, FColorList::NavyBlue)
@@ -357,13 +360,18 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 					EditMesh.Attributes()->EnableMaterialID();
 				}
 
+				EditMesh.Attributes()->EnablePrimaryColors();
+				FDynamicMeshColorOverlay* ColorOverlay = EditMesh.Attributes()->PrimaryColors();
+				FDynamicMeshMaterialAttribute* MaterialIDs = EditMesh.Attributes()->GetMaterialID();
+
 				{
 					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_Append, FColorList::DustyRose)
-					for (const FVector& Vertex : CombinedVertices)
+					for (auto It = CombinedVertices.CreateConstIterator(); It; ++It)
 					{
+						const FVector& Vertex = *It;
 						EditMesh.AppendVertex(Vertex);
 					}
-					UE::Geometry::FDynamicMeshMaterialAttribute* MaterialIDs = EditMesh.Attributes()->GetMaterialID();
+
 					for (const FTriangle& Triangle : CombinedTriangles)
 					{
 						const int32 TriangleID = EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
@@ -373,7 +381,19 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 						{
 							continue;
 						}
-						MaterialIDs->SetValue(TriangleID, static_cast<int32>(Triangle.MaterialIndex));
+						MaterialIDs->SetValue(TriangleID, 0);
+					}
+
+					ColorOverlay->CreateFromPredicate([](int, int, int) { return true; }, 0.0f);
+					for (const int32 ElementID : ColorOverlay->ElementIndicesItr())
+					{
+						const int32 VertexID = ColorOverlay->GetParentVertex(ElementID);
+						FVector4f Color;
+						Color.X = CombinedMaterialWeights[VertexID].Weights[0];
+						Color.Y = CombinedMaterialWeights[VertexID].Weights[1];
+						Color.Z = CombinedMaterialWeights[VertexID].Weights[2];
+						Color.W = CombinedMaterialWeights[VertexID].Weights[3];
+						ColorOverlay->SetElement(ElementID, Color);
 					}
 				}
 
@@ -411,8 +431,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			// int32 TriangleCount;
 			// TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVerticesAsync, CombinedTrianglesAsync, VertexCount, TriangleCount);
 			TArray<FIndex3i> Indices;
+			TArray<NS::SurfaceNets::FMaterialWeights> CombinedMaterialWeights;
 
-			NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVerticesAsync, Indices, DebugContext.Get());
+			NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVerticesAsync, Indices, CombinedMaterialWeights, DebugContext.Get());
 
 			Algo::Transform(Indices, CombinedTrianglesAsync, [](const FIndex3i& Triangle)
 			{
@@ -433,9 +454,10 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			AsyncTask(ENamedThreads::GameThread, [EditDynamicMeshFn,
 				CombinedVerticesAsync = MoveTemp(CombinedVerticesAsync),
 				CombinedTrianglesAsync = MoveTemp(CombinedTrianglesAsync),
+				CombinedMaterialWeights = MoveTemp(CombinedMaterialWeights),
 				DebugContext]
 			{
-				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync);
+				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync, CombinedMaterialWeights);
 				// NS::SurfaceNets::Debug::DrawSurfaceNetsDebug(*DebugContext);
 			});
 		});
@@ -446,7 +468,8 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 		TArray<FTriangle> CombinedTriangles;
 		// TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVertices, CombinedTriangles, OutVertexCount, OutTriangleCount);
 		TArray<FIndex3i> Indices;
-		NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVertices, Indices, DebugContext.Get());
+		TArray<NS::SurfaceNets::FMaterialWeights> CombinedMaterialWeights;
+		NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVertices, Indices, CombinedMaterialWeights, DebugContext.Get());
 		Algo::Transform(Indices, CombinedTriangles, [](const FIndex3i& Triangle)
 		{
 			FTriangle Triangle2;
@@ -459,7 +482,7 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 
 		if (DynamicMesh)
 		{
-			EditDynamicMeshFn(CombinedVertices, CombinedTriangles);
+			EditDynamicMeshFn(CombinedVertices, CombinedTriangles, CombinedMaterialWeights);
 			// NS::SurfaceNets::Debug::DrawSurfaceNetsDebug(*DebugContext);
 		}
 		else
