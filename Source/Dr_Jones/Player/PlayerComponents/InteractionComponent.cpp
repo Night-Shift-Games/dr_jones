@@ -55,7 +55,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 	if (const USceneComponent* FoundSceneComponent = Utilities::GetPlayerLookingAt(InteractionRange).GetComponent())
 	{
 		InteractableComponent = GetAttachedInteractableComponent(*FoundSceneComponent);
-		if (InteractableComponent)
+		if (InteractableComponent && InteractableComponent->IsInteractionEnabled())
 		{
 			return InteractableComponent;
 		}
@@ -63,7 +63,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 	if (const AActor* Actor = Utilities::GetPlayerLookingAt(InteractionRange).GetActor())
 	{
 		InteractableComponent = Actor->FindComponentByClass<UInteractableComponent>();
-		if (InteractableComponent && Actor->GetRootComponent() == InteractableComponent->GetAttachParent())
+		if (InteractableComponent && InteractableComponent->IsInteractionEnabled() && Actor->GetRootComponent() == InteractableComponent->GetAttachParent())
 		{
 			return InteractableComponent;
 		}
