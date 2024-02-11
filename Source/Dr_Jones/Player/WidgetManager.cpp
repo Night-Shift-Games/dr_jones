@@ -67,10 +67,6 @@ void UWidgetManager::SetWidgetVisibility(TSubclassOf<UDrJonesWidgetBase> WidgetC
 	{
 		return;
 	}
-	if (Visibility == ESlateVisibility::Visible && !Widget->IsInViewport())
-	{
-		Widget->AddToViewport();
-	}
 	Widget->SetVisibility(Visibility);
 }
 
