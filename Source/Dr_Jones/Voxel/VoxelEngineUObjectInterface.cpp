@@ -392,7 +392,7 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 						Color.X = CombinedMaterialWeights[VertexID].Weights[0];
 						Color.Y = CombinedMaterialWeights[VertexID].Weights[1];
 						Color.Z = CombinedMaterialWeights[VertexID].Weights[2];
-						Color.W = CombinedMaterialWeights[VertexID].Weights[3];
+						Color.W = CombinedMaterialWeights[VertexID].Weights[7];
 						ColorOverlay->SetElement(ElementID, Color);
 					}
 				}
