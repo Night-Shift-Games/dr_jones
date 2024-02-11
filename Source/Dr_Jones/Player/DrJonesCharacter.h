@@ -31,7 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
-	UEquipmentComponent* GetInventory() const { return InventoryComponent; }
+	UEquipmentComponent* GetInventory() const { return EquipmentComponent; }
 	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
 
 private:
@@ -41,15 +41,12 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UInteractionComponent> InteractionComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UReactionComponent> ReactionComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetManager> WidgetManager;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UEquipmentComponent> InventoryComponent;
+	TObjectPtr<UEquipmentComponent> EquipmentComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;

@@ -6,9 +6,9 @@
 #include "Animation/CharacterAnimationComponent.h"
 #include "Items/Tools/Tool.h"
 #include "Player/WidgetManager.h"
-#include "ReactionComponent.h"
 #include "Utilities.h"
 #include "Items/Letter.h"
+#include "SharedComponents/ActionComponent.h"
 
 void UEquipmentComponent::BeginPlay()
 {
@@ -30,6 +30,9 @@ void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInpu
 {
 	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::ChangeActiveItem);
 	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::OpenInventory);
+	EnhancedInputComponent->BindAction(PrimaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallAction);
+	EnhancedInputComponent->BindAction(SecondaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallSecondaryAction);
+
 	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
 	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
 	{
@@ -110,7 +113,6 @@ void UEquipmentComponent::SetActiveItem(AItem* NewActiveItem)
 		ItemInHand->GetMeshComponent()->SetVisibility(true);
 	}
 	
-	Owner->ReactionComponent->SetActiveItem(NewActiveItem);
 	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem ? NewActiveItem->GetItemAnimation() : nullptr);
 	
 	if (UDrJonesWidgetBase* Widget = Utilities::GetWidget(*this, ItemInfo))
@@ -176,3 +178,14 @@ void UEquipmentComponent::OpenInventory(const FInputActionValue& InputActionValu
 	ItemMenu->UpdateData();
 }
 
+void UEquipmentComponent::CallAction()
+{
+	UActionComponent* ReactionComponent = ItemInHand->FindComponentByClass<UActionComponent>();
+	ReactionComponent->CallPrimaryAction(GetOwner<ADrJonesCharacter>());
+}
+
+void UEquipmentComponent::CallSecondaryAction()
+{
+	UActionComponent* ReactionComponent = ItemInHand->FindComponentByClass<UActionComponent>();
+	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
+}

@@ -47,6 +47,8 @@ public:
 	bool CanPickUpItem() const;
 	
 	void OpenInventory(const FInputActionValue& InputActionValue);
+	void CallAction();
+	void CallSecondaryAction();
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;
@@ -72,6 +74,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> DetachItemAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> PrimaryAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> SecondaryAction;
 	
 private:
 	UPROPERTY(Transient)
