@@ -67,7 +67,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 			return InteractableComponent;
 		}
 	}
-	return InteractableComponent;
+	return InteractableComponent && InteractableComponent->IsInteractionEnabled() ? InteractableComponent : nullptr;
 }
 
 void UInteractionComponent::UpdateInteractionUI()
