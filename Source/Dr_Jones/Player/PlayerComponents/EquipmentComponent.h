@@ -47,8 +47,8 @@ public:
 	bool CanPickUpItem() const;
 	
 	void OpenInventory(const FInputActionValue& InputActionValue);
-	void CallAction();
-	void CallSecondaryAction();
+	void CallPrimaryItemAction();
+	void CallSecondaryItemAction();
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;

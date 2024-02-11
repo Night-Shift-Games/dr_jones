@@ -30,8 +30,8 @@ void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInpu
 {
 	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::ChangeActiveItem);
 	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::OpenInventory);
-	EnhancedInputComponent->BindAction(PrimaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallAction);
-	EnhancedInputComponent->BindAction(SecondaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallSecondaryAction);
+	EnhancedInputComponent->BindAction(PrimaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallPrimaryItemAction);
+	EnhancedInputComponent->BindAction(SecondaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallSecondaryItemAction);
 
 	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
 	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
@@ -178,14 +178,30 @@ void UEquipmentComponent::OpenInventory(const FInputActionValue& InputActionValu
 	ItemMenu->UpdateData();
 }
 
-void UEquipmentComponent::CallAction()
+void UEquipmentComponent::CallPrimaryItemAction()
 {
+	if (!ItemInHand)
+	{
+		return;
+	}
 	UActionComponent* ReactionComponent = ItemInHand->FindComponentByClass<UActionComponent>();
+	if (!ReactionComponent)
+	{
+		return;
+	}
 	ReactionComponent->CallPrimaryAction(GetOwner<ADrJonesCharacter>());
 }
 
-void UEquipmentComponent::CallSecondaryAction()
+void UEquipmentComponent::CallSecondaryItemAction()
 {
+	if (!ItemInHand)
+	{
+		return;
+	}
 	UActionComponent* ReactionComponent = ItemInHand->FindComponentByClass<UActionComponent>();
+	if (!ReactionComponent)
+	{
+		return;
+	}
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
 }
