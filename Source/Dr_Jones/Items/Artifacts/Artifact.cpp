@@ -3,6 +3,7 @@
 #include "Artifact.h"
 
 #include "ArtifactDatabase.h"
+#include "Utilities.h"
 #include "Player/PlayerComponents/EquipmentComponent.h"
 #include "Quest/QuestSystem.h"
 #include "SharedComponents/InteractableComponent.h"
@@ -64,9 +65,9 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
-	if (UEquipmentComponent* Inventory = Taker->GetInventory(); Inventory && Inventory->CanPickUpItem())
+	if (UEquipmentComponent* EquipmentComponent = Taker->GetEquipment(); EquipmentComponent && EquipmentComponent->CanPickUpItem())
 	{
-		Inventory->AddArtifact(*this);
+		EquipmentComponent->AddItem(this);
 		OnArtifactPickup.ExecuteIfBound(this);
 		OnArtifactPickedUp(Taker);
 
@@ -101,6 +102,22 @@ void AArtifact::Clear()
 	}
 	bArtifactCleared = true;
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Artifact Cleared!"));
+}
+
+void AArtifact::OnRemovedFromEquipment()
+{
+	Super::OnRemovedFromEquipment();
+
+	TArray<AActor*> Tools;
+	AActor& Player = Utilities::GetPlayerCharacter(*this);
+	GetAttachedActors(Tools);
+	TArray<AActor*> ActorsToIgnore = { &Player, this};
+	Algo::Copy(Tools, ActorsToIgnore);
+
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ActorsToIgnore);
+	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
+		
+	SetActorLocationAndRotation(GroundLocation, FRotator(0, Player.GetActorRotation().Yaw,0));
 }
 
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)

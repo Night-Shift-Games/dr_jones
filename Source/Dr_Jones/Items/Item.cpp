@@ -17,6 +17,18 @@ void AItem::SetInteractionEnabled(bool bEnabled) const
 	InteractableComponent->SetInteractionEnabled(bEnabled);
 }
 
+void AItem::OnAddedToEquipment()
+{
+	SetInteractionEnabled(false);
+	SetHandAttachmentPhysics();
+}
+
+void AItem::OnRemovedFromEquipment()
+{
+	SetInteractionEnabled(true);
+	SetWorldPhysics();
+}
+
 void AItem::SetHandAttachmentPhysics()
 {
 	RootComponent->SetMobility(EComponentMobility::Movable);
@@ -37,18 +49,4 @@ void AItem::SetWorldPhysics()
 		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 		Mesh->SetSimulatePhysics(false);
 	}
-}
-
-void AItem::SetupItemInHandProperties()
-{
-	SetInteractionEnabled(false);
-	GetMeshComponent()->SetVisibility(false);
-	SetHandAttachmentPhysics();
-}
-
-void AItem::SetupItemWorldProperties()
-{
-	SetInteractionEnabled(true);
-	GetMeshComponent()->SetVisibility(true);
-	SetWorldPhysics();
 }

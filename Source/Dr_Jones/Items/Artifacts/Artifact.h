@@ -60,6 +60,8 @@ public:
 	virtual UMeshComponent* GetMeshComponent() const override { return ArtifactMeshComponent; }
 	void SetupArtifact(const FArtifactData& ArtifactData);
 	void Clear();
+	
+	virtual void OnRemovedFromEquipment() override;
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = -1))

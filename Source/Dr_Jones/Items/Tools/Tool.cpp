@@ -24,10 +24,10 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing!"));
 	OwningPlayer = Player;
-	UEquipmentComponent* InventoryComponent = Player->GetInventory();
-	checkf(InventoryComponent, TEXT("Inventory is missing!"));
+	UEquipmentComponent* EquipmentComponent = Player->GetEquipment();
+	checkf(EquipmentComponent, TEXT("Inventory is missing!"));
 
-	InventoryComponent->AddTool(*this);
+	EquipmentComponent->AddItem(this);
 }
 
 UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
@@ -40,4 +40,22 @@ UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
 
 	checkf(OwningPlayer->CharacterAnimationComponent, TEXT("Animation Component is null"));
 	return OwningPlayer->CharacterAnimationComponent->FindItemActionMontage(*this, MontageName);
+}
+
+void ATool::OnRemovedFromEquipment()
+{
+	Super::OnRemovedFromEquipment();
+	GetMeshComponent()->SetVisibility(true);
+}
+
+void ATool::OnEquip()
+{
+	Super::OnEquip();
+	GetMeshComponent()->SetVisibility(true);
+}
+
+void ATool::OnUnequip()
+{
+	Super::OnUnequip();
+	GetMeshComponent()->SetVisibility(false);
 }

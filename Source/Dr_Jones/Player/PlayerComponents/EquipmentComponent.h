@@ -9,6 +9,7 @@
 
 #include "EquipmentComponent.generated.h"
 
+class ALetter;
 class ADrJonesCharacter;
 class ATool;
 
@@ -24,48 +25,58 @@ public:
 	virtual void BeginPlay() override;
 	void SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "DrJones|Equipment")
 	AItem* GetItemInHand() const { return ItemInHand; }
 
-	UFUNCTION(BlueprintPure)
-	TArray<ATool*> GetTools() const {return Tools; }
+	UFUNCTION(BlueprintPure, Category = "DrJones|Equipment")
+	TArray<ATool*> GetTools() const { return Tools; }
 
-	UFUNCTION(BlueprintCallable)
-	void SetActiveItemByClass(TSubclassOf<AItem> ItemClass);
+	UFUNCTION(BlueprintPure, Category = "DrJones|Equipment")
+	TArray<ALetter*> GetQuestItems() const { return QuestItems; }
 	
-	UFUNCTION(BlueprintCallable)
-	void SetActiveItem(AItem* NewActiveItem);
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Equipment")
+	void AddItem(AItem* ItemToAdd);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Equipment")
+	void EquipItemByClass(TSubclassOf<AItem> ItemClass);
 	
-	void AddArtifact(AArtifact& ArtifactToAdd);
-	void AddTool(ATool& ToolToAdd);
-	void RemoveTool(ATool& ToolToRemove);
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Equipment")
+	void EquipItem(AItem* NewActiveItem);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Equipment")
+	void UnequipItem();
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Equipment")
+	AItem* TakeOutItemInHand();
+
+	bool CanPickUpItem() const;
+
+	void CallPrimaryItemAction();
+	void CallSecondaryItemAction();
 	
 	void ChangeActiveItem(const FInputActionValue& InputActionValue);
 	void AttachItemToHand(AItem& ItemToAttach);
-	AItem* DetachActiveItemFromHand();
+	void DetachItemFromHand(AItem& ItemToDetach);
 	
-	bool CanPickUpItem() const;
-	
-	void OpenInventory(const FInputActionValue& InputActionValue);
-	void CallPrimaryItemAction();
-	void CallSecondaryItemAction();
+	void OpenEquipmentWheel(const FInputActionValue& InputActionValue);
 
 	UPROPERTY(BlueprintAssignable, Category = "Tools")
 	FOnToolAddedDelegate OnToolAdded;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Tools")
+	TArray<TSubclassOf<ATool>> DefaultTools;
+	
+	// UI
+	
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UDrJonesWidgetBase> ItemInfo;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UDrJonesWidgetBase> InventoryMenu;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TArray<TSubclassOf<ATool>> DefaultTools;
+	// Input Actions
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
-	TObjectPtr<AItem> ItemInHand;
-
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> ChangeItemAction;
 
@@ -73,18 +84,24 @@ protected:
 	TObjectPtr<UInputAction> OpenEquipmentAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	TObjectPtr<UInputAction> DetachItemAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> PrimaryAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> SecondaryAction;
 	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> UnequipItemAction;
+	
 private:
-	UPROPERTY(Transient)
+	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	TObjectPtr<AItem> ItemInHand;
+	
+	UPROPERTY(SaveGame)
 	TArray<TObjectPtr<ATool>> Tools;
 
-	UPROPERTY(Transient)
+	UPROPERTY(SaveGame)
+	TArray<TObjectPtr<ALetter>> QuestItems;
+	
+	UPROPERTY(SaveGame)
 	TObjectPtr<ADrJonesCharacter> Owner;
 };

@@ -22,98 +22,66 @@ void UEquipmentComponent::BeginPlay()
 	for (TSubclassOf<ATool> ToolClass : DefaultTools)
 	{
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
-		AddTool(*NewTool);
+		NewTool->GetMeshComponent()->SetVisibility(false);
+		AddItem(NewTool);
 	}
 }
 
 void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
 {
 	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::ChangeActiveItem);
-	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::OpenInventory);
+	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::OpenEquipmentWheel);
 	EnhancedInputComponent->BindAction(PrimaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallPrimaryItemAction);
 	EnhancedInputComponent->BindAction(SecondaryAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::CallSecondaryItemAction);
-
-	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
-	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
-	{
-		DetachActiveItemFromHand();
-	});
-	EnhancedInputComponent->AddActionBinding(CancelHold);
+	EnhancedInputComponent->BindAction(UnequipItemAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::UnequipItem);
 }
 
-void UEquipmentComponent::AddArtifact(AArtifact& ArtifactToAdd)
+void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 {
-	SetActiveItem(&ArtifactToAdd);
-}
-
-void UEquipmentComponent::AddTool(ATool& ToolToAdd)
-{
-	Tools.Emplace(&ToolToAdd);
-	if (!ItemInHand)
+	if (!ItemToAdd)
 	{
-		SetActiveItem(&ToolToAdd);
+		return;
 	}
-	else
+
+	if (ATool* Tool = Cast<ATool>(ItemToAdd))
 	{
-		AttachItemToHand(ToolToAdd);
+		Tools.Emplace(Tool);
+		OnToolAdded.Broadcast(Tool);
+	}
+	else if (ALetter* LetterToAdd = Cast<ALetter>(ItemToAdd))
+	{
+		QuestItems.Emplace(LetterToAdd);
 	}
 	
-	Owner->WidgetManager->RequestWidgetUpdate(ItemInfo, NullOpt);
-	OnToolAdded.Broadcast(&ToolToAdd);
+	AttachItemToHand(*ItemToAdd);
+	EquipItem(ItemToAdd);
+
+	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(ItemInfo);
 }
 
-void UEquipmentComponent::RemoveTool(ATool& ToolToRemove)
-{
-	Tools.Remove(&ToolToRemove);
-}
-
-void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
-{
-	const float Value = InputActionValue.Get<float>();
-	if (Value == 0 || Tools.IsEmpty())
-	{
-		return;
-	}
-	if (ItemInHand && !ItemInHand->IsA<ATool>())
-	{
-		return;
-	}
-	int32 ActiveItemID;
-	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
-	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
-	{
-		SetActiveItem(ActiveItem);
-	}
-}
-
-void UEquipmentComponent::SetActiveItemByClass(TSubclassOf<AItem> ItemClass)
+void UEquipmentComponent::EquipItemByClass(TSubclassOf<AItem> ItemClass)
 {
 	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
-	SetActiveItem(*FoundItem);
+	EquipItem(*FoundItem);
 }
 
-void UEquipmentComponent::SetActiveItem(AItem* NewActiveItem)
+void UEquipmentComponent::EquipItem(AItem* NewActiveItem)
 {
 	if (NewActiveItem == ItemInHand)
 	{
 		return;
 	}
-
-	if (ItemInHand && ItemInHand->IsA<ATool>())
-	{
-		// TODO: Recreating & Destroying mesh
-		ItemInHand->FindComponentByClass<UMeshComponent>()->SetVisibility(false);
-	}
+	
+	UnequipItem();
 
 	ItemInHand = NewActiveItem;
 	
-	if (NewActiveItem)
+	if (ItemInHand)
 	{
-		AttachItemToHand(*NewActiveItem);
-		ItemInHand->GetMeshComponent()->SetVisibility(true);
+		ItemInHand->OnEquip();
 	}
 	
-	Owner->CharacterAnimationComponent->SetActiveItemAnimation(NewActiveItem ? NewActiveItem->GetItemAnimation() : nullptr);
+	Owner->CharacterAnimationComponent->SetActiveItemAnimation(ItemInHand ? ItemInHand->GetItemAnimation() : nullptr);
 	
 	if (UDrJonesWidgetBase* Widget = Utilities::GetWidget(*this, ItemInfo))
 	{
@@ -121,61 +89,42 @@ void UEquipmentComponent::SetActiveItem(AItem* NewActiveItem)
 	}
 }
 
-void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
-{
-	ItemToAttach.SetupItemInHandProperties();
-	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
-}
-
-AItem* UEquipmentComponent::DetachActiveItemFromHand()
+void UEquipmentComponent::UnequipItem()
 {
 	if (!ItemInHand)
 	{
-		return nullptr;;
+		return;
 	}
+	AItem* ItemToUnequip = ItemInHand;
+	ItemInHand = nullptr;
 	
-	if (ItemInHand->IsA<AArtifact>() || ItemInHand->IsA<ALetter>())
+	ItemToUnequip->OnUnequip();
+	
+	if (ItemToUnequip->IsA<AArtifact>())
 	{
-		ItemInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		ItemInHand->SetupItemWorldProperties();
-
-		TArray<AActor*> ActorsToIgnore = {Owner, ItemInHand};
-		Algo::Copy(Tools, ActorsToIgnore);
-		Algo::Copy(Owner->Children, ActorsToIgnore);
-
-		FVector GroundLocation = Utilities::FindGround(*this, ItemInHand->GetActorLocation(), ActorsToIgnore);
-		GroundLocation.Z -= Utilities::GetMeshZOffset(*ItemInHand);
-		
-		ItemInHand->SetActorLocationAndRotation(GroundLocation, FRotator(0, GetOwner()->GetActorRotation().Yaw,0));
+		DetachItemFromHand(*ItemToUnequip);
 	}
+
+	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(ItemInfo);
+}
+
+AItem* UEquipmentComponent::TakeOutItemInHand()
+{
+	if (!ItemInHand)
+	{
+		return nullptr;
+	}
+
+	AItem* ItemToDetach = ItemInHand;
+	UnequipItem();
+	DetachItemFromHand(*ItemToDetach);
 	
-	AItem* ReturnValue = ItemInHand;
-	SetActiveItem(nullptr);
-	
-	return ReturnValue;
+	return ItemToDetach;
 }
 
 bool UEquipmentComponent::CanPickUpItem() const
 {
 	return !ItemInHand || ItemInHand && !ItemInHand->IsA<AArtifact>();
-}
-
-void UEquipmentComponent::OpenInventory(const FInputActionValue& InputActionValue)
-{
-	const bool bOpen = InputActionValue.Get<bool>();
-	if (!InventoryMenu)
-	{
-		return;
-	}
-	UWidgetManager* WidgetManager = Owner->GetWidgetManager();
-	UDrJonesWidgetBase* ItemMenu = Utilities::GetWidget(*this, InventoryMenu);
-	if (!ItemMenu)
-	{
-		WidgetManager->AddWidget(InventoryMenu);
-		ItemMenu = WidgetManager->GetWidget(InventoryMenu);
-	}
-	WidgetManager->SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	ItemMenu->UpdateData();
 }
 
 void UEquipmentComponent::CallPrimaryItemAction()
@@ -204,4 +153,65 @@ void UEquipmentComponent::CallSecondaryItemAction()
 		return;
 	}
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
+}
+
+void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
+{
+	const float Value = InputActionValue.Get<float>();
+	if (Value == 0 || Tools.IsEmpty())
+	{
+		return;
+	}
+	if (ItemInHand && !ItemInHand->IsA<ATool>())
+	{
+		return;
+	}
+	int32 ActiveItemID;
+	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
+	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
+	{
+		EquipItem(ActiveItem);
+	}
+}
+
+void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
+{
+	if (ItemToAttach.IsAttachedTo(GetOwner()))
+	{
+		return;
+	}
+	ItemToAttach.OnAddedToEquipment();
+	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
+}
+
+void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
+{
+	if (!ItemToDetach.IsAttachedTo(GetOwner()))
+	{
+		return;
+	}
+	
+	if (ATool* ToolToDetach = Cast<ATool>(&ItemToDetach))
+	{
+		Tools.Remove(ToolToDetach);
+	}
+	else if (ALetter* LetterToDetach = Cast<ALetter>(&ItemToDetach))
+	{
+		QuestItems.Remove(LetterToDetach);
+	}
+	
+	ItemToDetach.OnRemovedFromEquipment();
+	ItemToDetach.DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActionValue)
+{
+	const bool bOpen = InputActionValue.Get<bool>();
+	if (!InventoryMenu)
+	{
+		return;
+	}
+	
+	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(InventoryMenu);
 }

@@ -27,8 +27,11 @@ public:
 	virtual void SetHandAttachmentPhysics();
 	virtual void SetWorldPhysics();
 
-	void SetupItemInHandProperties();
-	void SetupItemWorldProperties();
+	virtual void OnEquip() {}
+	virtual void OnUnequip() {}
+
+	virtual void OnAddedToEquipment();
+	virtual void OnRemovedFromEquipment();
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")

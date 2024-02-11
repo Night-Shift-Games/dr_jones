@@ -25,11 +25,10 @@ void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
 	WidgetManager->ShowWidget(ReturnArtifactsWidgetClass);
 
-	UEquipmentComponent* Inventory = Player->GetInventory();
-	AItem* ItemInHand = Inventory->GetItemInHand();
+	UEquipmentComponent* Equipment = Player->GetEquipment();
+	AItem* ItemInHand = Equipment->GetItemInHand();
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr)
 	{
-		Inventory->DetachActiveItemFromHand();
 		AddArtifact(Artifact, Player);
 	}
 
@@ -40,7 +39,7 @@ void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 
 void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Player)
 {
-	Player->GetInventory()->DetachActiveItemFromHand();
+	Player->GetEquipment()->TakeOutItemInHand();
 	if (Artifacts.Contains(ArtifactToAdd))
 	{
 		return; 

@@ -31,7 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
-	UEquipmentComponent* GetInventory() const { return EquipmentComponent; }
+	UEquipmentComponent* GetEquipment() const { return EquipmentComponent; }
 	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
 
 private:

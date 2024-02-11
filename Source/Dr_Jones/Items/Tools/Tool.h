@@ -32,6 +32,10 @@ public:
 	
 	UAnimMontage* FindActionMontage(const FName& MontageName) const;
 	
+	virtual void OnRemovedFromEquipment() override;
+	virtual void OnEquip() override;
+	virtual void OnUnequip() override;
+	
 protected:
 	UPROPERTY(Transient)
 	TObjectPtr<ADrJonesCharacter> OwningPlayer;
