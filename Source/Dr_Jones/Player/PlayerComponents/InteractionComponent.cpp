@@ -3,11 +3,11 @@
 #include "Player/PlayerComponents/InteractionComponent.h"
 
 #include "EnhancedInputComponent.h"
-#include "Utilities.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
 #include "SharedComponents/InteractableComponent.h"
+#include "Utilities.h"
 
 UInteractionComponent::UInteractionComponent()
 {
@@ -18,7 +18,6 @@ void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner<ADrJonesCharacter>();
-	WidgetManager = Owner->GetWidgetManager();
 }
 
 void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -73,22 +72,17 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 
 void UInteractionComponent::UpdateInteractionUI()
 {
+	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InteractionUI, SelectedInteractiveComponent ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	
 	if (PreviousSelectedInteractiveActor && SelectedInteractiveComponent != PreviousSelectedInteractiveActor)
 	{
 		PreviousSelectedInteractiveActor->SetRenderPostProcessInteractionOutline(false);
 	}
-	if (!SelectedInteractiveComponent)
-	{
-		WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Hidden);
-		return;
-	}
-	if (!WidgetManager->GetWidget(InteractionUI))
-	{
-		WidgetManager->AddWidget(InteractionUI);
-	}
-	WidgetManager->SetWidgetVisibility(InteractionUI, ESlateVisibility::Visible);
 
-	SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
+	if (SelectedInteractiveComponent)
+	{
+		SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
+	}
 }
 
 void UInteractionComponent::Interact()

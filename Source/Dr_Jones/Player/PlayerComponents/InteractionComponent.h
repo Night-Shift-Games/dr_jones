@@ -51,7 +51,6 @@ protected:
 	
 protected:
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
-	TWeakObjectPtr<UWidgetManager> WidgetManager;
 	
 	UPROPERTY(EditAnywhere, Category = "Interaction")
 	float InteractionRange = 150.0f;
