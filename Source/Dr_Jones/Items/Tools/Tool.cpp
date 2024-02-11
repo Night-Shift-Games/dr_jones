@@ -4,7 +4,7 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/PlayerComponents/InventoryComponent.h"
+#include "Player/PlayerComponents/EquipmentComponent.h"
 #include "SharedComponents/InteractableComponent.h"
 
 void ATool::BeginPlay()
@@ -24,7 +24,7 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing!"));
 	OwningPlayer = Player;
-	UInventoryComponent* InventoryComponent = Player->GetInventory();
+	UEquipmentComponent* InventoryComponent = Player->GetInventory();
 	checkf(InventoryComponent, TEXT("Inventory is missing!"));
 
 	InventoryComponent->AddTool(*this);

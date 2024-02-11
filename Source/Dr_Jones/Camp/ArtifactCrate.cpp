@@ -3,7 +3,7 @@
 #include "Utilities.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Player/WidgetManager.h"
-#include "Player/PlayerComponents/InventoryComponent.h"
+#include "Player/PlayerComponents/EquipmentComponent.h"
 #include "Player/PlayerComponents/ReputationComponent.h"
 
 AArtifactCrate::AArtifactCrate() : Super()
@@ -25,7 +25,7 @@ void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
 	WidgetManager->ShowWidget(ReturnArtifactsWidgetClass);
 
-	UInventoryComponent* Inventory = Player->GetInventory();
+	UEquipmentComponent* Inventory = Player->GetInventory();
 	AItem* ItemInHand = Inventory->GetItemInHand();
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr)
 	{

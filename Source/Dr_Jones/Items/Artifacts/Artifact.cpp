@@ -3,7 +3,7 @@
 #include "Artifact.h"
 
 #include "ArtifactDatabase.h"
-#include "Player/PlayerComponents/InventoryComponent.h"
+#include "Player/PlayerComponents/EquipmentComponent.h"
 #include "Quest/QuestSystem.h"
 #include "SharedComponents/InteractableComponent.h"
 #include "World/Illuminati.h"
@@ -64,7 +64,7 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
-	if (UInventoryComponent* Inventory = Taker->GetInventory(); Inventory && Inventory->CanPickUpItem())
+	if (UEquipmentComponent* Inventory = Taker->GetInventory(); Inventory && Inventory->CanPickUpItem())
 	{
 		Inventory->AddArtifact(*this);
 		OnArtifactPickup.ExecuteIfBound(this);

@@ -7,7 +7,7 @@
 #include "Items/Artifacts/Artifact.h"
 #include "UI/DrJonesWidgetBase.h"
 
-#include "InventoryComponent.generated.h"
+#include "EquipmentComponent.generated.h"
 
 class ADrJonesCharacter;
 class ATool;
@@ -16,7 +16,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolAddedDelegate, ATool*, Tool);
 
 UCLASS(Blueprintable, ClassGroup = "Player Components",
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
-class DR_JONES_API UInventoryComponent : public UActorComponent
+class DR_JONES_API UEquipmentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 	

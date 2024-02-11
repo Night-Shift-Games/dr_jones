@@ -2,7 +2,7 @@
 
 #include "ArchaeologistDesk.h"
 
-#include "Player/PlayerComponents/InventoryComponent.h"
+#include "Player/PlayerComponents/EquipmentComponent.h"
 #include "Utilities.h"
 #include "World/Illuminati.h"
 
@@ -47,7 +47,7 @@ void AArchaeologistDesk::RemoveArtifact(AArtifact* Artifact)
 void AArchaeologistDesk::OnInteract(ADrJonesCharacter* Player)
 {
 	// It should depend which part of the desk is clicked - Components?
-	UInventoryComponent* Inventory = Player->GetInventory();
+	UEquipmentComponent* Inventory = Player->GetInventory();
 	AItem* ItemInHand = Inventory->GetItemInHand();
 	
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr; Artifact && !ArtifactOnDesk)

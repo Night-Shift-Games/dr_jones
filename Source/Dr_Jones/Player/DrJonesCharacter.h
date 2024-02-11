@@ -14,7 +14,7 @@ class UBlendCameraComponent;
 class UCharacterAnimationComponent;
 class UInputAction;
 class UInteractionComponent;
-class UInventoryComponent;
+class UEquipmentComponent;
 class UReactionComponent;
 class UReputationComponent;
 class UWidgetManager;
@@ -31,7 +31,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UWidgetManager* GetWidgetManager() const { return WidgetManager; }
-	UInventoryComponent* GetInventory() const { return InventoryComponent; }
+	UEquipmentComponent* GetInventory() const { return InventoryComponent; }
 	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
 
 private:
@@ -49,7 +49,7 @@ public:
 	TObjectPtr<UWidgetManager> WidgetManager;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UInventoryComponent> InventoryComponent;
+	TObjectPtr<UEquipmentComponent> InventoryComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;

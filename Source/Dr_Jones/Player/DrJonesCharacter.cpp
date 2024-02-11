@@ -7,7 +7,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "PlayerComponents/InteractionComponent.h"
-#include "PlayerComponents/InventoryComponent.h"
+#include "PlayerComponents/EquipmentComponent.h"
 #include "PlayerComponents/ReactionComponent.h"
 #include "PlayerComponents/ReputationComponent.h"
 #include "SharedComponents/BlendCameraComponent.h"
@@ -18,7 +18,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	ReactionComponent = CreateDefaultSubobject<UReactionComponent>(TEXT("ReactionComponent"));
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	InventoryComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("Inventory"));
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));

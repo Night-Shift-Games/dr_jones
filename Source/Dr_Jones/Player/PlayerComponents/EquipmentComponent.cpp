@@ -1,6 +1,6 @@
 // Property of Night Shift Games, all rights reserved.
 
-#include "InventoryComponent.h"
+#include "EquipmentComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "Animation/CharacterAnimationComponent.h"
@@ -10,7 +10,7 @@
 #include "Utilities.h"
 #include "Items/Letter.h"
 
-void UInventoryComponent::BeginPlay()
+void UEquipmentComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner<ADrJonesCharacter>();
@@ -26,10 +26,10 @@ void UInventoryComponent::BeginPlay()
 	}
 }
 
-void UInventoryComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
+void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
 {
-	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UInventoryComponent::ChangeActiveItem);
-	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UInventoryComponent::OpenInventory);
+	EnhancedInputComponent->BindAction(ChangeItemAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::ChangeActiveItem);
+	EnhancedInputComponent->BindAction(OpenEquipmentAction, ETriggerEvent::Triggered, this, &UEquipmentComponent::OpenInventory);
 	FInputActionBinding CancelHold(TEXT("CancelItemHold"), IE_Pressed);
 	CancelHold.ActionDelegate.GetDelegateForManualSet().BindLambda( [this]()
 	{
@@ -38,12 +38,12 @@ void UInventoryComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInpu
 	EnhancedInputComponent->AddActionBinding(CancelHold);
 }
 
-void UInventoryComponent::AddArtifact(AArtifact& ArtifactToAdd)
+void UEquipmentComponent::AddArtifact(AArtifact& ArtifactToAdd)
 {
 	SetActiveItem(&ArtifactToAdd);
 }
 
-void UInventoryComponent::AddTool(ATool& ToolToAdd)
+void UEquipmentComponent::AddTool(ATool& ToolToAdd)
 {
 	Tools.Emplace(&ToolToAdd);
 	if (!ItemInHand)
@@ -59,12 +59,12 @@ void UInventoryComponent::AddTool(ATool& ToolToAdd)
 	OnToolAdded.Broadcast(&ToolToAdd);
 }
 
-void UInventoryComponent::RemoveTool(ATool& ToolToRemove)
+void UEquipmentComponent::RemoveTool(ATool& ToolToRemove)
 {
 	Tools.Remove(&ToolToRemove);
 }
 
-void UInventoryComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
+void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
 {
 	const float Value = InputActionValue.Get<float>();
 	if (Value == 0 || Tools.IsEmpty())
@@ -83,13 +83,13 @@ void UInventoryComponent::ChangeActiveItem(const FInputActionValue& InputActionV
 	}
 }
 
-void UInventoryComponent::SetActiveItemByClass(TSubclassOf<AItem> ItemClass)
+void UEquipmentComponent::SetActiveItemByClass(TSubclassOf<AItem> ItemClass)
 {
 	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
 	SetActiveItem(*FoundItem);
 }
 
-void UInventoryComponent::SetActiveItem(AItem* NewActiveItem)
+void UEquipmentComponent::SetActiveItem(AItem* NewActiveItem)
 {
 	if (NewActiveItem == ItemInHand)
 	{
@@ -119,13 +119,13 @@ void UInventoryComponent::SetActiveItem(AItem* NewActiveItem)
 	}
 }
 
-void UInventoryComponent::AttachItemToHand(AItem& ItemToAttach)
+void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 {
 	ItemToAttach.SetupItemInHandProperties();
 	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
 }
 
-AItem* UInventoryComponent::DetachActiveItemFromHand()
+AItem* UEquipmentComponent::DetachActiveItemFromHand()
 {
 	if (!ItemInHand)
 	{
@@ -153,12 +153,12 @@ AItem* UInventoryComponent::DetachActiveItemFromHand()
 	return ReturnValue;
 }
 
-bool UInventoryComponent::CanPickUpItem() const
+bool UEquipmentComponent::CanPickUpItem() const
 {
 	return !ItemInHand || ItemInHand && !ItemInHand->IsA<AArtifact>();
 }
 
-void UInventoryComponent::OpenInventory(const FInputActionValue& InputActionValue)
+void UEquipmentComponent::OpenInventory(const FInputActionValue& InputActionValue)
 {
 	const bool bOpen = InputActionValue.Get<bool>();
 	if (!InventoryMenu)
