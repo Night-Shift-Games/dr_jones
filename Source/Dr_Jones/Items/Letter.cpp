@@ -9,3 +9,15 @@ ALetter::ALetter()
 	LetterUI = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetUI"));
 	LetterUI->SetupAttachment(RootComponent);
 }
+
+void ALetter::OnEquip()
+{
+	Super::OnEquip();
+	LetterMeshComponent->SetVisibility(true);
+}
+
+void ALetter::OnUnequip()
+{
+	Super::OnUnequip();
+	LetterMeshComponent->SetVisibility(false);
+}

@@ -15,6 +15,9 @@ class DR_JONES_API ALetter : public AItem
 
 public:
 	ALetter();
+
+	virtual void OnEquip() override;
+	virtual void OnUnequip() override;
 	
 public:
 	// Content of the letter.
