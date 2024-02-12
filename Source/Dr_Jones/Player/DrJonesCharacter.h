@@ -15,6 +15,7 @@ class UCharacterAnimationComponent;
 class UInputAction;
 class UInteractionComponent;
 class UEquipmentComponent;
+class UJournalComponent;
 class UReactionComponent;
 class UReputationComponent;
 class UWidgetManager;
@@ -51,6 +52,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UReputationComponent> ReputationComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UJournalComponent> JournalComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UBlendCameraComponent> BlendCameraComponent;
 	

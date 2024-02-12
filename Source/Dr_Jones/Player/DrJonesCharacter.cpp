@@ -8,6 +8,7 @@
 #include "InputActionValue.h"
 #include "PlayerComponents/InteractionComponent.h"
 #include "PlayerComponents/EquipmentComponent.h"
+#include "PlayerComponents/JournalComponent.h"
 #include "PlayerComponents/ReputationComponent.h"
 #include "SharedComponents/BlendCameraComponent.h"
 #include "WidgetManager.h"
@@ -17,6 +18,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
+	JournalComponent = CreateDefaultSubobject<UJournalComponent>(TEXT("JournalComponent"));
 	WidgetManager = CreateDefaultSubobject<UWidgetManager>(TEXT("WidgetManager"));
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
@@ -39,6 +41,7 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 	InteractionComponent->SetupPlayerInput(EnhancedInputComponent);
 	EquipmentComponent->SetupPlayerInput(EnhancedInputComponent);
+	JournalComponent->SetupPlayerInputComponent(*EnhancedInputComponent);
 }
 
 void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)
