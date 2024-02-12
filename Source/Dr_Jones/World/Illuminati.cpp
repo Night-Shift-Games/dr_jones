@@ -166,3 +166,15 @@ UQuestSystemComponent* AIlluminati::GetQuestSystemInstance(const UObject* WorldC
 
 	return Illuminati->QuestSystemComponent;
 }
+
+void AIlluminati::FillArchaeologicalSites()
+{
+	for (auto& SiteData : DefaultSites)
+	{
+		UArchaeologicalSite* NewSite = NewObject<UArchaeologicalSite>(this);
+		NewSite->GeoData = SiteData.GeoData;
+		NewSite->LevelName = SiteData.LevelName;
+		NewSite->SiteName = SiteData.SiteName;
+		ArchaeologicalSites.Emplace(SiteData.SiteName, NewSite);
+	}
+}

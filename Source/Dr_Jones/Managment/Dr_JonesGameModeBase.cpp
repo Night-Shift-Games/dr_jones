@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Dr_JonesGameModeBase.h"
+
+#include "Player/DrJonesCharacter.h"
 #include "Quest/QuestSystemLogic.h"
 #include "World/Illuminati.h"
 
@@ -14,13 +16,12 @@ ADr_JonesGameModeBase::ADr_JonesGameModeBase()
 	IlluminatiClass = AIlluminati::StaticClass();
 }
 
-void ADr_JonesGameModeBase::BeginPlay()
+void ADr_JonesGameModeBase::InitGameState()
 {
-	Super::BeginPlay();
-
-	OnQuestSystemInitializedDelegate.Broadcast();
-
+	Super::InitGameState();
 	Illuminati = CastChecked<AIlluminati>(GetWorld()->SpawnActor(IlluminatiClass));
+	OnQuestSystemInitializedDelegate.Broadcast();
+	Illuminati->FillArchaeologicalSites();
 }
 
 void ADr_JonesGameModeBase::Tick(float DeltaSeconds)

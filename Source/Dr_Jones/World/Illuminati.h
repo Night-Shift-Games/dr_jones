@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Clock.h"
+#include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "Quest/QuestSystem.h"
 #include "UObject/Object.h"
 #include "UObject/WeakObjectPtr.h"
@@ -117,7 +118,7 @@ class DR_JONES_API AIlluminati : public AInfo
 
 public:
 	AIlluminati();
-
+	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -163,7 +164,15 @@ public:
 		QuestSystem->SendQuestMessage(ArtifactCleanedMessage);
 	}
 
+	void FillArchaeologicalSites();
+	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Locations")
+	TArray<FArchaeologicalSiteFactoryData> DefaultSites;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Locations")
+	TMap<FName, TObjectPtr<UArchaeologicalSite>> ArchaeologicalSites;
+	
 	UPROPERTY(BlueprintAssignable, Category = "Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
 

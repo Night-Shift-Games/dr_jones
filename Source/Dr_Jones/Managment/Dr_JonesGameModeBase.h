@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "GameFramework/GameModeBase.h"
-#include "Player/DrJonesCharacter.h"
 
 #include "Dr_JonesGameModeBase.generated.h"
 
@@ -23,8 +22,8 @@ class DR_JONES_API ADr_JonesGameModeBase : public AGameModeBase
 
 public:
 	ADr_JonesGameModeBase();
-	
-	virtual void BeginPlay() override;
+
+	virtual void InitGameState() override;
 	virtual void Tick(float DeltaSeconds) override;
 
 	UQuestSystemLogic* GetQuestSystem() const;
