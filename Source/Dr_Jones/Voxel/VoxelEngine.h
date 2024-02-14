@@ -22,6 +22,8 @@ namespace NSVE
 		static constexpr bool bEnableParallelChunkIteration = true;
 	};
 
+	static_assert(FMath::IsPowerOfTwo(FVoxelEngineConfig::ChunkResolution));
+
 	inline TAutoConsoleVariable CVar_ParallelChunkIteration(
 		TEXT("NS.VE.ParallelChunkIteration"),
 		true,
@@ -389,7 +391,7 @@ namespace NSVE
 				FVoxelChunk* ChunksData = Chunks.GetData();
 				const int32 ChunkCount = DimensionsInChunks.X * DimensionsInChunks.Y * DimensionsInChunks.Z;
 				const bool bParallel = CVar_ParallelChunkIteration.GetValueOnAnyThread();
-				const EParallelForFlags Flags = bParallel ? EParallelForFlags::None : EParallelForFlags::ForceSingleThread;
+				const EParallelForFlags Flags = bParallel ? EParallelForFlags::Unbalanced : EParallelForFlags::ForceSingleThread;
 				ParallelForTemplate(ChunkCount, [this, ForEachChunk, ChunksData](int32 Index)
 				{
 					ForEachChunk(ChunksData[Index], Index);
@@ -430,11 +432,18 @@ namespace NSVE
 		FVoxelChunk& GetChunkRefByIndex(int32 Index);
 		const FVoxelChunk& GetChunkRefByIndex(int32 Index) const;
 
+		FVoxelChunk* FindChunkByCoords(const FIntVector& Coords);
+		const FVoxelChunk* FindChunkByCoords(const FIntVector& Coords) const;
+
 		static FVoxelAddress CalcVoxelAddressFromGlobalCoords(const FIntVector& GlobalCoords);
+		static FVoxelAddress CalcVoxelAddressFromSignedGlobalCoords(const FIntVector& GlobalCoords);
 		static FIntVector CalcGlobalCoordsFromVoxelAddress(const FVoxelAddress& VoxelAddress);
 
 		FVoxelAddress CalcVoxelAddressFromGlobalCoordsChecked(const FIntVector& GlobalCoords) const;
 		FIntVector CalcGlobalCoordsFromVoxelAddressChecked(const FVoxelAddress& VoxelAddress) const;
+
+		static FIntVector CalcChunkCoordsFromGlobalCoords(const FIntVector& GlobalCoords);
+		static FIntVector CalcChunkCoordsFromSignedGlobalCoords(const FIntVector& GlobalCoords);
 
 		FVoxel* ResolveAddress(const FVoxelAddress& VoxelAddress);
 		const FVoxel* ResolveAddress(const FVoxelAddress& VoxelAddress) const;
@@ -719,11 +728,34 @@ namespace NSVE
 		return const_cast<FVoxelGrid*>(this)->GetChunkRefByIndex(Index);
 	}
 
+	FORCEINLINE FVoxelChunk* FVoxelGrid::FindChunkByCoords(const FIntVector& Coords)
+	{
+		if (!AreCoordsValid(Coords))
+		{
+			return nullptr;
+		}
+		return &GetChunkRefByIndex(CoordsToIndex(Coords));
+	}
+
+	FORCEINLINE const FVoxelChunk* FVoxelGrid::FindChunkByCoords(const FIntVector& Coords) const
+	{
+		return const_cast<FVoxelGrid*>(this)->FindChunkByCoords(Coords);
+	}
+
 	FORCEINLINE FVoxelAddress FVoxelGrid::CalcVoxelAddressFromGlobalCoords(const FIntVector& GlobalCoords)
 	{
+		ensureMsgf(GlobalCoords.GetMin() >= 0, TEXT("Negative global coords will cause unpredictable results."));
 		FVoxelAddress Address;
 		Address.ChunkCoords = GlobalCoords / FVoxelChunk::Resolution;
 		Address.VoxelCoords = GlobalCoords % FVoxelChunk::Resolution;
+		return Address;
+	}
+
+	FORCEINLINE FVoxelAddress FVoxelGrid::CalcVoxelAddressFromSignedGlobalCoords(const FIntVector& GlobalCoords)
+	{
+		FVoxelAddress Address;
+		Address.ChunkCoords = CalcChunkCoordsFromSignedGlobalCoords(GlobalCoords);
+		Address.VoxelCoords = (GlobalCoords + (Address.ChunkCoords * FVoxelChunk::Resolution)) % FVoxelChunk::Resolution;
 		return Address;
 	}
 
@@ -754,5 +786,20 @@ namespace NSVE
 		check(GlobalCoords.Y < GetDimensionsInChunks().Y * FVoxelChunk::Resolution);
 		check(GlobalCoords.Z < GetDimensionsInChunks().Z * FVoxelChunk::Resolution);
 		return GlobalCoords;
+	}
+
+	FORCEINLINE FIntVector FVoxelGrid::CalcChunkCoordsFromGlobalCoords(const FIntVector& GlobalCoords)
+	{
+		ensureMsgf(GlobalCoords.GetMin() >= 0, TEXT("Negative global coords will cause unpredictable results."));
+		return GlobalCoords / FVoxelChunk::Resolution;
+	}
+
+	FORCEINLINE FIntVector FVoxelGrid::CalcChunkCoordsFromSignedGlobalCoords(const FIntVector& GlobalCoords)
+	{
+		FIntVector ChunkCoords;
+		ChunkCoords.X = GlobalCoords.X < 0 ? ((GlobalCoords.X - (FVoxelChunk::Resolution - 1)) / FVoxelChunk::Resolution) : (GlobalCoords.X / FVoxelChunk::Resolution);
+		ChunkCoords.Y = GlobalCoords.Y < 0 ? ((GlobalCoords.Y - (FVoxelChunk::Resolution - 1)) / FVoxelChunk::Resolution) : (GlobalCoords.Y / FVoxelChunk::Resolution);
+		ChunkCoords.Z = GlobalCoords.Z < 0 ? ((GlobalCoords.Z - (FVoxelChunk::Resolution - 1)) / FVoxelChunk::Resolution) : (GlobalCoords.Z / FVoxelChunk::Resolution);
+		return ChunkCoords;
 	}
 }

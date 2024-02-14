@@ -10,6 +10,8 @@ namespace NS::SurfaceNets
 	using namespace NSVE;
 	using namespace UE::Geometry;
 
+	struct FSurfaceNetsChunkField;
+
 	inline TAutoConsoleVariable CVar_Convolution(
 		TEXT("NS.VE.SurfaceNets.Convolution"),
 		true,
@@ -48,6 +50,12 @@ namespace NS::SurfaceNets
 			TEXT("Voxel Engine Surface Nets - draw SDF values of cell corners."),
 			ECVF_Cheat);
 
+		inline TAutoConsoleVariable CVar_SurfaceNetsField(
+			TEXT("NS.VE.SurfaceNets.Debug.Field"),
+			false,
+			TEXT("Voxel Engine Surface Nets - enable surface nets chunk field debug visualization."),
+			ECVF_Cheat);
+
 		struct FSurfacePointVis
 		{
 			int32 ChunkIndex;
@@ -66,6 +74,7 @@ namespace NS::SurfaceNets
 		{
 			TArray<FSurfacePointVis> SurfacePoints;
 			FCriticalSection SurfacePointsMutex;
+			TArray<TSharedPtr<FSurfaceNetsChunkField>> SurfaceNetsFields;
 		};
 
 		inline void ClearDebugContext(FDebugContext& DebugContext)
@@ -140,6 +149,7 @@ namespace NS::SurfaceNets
 			return const_cast<TField3D*>(this)->Get(Coords);
 		}
 
+		// FFunc - void(FElement, int32, FIntVector)
 		template <typename FFunc>
 		void Iterate(FFunc ForEach)
 		{
@@ -159,12 +169,14 @@ namespace NS::SurfaceNets
 			}
 		}
 
+		// FFunc - void(FElement, int32, FIntVector)
 		template <typename FFunc>
 		void Iterate(FFunc ForEach) const
 		{
 			return const_cast<TField3D*>(this)->Iterate(ForEach);
 		}
 
+		// FFunc - void(int32, FIntVector)
 		template <typename FFunc>
 		static void Iterate_Static(FFunc ForEach)
 		{
@@ -327,8 +339,18 @@ namespace NS::SurfaceNets
 				for (LocalVoxelCoords.X = -2; LocalVoxelCoords.X + 2 < FSurfaceNetsChunkField::Resolution; ++LocalVoxelCoords.X, ++SurfaceNetsFieldIndex)
 				{
 					check(SurfaceNetsFieldIndex >= 0 && SurfaceNetsFieldIndex < ChunkFields.SurfaceNetsField->Num());
-					const FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
-					const FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
+					FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
+
+					const FIntVector ChunkCoords = Grid.CalcChunkCoordsFromSignedGlobalCoords(GlobalCoords);
+					// TODO: Fix this shit
+					if (Grid.FindChunkByCoords(ChunkCoords) == nullptr)
+					{
+						GlobalCoords.X = FMath::Clamp(GlobalCoords.X, BaseGlobalCoords.X, BaseGlobalCoords.X + FVoxelChunk::Resolution - 1);
+						GlobalCoords.Y = FMath::Clamp(GlobalCoords.Y, BaseGlobalCoords.Y, BaseGlobalCoords.Y + FVoxelChunk::Resolution - 1);
+						GlobalCoords.Z = FMath::Clamp(GlobalCoords.Z, BaseGlobalCoords.Z, BaseGlobalCoords.Z + FVoxelChunk::Resolution - 1);
+					}
+
+					FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
 					const FVoxel* Voxel = Grid.ResolveAddress(VoxelAddress);
 					ChunkFields.SurfaceNetsField->Get(SurfaceNetsFieldIndex) = Voxel ? (Voxel->bSolid ? -1.0f : 1.0f) : NAN;
 
@@ -348,6 +370,7 @@ namespace NS::SurfaceNets
 				}
 			}
 		}
+
 		return ChunkFields;
 	}
 
@@ -630,7 +653,8 @@ namespace NS::SurfaceNets
 		};
 
 		const FVoxelChunk::FTransformData TransformData = VoxelChunk.MakeTransformData();
-		constexpr int32 CellCount = (FVoxelChunk::Resolution + 1) * (FVoxelChunk::Resolution + 1) * (FVoxelChunk::Resolution + 1);
+		const FIntVector ChunkCoords = VoxelGrid.IndexToCoords(ChunkIndex);
+		constexpr int32 CellCount = (FVoxelChunk::Resolution + 2) * (FVoxelChunk::Resolution + 2) * (FVoxelChunk::Resolution + 2);
 
 		TArray<FCell> Cells;
 		TArray<FSurfacePoint> SurfacePoints;
@@ -647,18 +671,37 @@ namespace NS::SurfaceNets
 			ConvolveField<FGaussianKernel3D_5x5x5>(ChunkFields.MaterialField);
 		}
 
+		if (DebugContext)
+		{
+			check(ChunkFields.SurfaceNetsField.IsValid());
+			DebugContext->SurfaceNetsFields.SetNum(FMath::Max(DebugContext->SurfaceNetsFields.Num(), ChunkIndex + 1));
+			DebugContext->SurfaceNetsFields[ChunkIndex] = MakeShared<FSurfaceNetsChunkField>();
+			*DebugContext->SurfaceNetsFields[ChunkIndex].Get() = *ChunkFields.SurfaceNetsField.Get();
+		}
+
 		{
 			SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelChunk_MakeCells, FColorList::GreenYellow)
 
 			int32 CellIndex = 0;
 			FIntVector VoxelCoords;
 			// NOTE: One more cell per dimension is needed for creating quads at chunk's borders
-			for (VoxelCoords.Z = 0; VoxelCoords.Z < FVoxelChunk::Resolution + 1; ++VoxelCoords.Z)
+			for (VoxelCoords.Z = -1; VoxelCoords.Z < FVoxelChunk::Resolution + 1; ++VoxelCoords.Z)
 			{
-				for (VoxelCoords.Y = 0; VoxelCoords.Y < FVoxelChunk::Resolution + 1; ++VoxelCoords.Y)
+				for (VoxelCoords.Y = -1; VoxelCoords.Y < FVoxelChunk::Resolution + 1; ++VoxelCoords.Y)
 				{
-					for (VoxelCoords.X = 0; VoxelCoords.X < FVoxelChunk::Resolution + 1; ++VoxelCoords.X, ++CellIndex)
+					for (VoxelCoords.X = -1; VoxelCoords.X < FVoxelChunk::Resolution + 1; ++VoxelCoords.X, ++CellIndex)
 					{
+						if (VoxelCoords.GetMin() == -1)
+						{
+							const FIntVector GlobalCoords = VoxelGrid.CalcGlobalCoordsFromVoxelAddress(MakeVoxelAddress(ChunkCoords, VoxelCoords));
+							const FVoxelAddress VoxelAddress = VoxelGrid.CalcVoxelAddressFromSignedGlobalCoords(GlobalCoords);
+							// Means the chunk does exists, therefore it will generate border quads
+							if (VoxelGrid.FindChunkByCoords(VoxelAddress.ChunkCoords) != nullptr)
+							{
+								continue;
+							}
+						}
+
 						FCell& Cell = Cells[CellIndex];
 						if (!MakeCellAtVoxel(TransformData, VoxelCoords, *ChunkFields.SurfaceNetsField, Cell))
 						{
@@ -694,9 +737,9 @@ namespace NS::SurfaceNets
 			{
 				const FSurfacePoint& SurfacePoint = *It;
 				const FIntVector& CellCoords = SurfacePoint.CellCoords;
-				check(CellCoords.X >= 0 && CellCoords.X < FVoxelChunk::Resolution + 1);
-				check(CellCoords.Y >= 0 && CellCoords.Y < FVoxelChunk::Resolution + 1);
-				check(CellCoords.Z >= 0 && CellCoords.Z < FVoxelChunk::Resolution + 1);
+				check(CellCoords.X >= -1 && CellCoords.X < FVoxelChunk::Resolution + 2);
+				check(CellCoords.Y >= -1 && CellCoords.Y < FVoxelChunk::Resolution + 2);
+				check(CellCoords.Z >= -1 && CellCoords.Z < FVoxelChunk::Resolution + 2);
 				const int32 SurfacePointIndex = It.GetIndex();
 
 				FCell& Cell = Cells[SurfacePoint.CellIndex];

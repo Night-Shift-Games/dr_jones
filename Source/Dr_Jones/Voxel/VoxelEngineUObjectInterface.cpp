@@ -15,11 +15,13 @@
 FVoxelGridVisualizerSceneProxy::FVoxelGridVisualizerSceneProxy(const UVoxelGridVisualizer* InComponent) :
 	FPrimitiveSceneProxy(InComponent),
 	SurfacePoints(InComponent->SurfaceNetsDebugContext->SurfacePoints),
+	SurfaceNetsChunkFields(InComponent->SurfaceNetsDebugContext->SurfaceNetsFields),
 	bDrawSurfacePoints(NS::SurfaceNets::Debug::CVar_SurfacePoints.GetValueOnGameThread()),
 	bDrawSNCells(NS::SurfaceNets::Debug::CVar_Cells.GetValueOnGameThread()),
 	bDrawSNCellIntersections(NS::SurfaceNets::Debug::CVar_Cells_Intersections.GetValueOnGameThread()),
 	bDrawSNCellSDF(NS::SurfaceNets::Debug::CVar_Cells_SDFValues.GetValueOnGameThread()),
 	bDrawVoxels(CVarVisualizeVoxelGrid.GetValueOnGameThread()),
+	bDrawSNField(NS::SurfaceNets::Debug::CVar_SurfaceNetsField.GetValueOnGameThread()),
 	CurrentChunkIndex(-1),
 #if WITH_EDITORONLY_DATA
 	bDrawDebug(InComponent->GetVoxelGrid()->bDrawDebug)
@@ -93,9 +95,10 @@ void FVoxelGridVisualizerSceneProxy::GetDynamicMeshElements(const TArray<const F
 			}
 		}
 
+		const FVector BaseLocation = TransformData.RootCenter - TransformData.RootExtent + TransformData.VoxelSize / 2.0;
+
 		if (bDrawSNCells)
 		{
-			const FVector BaseLocation = TransformData.RootCenter - TransformData.RootExtent + TransformData.VoxelSize / 2.0;
 			for (const NS::SurfaceNets::Debug::FSurfacePointVis& Vis : SurfacePoints)
 			{
 				if (Vis.ChunkIndex == CurrentChunkIndex && Vis.CellCoords.GetMax() < NSVE::FVoxelChunk::Resolution)
@@ -144,6 +147,24 @@ void FVoxelGridVisualizerSceneProxy::GetDynamicMeshElements(const TArray<const F
 					}
 				}
 			}
+		}
+
+		if (bDrawSNField && !SurfaceNetsChunkFields.IsEmpty() && SurfaceNetsChunkFields.IsValidIndex(CurrentChunkIndex))
+		{
+			TSharedPtr<NS::SurfaceNets::FSurfaceNetsChunkField> Field = SurfaceNetsChunkFields[CurrentChunkIndex];
+			Field->Iterate([&, this](float Value, int32 Index, const FIntVector& Coords)
+			{
+				static constexpr float SizeMultiplier = 10.0f;
+				static constexpr float MinSize = 3.0f;
+
+				const FVector Location = BaseLocation + FVector(Coords - FIntVector(2)) * TransformData.VoxelSize;
+				const bool bNegative = Value < 0.0f;
+				const float AbsValue = FMath::Abs(Value);
+				const uint8 ColorValue = FMath::Clamp(static_cast<uint8>(AbsValue * 255.0f), 0, 255);
+				const FColor Color = bNegative ? FColor(0, 0, ColorValue) : FColor(ColorValue, 0, 0);
+				const float PointSize = FMath::Max(MinSize, AbsValue * SizeMultiplier);
+				PDI->DrawPoint(Location, Color, PointSize, SDPG_World);
+			});
 		}
 	}
 }
@@ -359,8 +380,11 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 				{
 					EditMesh.Attributes()->EnableMaterialID();
 				}
+				if (!EditMesh.Attributes()->HasPrimaryColors())
+				{
+					EditMesh.Attributes()->EnablePrimaryColors();
+				}
 
-				EditMesh.Attributes()->EnablePrimaryColors();
 				FDynamicMeshColorOverlay* ColorOverlay = EditMesh.Attributes()->PrimaryColors();
 				FDynamicMeshMaterialAttribute* MaterialIDs = EditMesh.Attributes()->GetMaterialID();
 

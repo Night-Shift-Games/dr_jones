@@ -49,7 +49,9 @@ private:
 	bool bDrawSNCellSDF;
 	bool bDrawSurfacePoints;
 	bool bDrawVoxels;
+	bool bDrawSNField;
 	TArray<NS::SurfaceNets::Debug::FSurfacePointVis> SurfacePoints;
+	TArray<TSharedPtr<NS::SurfaceNets::FSurfaceNetsChunkField>> SurfaceNetsChunkFields;
 	int32 CurrentChunkIndex;
 };
 
