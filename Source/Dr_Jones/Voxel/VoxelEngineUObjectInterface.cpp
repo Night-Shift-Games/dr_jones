@@ -236,6 +236,12 @@ TPair<int32, NSVE::FVoxelChunk*> UVoxelGridVisualizer::GetCurrentChunk() const
 FBoxSphereBounds UVoxelGridVisualizer::CalcBounds(const FTransform& LocalToWorld) const
 {
 	const NSVE::FVoxelGrid& VoxelGrid = GetVoxelGrid()->GetInternal();
+	if (VoxelGrid.GetChunks().IsEmpty())
+	{
+		// Avoid 0 sized bounds.
+		return FBoxSphereBounds(GetComponentLocation(), FVector(1.0), 1.0);
+	}
+
 	FBoxSphereBounds GridBounds;
 	GridBounds.Origin = VoxelGrid.GetTransform().GetLocation();
 	GridBounds.BoxExtent = VoxelGrid.GetExtent();
