@@ -23,20 +23,11 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 {
 	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
 
-	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
-
 	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
-	ChunksInRadius.Reserve(InternalGrid.GetChunkCount());
-	const double DigRadiusSquared = DigRadius * DigRadius;
-	InternalGrid.IterateChunks([&](NSVE::FVoxelChunk& Chunk, int32 Index)
-	{
-		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
-		{
-			ChunksInRadius.Add(&Chunk);
-		}
-	});
+	GetChunksInRadius(Location, DigRadius, ChunksInRadius);
+
 	const int32 ChunkCount = ChunksInRadius.Num();
-	ParallelForTemplate(ChunkCount, [ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
+	ParallelForTemplate(ChunkCount, [this, ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
 	{
 		DigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
@@ -44,22 +35,30 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 	UpdateMesh(true);
 }
 
-void ADigSite::UnDig(const FVector& Location, float DigRadius)
+FDigSiteSample ADigSite::SampleDig(const FVector& Location, float DigRadius)
 {
-	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
-
-	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
+	SCOPED_NAMED_EVENT(DigSite_SampleDig, FColorList::YellowGreen)
 
 	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
-	ChunksInRadius.Reserve(InternalGrid.GetChunkCount());
-	const double DigRadiusSquared = DigRadius * DigRadius;
-	InternalGrid.IterateChunks([&](NSVE::FVoxelChunk& Chunk, int32 Index)
+	GetChunksInRadius(Location, DigRadius, ChunksInRadius);
+
+	FDigSiteSample DigSiteSample;
+	for (const NSVE::FVoxelChunk* Chunk : ChunksInRadius)
 	{
-		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
-		{
-			ChunksInRadius.Add(&Chunk);
-		}
-	});
+		check(Chunk);
+		SampleVoxelsInRadius(*Chunk, Location, DigRadius, DigSiteSample.Voxels, DigSiteSample.Artifacts);
+	}
+
+	return DigSiteSample;
+}
+
+void ADigSite::UnDig(const FVector& Location, float DigRadius)
+{
+	SCOPED_NAMED_EVENT(DigSite_UnDig, FColorList::VioletRed)
+
+	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
+	GetChunksInRadius(Location, DigRadius, ChunksInRadius);
+
 	const int32 ChunkCount = ChunksInRadius.Num();
 	ParallelForTemplate(ChunkCount, [ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
 	{
@@ -86,6 +85,21 @@ void ADigSite::UpdateMesh(bool bAsync)
 		, VoxelGrid->GridVisualizer->SurfaceNetsDebugContext
 #endif
 	);
+}
+
+void ADigSite::GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks) const
+{
+	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
+
+	OutChunks.Reserve(InternalGrid.GetChunkCount());
+	const double DigRadiusSquared = Radius * Radius;
+	InternalGrid.IterateChunks([&](NSVE::FVoxelChunk& Chunk, int32 Index)
+	{
+		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
+		{
+			OutChunks.Add(&Chunk);
+		}
+	});
 }
 
 void ADigSite::BeginPlay()
@@ -125,8 +139,11 @@ void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
 
 void ADigSite::DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius)
 {
+	SCOPED_NAMED_EVENT(DigSite_DigVoxelsInRadius, FColorList::CadetBlue)
+
 	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
-	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	TArray<FVector> PointsInRadius;
+	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius, &PointsInRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 	{
 		const FVector WorldPosition = NSVE::FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
 		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
@@ -136,8 +153,58 @@ void ADigSite::DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Locati
 	});
 }
 
+void ADigSite::SampleVoxelsInRadius(const NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius, TArray<FDigSiteVoxelData>& OutVoxels, TArray<AArtifact*>& OutHitArtifacts) const
+{
+	SCOPED_NAMED_EVENT(DigSite_SampleVoxelsInRadius, FColorList::CadetBlue)
+
+	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
+	TArray<FVector> PointsInRadius;
+	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius, &PointsInRadius, &OutVoxels](const NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
+	{
+		const FVector WorldPosition = NSVE::FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
+		const bool bIsInRadius = Utilities::IsPointInSphere(WorldPosition, Location, DigRadius);
+		check((bIsInRadius & 1) == bIsInRadius);
+
+		if (bIsInRadius && Voxel.bSolid)
+		{
+			PointsInRadius.Add(WorldPosition);
+			FDigSiteVoxelData& VoxelData = OutVoxels.Emplace_GetRef();
+			VoxelData.MaterialIndex = Voxel.LocalMaterial;
+		}
+	});
+
+	const UWorld* World = GetWorld();
+	TSet<AArtifact*> HitArtifacts;
+	TArray<FOverlapResult> OverlapResults;
+	for (const FVector PointInRadius : PointsInRadius)
+	{
+		OverlapResults.Reset();
+		FCollisionObjectQueryParams ObjectQueryParams;
+		// QueryParams.AddObjectTypesToQuery(ECC_);
+		if (World->OverlapMultiByObjectType(
+			OverlapResults,
+			PointInRadius,
+			FQuat::Identity,
+			ObjectQueryParams,
+			FCollisionShape::MakeBox(FVector(TransformData.VoxelSize / 2.0f)),
+			FCollisionQueryParams::DefaultQueryParam))
+		{
+			for (const FOverlapResult& Result : OverlapResults)
+			{
+				if (AArtifact* Artifact = Cast<AArtifact>(Result.GetActor()))
+				{
+					HitArtifacts.Add(Artifact);
+				}
+			}
+		}
+	}
+	OutHitArtifacts = HitArtifacts.Array();
+}
+
 void ADigSite::UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius)
 {
+	SCOPED_NAMED_EVENT(DigSite_UnDigVoxelsInRadius, FColorList::CadetBlue)
+
 	NSVE::FVoxelChunk::FTransformData TransformData = Chunk.MakeTransformData();
 	Chunk.Voxels.Iterate([&TransformData, &Location, DigRadius](NSVE::FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 	{

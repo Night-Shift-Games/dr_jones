@@ -18,6 +18,27 @@ namespace NSVE
 
 class UVoxelGrid;
 
+USTRUCT(BlueprintType)
+struct FDigSiteVoxelData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 MaterialIndex = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FDigSiteSample
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FDigSiteVoxelData> Voxels;
+
+	UPROPERTY(BlueprintReadOnly);
+	TArray<AArtifact*> Artifacts;
+};
+
 UCLASS()
 class DR_JONES_API ADigSite : public AActor
 {
@@ -30,15 +51,21 @@ public:
 	void Dig(const FVector& Location, float DigRadius);
 
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
+	FDigSiteSample SampleDig(const FVector& Location, float DigRadius);
+
+	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void UnDig(const FVector& Location, float DigRadius);
 
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void UpdateMesh(bool bAsync = true);
 
+	void GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks) const;
+
 protected:
 	virtual void BeginPlay() override;
 
 	void SetupDigSite(const FVector& DigSiteLocation);
+	void SampleVoxelsInRadius(const NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius, TArray<FDigSiteVoxelData>& OutVoxels, TArray<AArtifact*>& OutHitArtifacts) const;
 	static void DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 	static void UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 
