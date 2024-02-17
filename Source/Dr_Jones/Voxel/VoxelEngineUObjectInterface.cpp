@@ -275,54 +275,11 @@ UVoxelGrid::UVoxelGrid()
 #endif
 }
 
-void UVoxelGrid::BeginPlay()
+void UVoxelGrid::InitializeGrid(const NSVE::FVoxelGridInitializer& Initializer)
 {
 	using namespace NSVE;
 
-	Super::BeginPlay();
 
-	const AActor* Owner = GetOwner();
-	if (!Owner)
-	{
-		return;
-	}
-
-	FVoxelGridInitializer Initializer;
-	Initializer.Transform = Owner->GetTransform();
-	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());
-	if (!GeneratedLayers.IsEmpty())
-	{
-		const double BaseZ = Initializer.Transform.GetLocation().Z;
-		for (int32 I = 0; I < GeneratedLayers.Num(); ++I)
-		{
-			const FVoxelGridGeneratedLayer& Layer = GeneratedLayers[I];
-			FVoxelLayer& VoxelLayer = Initializer.Layers.AddDefaulted_GetRef();
-			VoxelLayer.PlaneMaxZ = BaseZ + Layer.Depth;
-			VoxelLayer.LocalMaterialIndex = I;
-		}
-	}
-	else
-	{
-		Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
-	}
-
-	FCollisionObjectQueryParams QueryParams;
-	QueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-
-	TArray<FOverlapResult> Overlaps;
-	GetWorld()->OverlapMultiByObjectType(Overlaps,
-		Initializer.Transform.GetLocation(),
-		Initializer.Transform.GetRotation(),
-		QueryParams,
-		FCollisionShape::MakeBox(Extents));
-
-	for (const FOverlapResult& Overlap : Overlaps)
-	{
-		if (const AArtifact* Artifact = Cast<AArtifact>(Overlap.GetActor()))
-		{
-			Initializer.ArtifactLocations.Add(Artifact->GetActorLocation());
-		}
-	}
 
 	check(InternalVoxelGrid);
 	InternalVoxelGrid->Initialize(Initializer);
@@ -332,6 +289,7 @@ void UVoxelGrid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// TODO: Remove this crap and reimplement it in the vis component
 #if ENABLE_VOXEL_ENGINE_DEBUG && WITH_EDITORONLY_DATA
 	if (bDrawDebug && CVarVisualizeVoxelGrid.GetValueOnGameThread())
 	{

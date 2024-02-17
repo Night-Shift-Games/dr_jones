@@ -106,23 +106,18 @@ void ADigSite::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SpawnArtifacts();
+	InitializeVoxelGrid();
+
 	DynamicMeshComponent->SetWorldTransform(FTransform{});
 	UpdateMesh(false);
 
 	TArray<UMaterialInterface*> MaterialSet;
-	for (auto It = VoxelGrid->GeneratedLayers.CreateConstIterator(); It; ++It)
+	if (MeshMaterial)
 	{
-		if (It.GetIndex() >= 7)
-		{
-			break;
-		}
-		MaterialSet.Add(It->Material);
+		MaterialSet.Add(MeshMaterial);
 	}
-	MaterialSet.SetNumZeroed(8);
-	MaterialSet.Insert(VoxelGrid->ArtifactHintMaterial, 7);
 	DynamicMeshComponent->ConfigureMaterialSet(MaterialSet);
-	
-	SpawnArtifacts();
 }
 
 void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
@@ -214,6 +209,50 @@ void ADigSite::UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Loca
 
 		Voxel.bSolid |= bIsInRadius;
 	});
+}
+
+void ADigSite::InitializeVoxelGrid()
+{
+	check(VoxelGrid);
+
+	NSVE::FVoxelGridInitializer Initializer;
+	Initializer.Transform = GetTransform();
+	Initializer.Bounds = FBoxSphereBounds(Initializer.Transform.GetLocation(), Extents, Extents.Size());
+	if (!GeneratedLayers.IsEmpty())
+	{
+		const double BaseZ = Initializer.Transform.GetLocation().Z;
+		for (int32 I = 0; I < GeneratedLayers.Num(); ++I)
+		{
+			const FVoxelGridGeneratedLayer& Layer = GeneratedLayers[I];
+			NSVE::FVoxelLayer& VoxelLayer = Initializer.Layers.AddDefaulted_GetRef();
+			VoxelLayer.PlaneMaxZ = BaseZ + Layer.Depth;
+			VoxelLayer.LocalMaterialIndex = I;
+		}
+	}
+	else
+	{
+		Initializer.FillSurfaceZ_WS = Initializer.Transform.GetLocation().Z;
+	}
+
+	FCollisionObjectQueryParams QueryParams;
+	QueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+
+	TArray<FOverlapResult> Overlaps;
+	GetWorld()->OverlapMultiByObjectType(Overlaps,
+		Initializer.Transform.GetLocation(),
+		Initializer.Transform.GetRotation(),
+		QueryParams,
+		FCollisionShape::MakeBox(Extents));
+
+	for (const FOverlapResult& Overlap : Overlaps)
+	{
+		if (const AArtifact* Artifact = Cast<AArtifact>(Overlap.GetActor()))
+		{
+			Initializer.ArtifactLocations.Add(Artifact->GetActorLocation());
+		}
+	}
+
+	VoxelGrid->InitializeGrid(Initializer);
 }
 
 void ADigSite::SpawnArtifacts()

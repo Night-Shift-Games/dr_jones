@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/DynamicMeshComponent.h"
+#include "Voxel/VoxelEngineUObjectInterface.h"
 
 #include "DigSite.generated.h"
 
@@ -69,7 +70,22 @@ protected:
 	static void DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 	static void UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 
+	void InitializeVoxelGrid();
 	void SpawnArtifacts();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	FVector Extents = FVector(800.0, 800.0, 800.0);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	TArray<FVoxelGridGeneratedLayer> GeneratedLayers;
+
+	// DEPRECATED
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	TObjectPtr<UMaterialInterface> ArtifactHintMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	TObjectPtr<UMaterialInterface> MeshMaterial;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")

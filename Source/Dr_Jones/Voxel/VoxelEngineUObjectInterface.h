@@ -84,6 +84,9 @@ struct FVoxelGridGeneratedLayer
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Depth = 0.0f;
 
+	// DEPRECATED
+	// The index in the layer array is used as a vertex color channel:
+	// 0-BG, 1-R, 2-G, 3-B and 7-A (for the temp hint layer)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInterface> Material;
 };
@@ -96,22 +99,13 @@ class DR_JONES_API UVoxelGrid : public UActorComponent
 public:
 	UVoxelGrid();
 
+	void InitializeGrid(const NSVE::FVoxelGridInitializer& Initializer);
 	NSVE::FVoxelGrid& GetInternal() const { check(InternalVoxelGrid.IsValid()); return *InternalVoxelGrid.Get(); }
 
 protected:
-	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
-	FVector Extents = FVector(400.0, 400.0, 400.0);
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
-	TArray<FVoxelGridGeneratedLayer> GeneratedLayers;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NightShift|VoxelEngine")
-	TObjectPtr<UMaterialInterface> ArtifactHintMaterial;
-
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NightShift|VoxelEngine")
 	bool bDrawDebug = false;
