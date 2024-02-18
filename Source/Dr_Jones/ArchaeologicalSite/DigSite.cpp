@@ -2,6 +2,7 @@
 
 #include "DigSite.h"
 
+#include "DigSiteBorder.h"
 #include "Dr_Jones.h"
 #include "Utilities.h"
 #include "Items/Artifacts/Artifact.h"
@@ -118,6 +119,22 @@ void ADigSite::BeginPlay()
 		MaterialSet.Add(MeshMaterial);
 	}
 	DynamicMeshComponent->ConfigureMaterialSet(MaterialSet);
+
+	if (BorderGeneratorClass)
+	{
+		if (!ensure(BorderGenerator == nullptr))
+		{
+			BorderGenerator->DestroyComponent();
+			BorderGenerator = nullptr;
+		}
+
+		FDigSiteRectangularBorderDesc BorderDesc;
+		BorderDesc.Center_WS = GetActorLocation();
+		BorderDesc.Extents2D = FVector2D{ Extents.X, Extents.Y };
+
+		BorderGenerator = NewObject<UDigSiteBorder>(this, BorderGeneratorClass);
+		BorderGenerator->GenerateRectangularBorder(BorderDesc);
+	}
 }
 
 void ADigSite::SetupDigSite(const FVector& DigSiteLocation)
