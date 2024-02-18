@@ -755,7 +755,12 @@ namespace NSVE
 	{
 		FVoxelAddress Address;
 		Address.ChunkCoords = CalcChunkCoordsFromSignedGlobalCoords(GlobalCoords);
-		Address.VoxelCoords = (GlobalCoords + (Address.ChunkCoords * FVoxelChunk::Resolution)) % FVoxelChunk::Resolution;
+		const FIntVector AbsChunkCoords{
+			FMath::Abs(Address.ChunkCoords.X),
+			FMath::Abs(Address.ChunkCoords.Y),
+			FMath::Abs(Address.ChunkCoords.Z),
+		};
+		Address.VoxelCoords = (GlobalCoords + ((AbsChunkCoords + FIntVector(1)) * FVoxelChunk::Resolution)) % FVoxelChunk::Resolution;
 		return Address;
 	}
 

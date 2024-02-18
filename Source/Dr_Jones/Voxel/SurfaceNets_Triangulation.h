@@ -342,12 +342,14 @@ namespace NS::SurfaceNets
 					FIntVector GlobalCoords = BaseGlobalCoords + LocalVoxelCoords;
 
 					const FIntVector ChunkCoords = Grid.CalcChunkCoordsFromSignedGlobalCoords(GlobalCoords);
-					// TODO: Fix this shit
 					if (Grid.FindChunkByCoords(ChunkCoords) == nullptr)
 					{
-						GlobalCoords.X = FMath::Clamp(GlobalCoords.X, BaseGlobalCoords.X, BaseGlobalCoords.X + FVoxelChunk::Resolution - 1);
-						GlobalCoords.Y = FMath::Clamp(GlobalCoords.Y, BaseGlobalCoords.Y, BaseGlobalCoords.Y + FVoxelChunk::Resolution - 1);
-						GlobalCoords.Z = FMath::Clamp(GlobalCoords.Z, BaseGlobalCoords.Z, BaseGlobalCoords.Z + FVoxelChunk::Resolution - 1);
+						// TODO: This won't work when the system will allow chunks to be non-uniformly spread throughout the grid
+						// Then we will need an SDF to dilate the field / have a way to fetch the closest voxel.
+						const FIntVector GridDimensions = Grid.GetDimensionsInVoxels();
+						GlobalCoords.X = FMath::Clamp(GlobalCoords.X, 0, GridDimensions.X);
+						GlobalCoords.Y = FMath::Clamp(GlobalCoords.Y, 0, GridDimensions.Y);
+						GlobalCoords.Z = FMath::Clamp(GlobalCoords.Z, 0, GridDimensions.Z);
 					}
 
 					FVoxelAddress VoxelAddress = Grid.CalcVoxelAddressFromGlobalCoords(GlobalCoords);
