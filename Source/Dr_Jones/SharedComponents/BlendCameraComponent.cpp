@@ -2,6 +2,7 @@
 
 #include "BlendCameraComponent.h"
 
+#include "Utilities.h"
 #include "Blueprint/UserWidget.h"
 #include "Player/DrJonesCharacter.h"
 #include "Player/WidgetManager.h"
@@ -21,7 +22,7 @@ void UBlendCameraComponent::BeginPlay()
 	}
 }
 
-void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* WidgetToFocus)
+void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, const float BlendTime)
 {
 	if (!NewViewTarget)
 	{
@@ -35,28 +36,7 @@ void UBlendCameraComponent::SetViewTarget(AActor* NewViewTarget, UUserWidget* Wi
 		return;
 	}
 	
-	Controller->SetViewTargetWithBlend(NewViewTarget, 0.5f);
-	// TODO:
-	ADrJonesCharacter* Character = GetOwner<ADrJonesCharacter>();
-	Character->GetMesh()->SetVisibility(false);
-	
-	if (WidgetToFocus)
-	{
-		// Controller->bShowMouseCursor = true;
-		//
-		// FInputModeGameAndUI InputMode;
-		// InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		// InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
-		// Controller->SetInputMode(InputMode);
-		//
-		Character->GetWidgetManager()->SetWidgetVisibility(WidgetClass, ESlateVisibility::Hidden);
-		//
-		// const UWorld* World = Controller->GetWorld();
-		// ensureAlwaysMsgf(World, TEXT("Camera is not in the world!"));
-		// UGameViewportClient* Viewport = World->GetGameViewport();
-		// check(Viewport);
-		// Viewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
-	}
+	Controller->SetViewTargetWithBlend(NewViewTarget, BlendTime);
 }
 
 void UBlendCameraComponent::ResetViewTarget()
@@ -70,10 +50,8 @@ void UBlendCameraComponent::ResetViewTarget()
 	Controller->SetViewTargetWithBlend(MainViewTarget, 0.3f);
 
 	Controller->bShowMouseCursor = false;
-	// TODO:
-	ADrJonesCharacter* Character = GetOwner<ADrJonesCharacter>();
-	Character->GetMesh()->SetVisibility(true);
-	Character->GetWidgetManager()->SetWidgetVisibility(WidgetClass, ESlateVisibility::Visible);
+
+	Utilities::GetWidgetManager(*this).SetWidgetVisibility(WidgetClass, ESlateVisibility::Visible);
 	
 	FInputModeGameOnly InputMode;
 	Controller->SetInputMode(InputMode);

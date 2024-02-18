@@ -21,7 +21,7 @@ public:
 	APlayerController* GetViewingController() const;
 	
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Camera")
-	void SetViewTarget(AActor* NewViewTarget, UUserWidget* WidgetToFocus);
+	void SetViewTarget(AActor* NewViewTarget, const float BlendTime = 0.5f);
 
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Camera")
 	void ResetViewTarget();

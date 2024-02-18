@@ -55,8 +55,7 @@ void AMap::FocusOnMap(ADrJonesCharacter& Character)
 	{
 		return;
 	}
-	BlendCameraComponent->SetViewTarget(this, MapWidgetComponent->GetWidget());
-	EnableInput(Character.GetController<APlayerController>());
+	BlendCameraComponent->SetViewTarget(this, 0.3f);
 }
 
 void AMap::UnfocusOnMap()
@@ -65,7 +64,6 @@ void AMap::UnfocusOnMap()
 	{
 		return;
 	}
-	DisableInput(BlendCameraComponent->GetOwner<ADrJonesCharacter>()->GetController<APlayerController>());
 	BlendCameraComponent->ResetViewTarget();
 	BlendCameraComponent = nullptr;
 }
