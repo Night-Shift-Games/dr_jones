@@ -9,6 +9,7 @@
 
 #include "DigSite.generated.h"
 
+class UDigSiteBorder;
 class AArtifact;
 
 namespace NSVE
@@ -65,7 +66,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	// UNUSED
 	void SetupDigSite(const FVector& DigSiteLocation);
+
 	void SampleVoxelsInRadius(const NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius, TArray<FDigSiteVoxelData>& OutVoxels, TArray<AArtifact*>& OutHitArtifacts) const;
 	static void DigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
 	static void UnDigVoxelsInRadius(NSVE::FVoxelChunk& Chunk, const FVector& Location, float DigRadius);
@@ -74,30 +77,36 @@ protected:
 	void SpawnArtifacts();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site|Voxel Grid")
 	FVector Extents = FVector(800.0, 800.0, 800.0);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site|Voxel Grid")
 	TArray<FVoxelGridGeneratedLayer> GeneratedLayers;
 
 	// DEPRECATED
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site|Voxel Grid")
 	TObjectPtr<UMaterialInterface> ArtifactHintMaterial;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite|VoxelGrid")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site|Voxel Grid")
 	TObjectPtr<UMaterialInterface> MeshMaterial;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
+	TSubclassOf<UDigSiteBorder> BorderGeneratorClass;
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	TObjectPtr<UVoxelGrid> VoxelGrid;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
+	UPROPERTY(BlueprintReadOnly, Category = "Dig Site")
+	TObjectPtr<UDigSiteBorder> BorderGenerator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	TArray<TSubclassOf<AArtifact>> Artifacts;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DigSite")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	int ArtifactSpawnRate = 15.f;
 	
 	double Width = 1500.0;
