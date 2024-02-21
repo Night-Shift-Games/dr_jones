@@ -16,10 +16,10 @@ struct FCultureTimeRange
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Begin;
+	int32 Begin = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 End;
+	int32 End = 0;
 };
 
 USTRUCT(BlueprintType)

@@ -13,13 +13,13 @@ struct FDigSiteRectangularBorderDesc
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Center_WS;
+	FVector Center_WS = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D Extents2D;
+	FVector2D Extents2D = FVector2D::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Height;
+	float Height = 0.0f;
 };
 
 UCLASS(Blueprintable, Abstract, ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
