@@ -41,7 +41,7 @@ struct FArchaeologicalSiteFactoryData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D GeoData;
+	FVector2D GeoData = FVector2D::ZeroVector;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName LevelName = TEXT("L_ValleyOfKings");
