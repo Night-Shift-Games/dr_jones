@@ -131,6 +131,7 @@ void ADigSite::BeginPlay()
 		FDigSiteRectangularBorderDesc BorderDesc;
 		BorderDesc.Center_WS = GetActorLocation();
 		BorderDesc.Extents2D = FVector2D{ Extents.X, Extents.Y };
+		BorderDesc.Height = Extents.Z;
 
 		BorderGenerator = NewObject<UDigSiteBorder>(this, BorderGeneratorClass);
 		BorderGenerator->GenerateRectangularBorder(BorderDesc);

@@ -17,6 +17,9 @@ struct FDigSiteRectangularBorderDesc
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D Extents2D;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Height;
 };
 
 UCLASS(Blueprintable, Abstract, ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
