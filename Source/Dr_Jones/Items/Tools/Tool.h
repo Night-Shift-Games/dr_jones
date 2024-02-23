@@ -11,7 +11,7 @@
 class UActionComponent;
 class UInteractableComponent;
 
-static TAutoConsoleVariable CVarToolDebug(
+inline TAutoConsoleVariable CVarToolDebug(
 	TEXT("NS.ToolDebug"),
 	false,
 	TEXT("Draw debug shapes for the tools' functionality"),

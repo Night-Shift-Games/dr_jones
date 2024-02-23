@@ -10,7 +10,7 @@
 
 class UQuest;
 
-static TAutoConsoleVariable CVarQuestSystemDebug(
+inline TAutoConsoleVariable CVarQuestSystemDebug(
 	TEXT("NS.QuestSystem.Debug"),
 	false,
 	TEXT("Enable Quest System debug logging."),

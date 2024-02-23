@@ -15,7 +15,7 @@ class IQuestMessageInterface;
 class USoundCue;
 class UQuestSystemComponent;
 
-static TAutoConsoleVariable CVarIlluminatiDebug(
+inline TAutoConsoleVariable CVarIlluminatiDebug(
 	TEXT("NS.Illuminati.Debug"),
 	false,
 	TEXT("Enable Illuminati debug logging."),

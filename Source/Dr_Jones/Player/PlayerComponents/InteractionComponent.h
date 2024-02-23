@@ -13,7 +13,7 @@ class UDrJonesWidgetBase;
 class UInputAction;
 class UWidgetManager;
 
-static TAutoConsoleVariable<bool> CVarInteraction(
+inline TAutoConsoleVariable<bool> CVarInteraction(
 	TEXT("NS.Interaction"),
 	false,
 	TEXT("Interaction helper function"),
