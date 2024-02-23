@@ -5,6 +5,7 @@
 #include "ArtifactDatabase.h"
 #include "Utilities.h"
 #include "Player/PlayerComponents/EquipmentComponent.h"
+#include "Quest/QuestMessages.h"
 #include "Quest/QuestSystem.h"
 #include "SharedComponents/InteractableComponent.h"
 #include "World/Illuminati.h"
@@ -65,18 +66,19 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
-	if (UEquipmentComponent* EquipmentComponent = Taker->GetEquipment(); EquipmentComponent && EquipmentComponent->CanPickUpItem())
+	UEquipmentComponent* EquipmentComponent = Taker->GetEquipment();
+	if (!EquipmentComponent && !EquipmentComponent->CanPickUpItem())
 	{
-		EquipmentComponent->AddItem(this);
-		OnArtifactPickup.ExecuteIfBound(this);
-		OnArtifactPickedUp(Taker);
-
-		UQuestSystemComponent* QuestSystem = AIlluminati::GetQuestSystemInstance(this);
-		check(QuestSystem);
-		UArtifactCollectedQuestMessage* ArtifactCollectedMessage = NewObject<UArtifactCollectedQuestMessage>();
-		ArtifactCollectedMessage->Artifact = this;
-		QuestSystem->SendQuestMessage(ArtifactCollectedMessage);
+		return;
 	}
+	EquipmentComponent->AddItem(this);
+	OnArtifactPickup.ExecuteIfBound(this);
+	OnArtifactPickedUp(Taker);
+
+	AIlluminati::SendQuestMessage<UArtifactCollectedQuestMessage>(this, [&](UArtifactCollectedQuestMessage* ArtifactCollectedMessage)
+	{
+		ArtifactCollectedMessage->Artifact = this;
+	});
 }
 
 void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)

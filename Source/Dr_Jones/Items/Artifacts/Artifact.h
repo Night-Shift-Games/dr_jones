@@ -28,16 +28,6 @@ struct FProceduralArtifactData
 };
 
 UCLASS(Blueprintable)
-class UArtifactCollectedQuestMessage : public UObject, public IQuestMessageInterface
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<AArtifact> Artifact;
-};
-
-UCLASS(Blueprintable)
 class DR_JONES_API AArtifact : public AItem
 {
 	GENERATED_BODY()
@@ -105,7 +95,7 @@ public:
 	bool bArtifactCleared = false;
 	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMeshComponent> ArtifactMeshComponent;
 };
 

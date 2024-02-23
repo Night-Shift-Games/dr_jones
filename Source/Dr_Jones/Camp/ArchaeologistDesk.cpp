@@ -4,6 +4,8 @@
 
 #include "Player/PlayerComponents/EquipmentComponent.h"
 #include "Utilities.h"
+#include "Quest/QuestMessages.h"
+#include "SharedComponents/InteractableComponent.h"
 #include "World/Illuminati.h"
 
 AArchaeologistDesk::AArchaeologistDesk() : Super()
@@ -46,7 +48,7 @@ void AArchaeologistDesk::RemoveArtifact(AArtifact* Artifact)
 void AArchaeologistDesk::OnInteract(ADrJonesCharacter* Player)
 {
 	// It should depend which part of the desk is clicked - Components?
-	UEquipmentComponent* EquipmentComponent = Player->GetEquipment();
+	const UEquipmentComponent* EquipmentComponent = Player->GetEquipment();
 	AItem* ItemInHand = EquipmentComponent->GetItemInHand();
 	
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr; Artifact && !ArtifactOnDesk)
