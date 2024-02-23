@@ -31,8 +31,6 @@ void AArtifact::BeginPlay()
 
 void AArtifact::OnConstruction(const FTransform& Transform)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Construction"));
-
 	if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent))
 	{
 		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
