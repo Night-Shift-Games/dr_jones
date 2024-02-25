@@ -4,6 +4,7 @@
 
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
+#include "Utilities/Utilities.h"
 
 AItem::AItem()
 {
@@ -49,4 +50,11 @@ void AItem::SetWorldPhysics()
 		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 		Mesh->SetSimulatePhysics(false);
 	}
+}
+
+FVector AItem::GetLocationOfItemAfterDropdown() const
+{
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this }, ECC_WorldStatic);
+	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
+	return GroundLocation;
 }

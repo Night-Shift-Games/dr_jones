@@ -106,16 +106,11 @@ void AArtifact::OnRemovedFromEquipment()
 {
 	Super::OnRemovedFromEquipment();
 
-	TArray<AActor*> Tools;
-	AActor& Player = Utilities::GetPlayerCharacter(*this);
-	GetAttachedActors(Tools);
-	TArray<AActor*> ActorsToIgnore = { &Player, this};
-	Algo::Copy(Tools, ActorsToIgnore);
+	const ADrJonesCharacter* Player = GetInstigator<ADrJonesCharacter>();
+	const FVector GroundLocation = GetLocationOfItemAfterDropdown();
+	const FRotator Rotation = Player ? FRotator(0.0, Player->GetActorRotation().Yaw, 0.0) : FRotator::ZeroRotator; 
 
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ActorsToIgnore);
-	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
-		
-	SetActorLocationAndRotation(GroundLocation, FRotator(0, Player.GetActorRotation().Yaw,0));
+	SetActorLocationAndRotation(GroundLocation, Rotation);
 }
 
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)

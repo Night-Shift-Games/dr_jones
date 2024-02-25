@@ -30,7 +30,7 @@ namespace Utilities
 		return (SphereOrigin - Point).SquaredLength() < (Radius * Radius);
 	}
 
-	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore, ECollisionChannel Channel)
+	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<const AActor*>& ActorsToIgnore, ECollisionChannel Channel)
 	{
 		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)

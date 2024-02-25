@@ -26,7 +26,8 @@ public:
 	void SetInteractionEnabled(bool bEnabled) const;
 	virtual void SetHandAttachmentPhysics();
 	virtual void SetWorldPhysics();
-
+	FVector GetLocationOfItemAfterDropdown() const;
+	
 	virtual void OnEquip() {}
 	virtual void OnUnequip() {}
 
