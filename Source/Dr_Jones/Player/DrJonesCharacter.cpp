@@ -2,16 +2,16 @@
 
 #include "DrJonesCharacter.h"
 
-#include "Animation/CharacterAnimationComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
-#include "PlayerComponents/InteractionComponent.h"
-#include "PlayerComponents/EquipmentComponent.h"
-#include "PlayerComponents/JournalComponent.h"
-#include "PlayerComponents/ReputationComponent.h"
-#include "SharedComponents/BlendCameraComponent.h"
-#include "WidgetManager.h"
+#include "Animation/CharacterAnimationComponent.h"
+#include "Camera/BlendCameraComponent.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Interaction/InteractionComponent.h"
+#include "Journal/JournalComponent.h"
+#include "Reputation/ReputationComponent.h"
+#include "UI/WidgetManager.h"
 
 ADrJonesCharacter::ADrJonesCharacter()
 {

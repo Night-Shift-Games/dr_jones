@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "ArtifactDatabase.h"
 #include "Items/Item.h"
-#include "Quest/QuestSystem.h"
 
 #include "Artifact.generated.h"
 

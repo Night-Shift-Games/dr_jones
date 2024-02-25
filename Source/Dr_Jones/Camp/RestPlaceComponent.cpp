@@ -2,9 +2,7 @@
 
 #include "RestPlaceComponent.h"
 
-#include "Dr_Jones.h"
-#include "SharedComponents/InteractableComponent.h"
-#include "World/Illuminati.h"
+#include "Interaction/InteractableComponent.h"
 
 URestPlaceComponent::URestPlaceComponent()
 {

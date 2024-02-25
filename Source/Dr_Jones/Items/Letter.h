@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Components/WidgetComponent.h"
 #include "Items/Item.h"
 
 #include "Letter.generated.h"
+
+class UWidgetComponent;
 
 UCLASS()
 class DR_JONES_API ALetter : public AItem

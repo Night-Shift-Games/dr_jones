@@ -4,11 +4,12 @@
 
 #include "EnhancedInputComponent.h"
 #include "Animation/CharacterAnimationComponent.h"
-#include "Items/Tools/Tool.h"
-#include "Player/WidgetManager.h"
-#include "Utilities.h"
+#include "Items/ActionComponent.h"
+#include "Items/Artifacts/Artifact.h"
 #include "Items/Letter.h"
-#include "SharedComponents/ActionComponent.h"
+#include "Items/Tools/Tool.h"
+#include "UI/WidgetManager.h"
+#include "Utilities/Utilities.h"
 
 void UEquipmentComponent::BeginPlay()
 {

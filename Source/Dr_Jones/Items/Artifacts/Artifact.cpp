@@ -2,12 +2,10 @@
 
 #include "Artifact.h"
 
-#include "ArtifactDatabase.h"
-#include "Utilities.h"
-#include "Player/PlayerComponents/EquipmentComponent.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Interaction/InteractableComponent.h"
 #include "Quest/QuestMessages.h"
-#include "Quest/QuestSystem.h"
-#include "SharedComponents/InteractableComponent.h"
+#include "Utilities/Utilities.h"
 #include "World/Illuminati.h"
 
 AArtifact::AArtifact()

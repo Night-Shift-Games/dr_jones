@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CampEntity.h"
-#include "Items/Artifacts/Artifact.h"
+#include "CoreMinimal.h"
+
 #include "ArchaeologistDesk.generated.h"
+
+class AArtifact;
 
 UCLASS()
 class DR_JONES_API AArchaeologistDesk : public ACampEntity

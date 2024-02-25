@@ -1,7 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Items/Tools/Tool.h"
+#include "Tool.h"
 
 #include "Pickaxe.generated.h"
 
@@ -10,6 +9,7 @@ class DR_JONES_API APickaxe : public ATool
 {
 	GENERATED_BODY()
 public:
+	
 	UFUNCTION()
 	void Dig();
 	

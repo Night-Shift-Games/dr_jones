@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Dr_Jones.h"
 #include "GeoLocation.h"
-#include "Spatial/SpatialData.h"
+#include "Utilities/SpatialData.h"
 #include "UObject/Object.h"
 
 #include "WorldSpatialData.generated.h"

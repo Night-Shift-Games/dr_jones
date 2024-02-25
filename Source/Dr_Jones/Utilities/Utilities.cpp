@@ -1,9 +1,9 @@
 ﻿#include "Utilities.h"
 
+#include "Interaction/InteractionComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/WidgetManager.h"
-#include "Player/PlayerComponents/InteractionComponent.h"
+#include "UI/WidgetManager.h"
 
 namespace Utilities
 {

@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Dr_Jones.h"
-#include "UI/DrJonesWidgetBase.h"
 
 #include "ReputationComponent.generated.h"
 
-static TAutoConsoleVariable CVarReputationDebug(
+class UDrJonesWidgetBase;
+
+inline TAutoConsoleVariable CVarReputationDebug(
 	TEXT("NS.Reputation.Debug"),
 	false,
 	TEXT("Enable Reputation system debug logging."),
@@ -55,7 +55,6 @@ private:
 	// "Negative" reputation
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
 	int32 TreasureHunterReputation = 0;
-
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
 	TSubclassOf<UDrJonesWidgetBase> ReputationBarWidgetClass;

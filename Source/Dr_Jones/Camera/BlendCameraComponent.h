@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
-#include "UI/DrJonesWidgetBase.h"
+#include "Components/ActorComponent.h"
 
 #include "BlendCameraComponent.generated.h"
+
+class UDrJonesWidgetBase;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent),
 	HideCategories=(Tick))

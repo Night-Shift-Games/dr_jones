@@ -2,6 +2,7 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 
+#include "Items/Item.h"
 #include "Player/DrJonesCharacter.h"
 
 UCharacterAnimationComponent::UCharacterAnimationComponent()

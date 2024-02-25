@@ -4,9 +4,9 @@
 
 #include "Animation/CharacterAnimationComponent.h"
 #include "Components/ShapeComponent.h"
-#include "SharedComponents/ActionComponent.h"
-#include "Utilities.h"
+#include "Items/ActionComponent.h"
 #include "Player/DrJonesCharacter.h"
+#include "Utilities/Utilities.h"
 
 void AShovel::BeginPlay()
 {

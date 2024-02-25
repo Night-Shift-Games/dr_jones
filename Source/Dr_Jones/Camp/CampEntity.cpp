@@ -2,8 +2,8 @@
 
 #include "CampEntity.h"
 
-#include "Utilities.h"
-#include "SharedComponents/InteractableComponent.h"
+#include "Interaction/InteractableComponent.h"
+#include "Utilities/Utilities.h"
 
 ACampEntity::ACampEntity()
 {

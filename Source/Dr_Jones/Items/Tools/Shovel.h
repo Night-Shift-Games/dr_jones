@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Tool.h"
 
 #include "Shovel.generated.h"

@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "SharedComponents/InteractableComponent.h"
 
 #include "InteractionComponent.generated.h"
 
+class UInteractableComponent;
 class ADrJonesCharacter;
 class UDrJonesWidgetBase;
 class UInputAction;

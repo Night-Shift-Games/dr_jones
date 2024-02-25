@@ -4,14 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Items/Artifacts/Artifact.h"
-#include "UI/DrJonesWidgetBase.h"
 
 #include "EquipmentComponent.generated.h"
 
-class ALetter;
+class AArtifact;
 class ADrJonesCharacter;
+class AItem;
+class ALetter;
 class ATool;
+class UDrJonesWidgetBase;
+class UInputAction;
+struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToolAddedDelegate, ATool*, Tool);
 

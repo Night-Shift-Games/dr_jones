@@ -2,8 +2,8 @@
 
 #include "Item.h"
 
-#include "SharedComponents/ActionComponent.h"
-#include "SharedComponents/InteractableComponent.h"
+#include "Interaction/InteractableComponent.h"
+#include "Items/ActionComponent.h"
 
 AItem::AItem()
 {

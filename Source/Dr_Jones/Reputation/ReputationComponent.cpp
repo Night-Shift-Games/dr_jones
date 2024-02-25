@@ -1,8 +1,9 @@
 ﻿// Property of Night Shift Games, all rights reserved.
 
 #include "ReputationComponent.h"
+#include "UI/DrJonesWidgetBase.h"
 
-#include "Utilities.h"
+#include "Utilities/Utilities.h"
 
 UReputationComponent::UReputationComponent()
 {

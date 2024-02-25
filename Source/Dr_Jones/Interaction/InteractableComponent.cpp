@@ -1,6 +1,6 @@
 // Property of Night Shift Games, all rights reserved.
 
-#include "SharedComponents/InteractableComponent.h"
+#include "Interaction/InteractableComponent.h"
 
 UInteractableComponent::UInteractableComponent()
 {

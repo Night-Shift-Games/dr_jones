@@ -1,13 +1,13 @@
 // Property of Night Shift Games, all rights reserved.
 
-#include "Player/PlayerComponents/InteractionComponent.h"
+#include "Interaction/InteractionComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Interaction/InteractableComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/WidgetManager.h"
-#include "SharedComponents/InteractableComponent.h"
-#include "Utilities.h"
+#include "UI/WidgetManager.h"
+#include "Utilities/Utilities.h"
 
 UInteractionComponent::UInteractionComponent()
 {

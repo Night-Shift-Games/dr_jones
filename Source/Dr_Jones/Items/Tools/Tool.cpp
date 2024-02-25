@@ -3,9 +3,9 @@
 #include "Items/Tools/Tool.h"
 
 #include "Animation/CharacterAnimationComponent.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Interaction/InteractableComponent.h"
 #include "Player/DrJonesCharacter.h"
-#include "Player/PlayerComponents/EquipmentComponent.h"
-#include "SharedComponents/InteractableComponent.h"
 
 void ATool::BeginPlay()
 {

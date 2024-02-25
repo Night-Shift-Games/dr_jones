@@ -2,10 +2,11 @@
 
 #include "ArchaeologistDesk.h"
 
-#include "Player/PlayerComponents/EquipmentComponent.h"
-#include "Utilities.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Interaction/InteractableComponent.h"
+#include "Items/Artifacts/Artifact.h"
 #include "Quest/QuestMessages.h"
-#include "SharedComponents/InteractableComponent.h"
+#include "Utilities/Utilities.h"
 #include "World/Illuminati.h"
 
 AArchaeologistDesk::AArchaeologistDesk() : Super()

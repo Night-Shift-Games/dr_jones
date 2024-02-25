@@ -2,14 +2,11 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CampEntity.h"
-#include "SharedComponents/InteractableComponent.h"
-#include "UI/DrJonesWidgetBase.h"
-#include "UI/ReturnArtifactWidget.h"
 
 #include "ArtifactCrate.generated.h"
 
+class UReturnArtifactWidget;
 class AArtifact;
 
 UCLASS()
@@ -49,5 +46,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool IsArchaeologistCrate = true;
-	
 };

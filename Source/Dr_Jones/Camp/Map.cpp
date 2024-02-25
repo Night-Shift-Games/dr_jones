@@ -2,9 +2,10 @@
 
 #include "Map.h"
 
+#include "Camera/BlendCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
-#include "SharedComponents/BlendCameraComponent.h"
+#include "Interaction/InteractableComponent.h"
 
 AMap::AMap() : Super()
 {

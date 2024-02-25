@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "CampEntity.h"
-#include "SharedComponents/InteractableComponent.h"
 
 #include "Map.generated.h"
 

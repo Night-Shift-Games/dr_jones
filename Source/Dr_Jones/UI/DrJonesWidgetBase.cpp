@@ -1,5 +1,7 @@
 #include "DrJonesWidgetBase.h"
 
+#include "Player/DrJonesCharacter.h"
+
 UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
 	if (!WidgetClass)

@@ -1,9 +1,8 @@
 // Property of Night Shift Games, all rights reserved.
 
-
 #include "Quest/Quest.h"
-#include "Dr_Jones.h"
 
+#include "Dr_Jones.h"
 
 UQuest_OLD* UQuest_OLD::Construct(const UQuestData& QuestAsset)
 {

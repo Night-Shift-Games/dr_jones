@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ArchaeologicalSite/ArchaeologicalSite.h"
 #include "GameFramework/GameModeBase.h"
 
 #include "Dr_JonesGameModeBase.generated.h"
@@ -41,9 +40,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWorldData> GlobalWorldData;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UArchaeologicalSite> ArchaeologicalSite;
 
 	// X-Files theme starts playing
 	UPROPERTY(SaveGame, Instanced, BlueprintReadOnly)

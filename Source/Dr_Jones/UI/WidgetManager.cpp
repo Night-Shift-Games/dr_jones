@@ -3,8 +3,8 @@
 #include "WidgetManager.h"
 
 #include "Blueprint/UserWidget.h"
-#include "DrJonesCharacter.h"
 #include "Framework/Application/NavigationConfig.h"
+#include "Player/DrJonesCharacter.h"
 #include "UI/DrJonesWidgetBase.h"
 
 void UWidgetManager::BeginPlay()

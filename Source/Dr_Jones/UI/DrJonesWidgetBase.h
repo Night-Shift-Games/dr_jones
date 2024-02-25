@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 
-#include "Blueprint/UserWidget.h"
-#include "Player/DrJonesCharacter.h"
-
 #include "DrJonesWidgetBase.generated.h"
+
+class ADrJonesCharacter;
 
 UCLASS()
 class UDrJonesWidgetBase : public UUserWidget

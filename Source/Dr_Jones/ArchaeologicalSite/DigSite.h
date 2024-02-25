@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Components/DynamicMeshComponent.h"
+#include "GameFramework/Actor.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
 #include "DigSite.generated.h"

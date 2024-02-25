@@ -5,11 +5,9 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
+
 #include "QuestData.generated.h"
 
-/**
- * 
- */
 USTRUCT(Blueprintable, BlueprintType)
 struct DR_JONES_API FQuestContentData
 {
@@ -22,9 +20,6 @@ struct DR_JONES_API FQuestContentData
 	FText Content;
 };
 
-/**
- *
- */
 USTRUCT(Blueprintable, BlueprintType)
 struct DR_JONES_API FQuestNoteData
 {
@@ -34,9 +29,6 @@ struct DR_JONES_API FQuestNoteData
 	class UStaticMesh* NoteMesh;
 };
 
-/**
- * 
- */
 UCLASS(Blueprintable, BlueprintType)
 class DR_JONES_API UQuestData : public UDataAsset
 {
@@ -53,9 +45,6 @@ public:
 	FQuestNoteData QuestNoteData;
 };
 
-/**
- *
- */
 USTRUCT(BlueprintType)
 struct FQuestTableRow : public FTableRowBase
 {
@@ -73,14 +62,11 @@ public:
 
 FORCEINLINE const FQuestTableRow& FQuestTableRow::GetQuestTableRow(const FDataTableRowHandle& DataTableRow)
 {
-	FQuestTableRow* Row = DataTableRow.GetRow<FQuestTableRow>(TEXT("Quest Row"));
-	if (Row)
+	if (FQuestTableRow* Row = DataTableRow.GetRow<FQuestTableRow>(TEXT("Quest Row")))
 	{
 		return *Row;
 	}
-	else
-	{
-		static FQuestTableRow NullRow;
-		return NullRow;
-	}
+
+	static FQuestTableRow NullRow;
+	return NullRow;
 }

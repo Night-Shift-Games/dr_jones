@@ -1,6 +1,7 @@
 ﻿// Property of Night Shift Games, all rights reserved.
 
 #pragma once
+
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
 

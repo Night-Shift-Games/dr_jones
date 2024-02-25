@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Items/Item.h"
 
 #include "CharacterAnimationComponent.generated.h"
+
+class AItem;
 
 USTRUCT(BlueprintType, Category = "Animation")
 struct FCharacterAnimations

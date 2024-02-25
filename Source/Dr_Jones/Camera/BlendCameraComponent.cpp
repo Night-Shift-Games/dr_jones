@@ -2,10 +2,9 @@
 
 #include "BlendCameraComponent.h"
 
-#include "Utilities.h"
 #include "Blueprint/UserWidget.h"
-#include "Player/DrJonesCharacter.h"
-#include "Player/WidgetManager.h"
+#include "UI/WidgetManager.h"
+#include "Utilities/Utilities.h"
 
 UBlendCameraComponent::UBlendCameraComponent()
 {

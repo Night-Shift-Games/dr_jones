@@ -2,6 +2,8 @@
 
 #include "Items/Letter.h"
 
+#include "Components/WidgetComponent.h"
+
 ALetter::ALetter()
 {
 	LetterMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));

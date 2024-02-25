@@ -2,7 +2,7 @@
 
 #include "WorldSpatialDataFactory.h"
 
-#include "Serialization/BinaryCursor.h"
+#include "Utilities/BinaryCursor.h"
 #include "World/WorldSpatialData.h"
 
 UWorldSpatialDataFactory::UWorldSpatialDataFactory(const FObjectInitializer& ObjectInitializer)

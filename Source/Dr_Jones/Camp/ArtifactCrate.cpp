@@ -1,10 +1,12 @@
 #include "ArtifactCrate.h"
 
-#include "Utilities.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Interaction/InteractableComponent.h"
 #include "Items/Artifacts/Artifact.h"
-#include "Player/WidgetManager.h"
-#include "Player/PlayerComponents/EquipmentComponent.h"
-#include "Player/PlayerComponents/ReputationComponent.h"
+#include "Reputation/ReputationComponent.h"
+#include "UI/ReturnArtifactWidget.h"
+#include "UI/WidgetManager.h"
+#include "Utilities/Utilities.h"
 
 AArtifactCrate::AArtifactCrate() : Super()
 {

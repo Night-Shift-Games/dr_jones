@@ -3,10 +3,9 @@
 #include "DigSite.h"
 
 #include "DigSiteBorder.h"
-#include "Dr_Jones.h"
-#include "Utilities.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Utilities/Utilities.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
 ADigSite::ADigSite()

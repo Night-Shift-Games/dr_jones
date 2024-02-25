@@ -1,10 +1,11 @@
 #include "Pickaxe.h"
 
-#include "SharedComponents/ActionComponent.h"
+#include "Items/ActionComponent.h"
 
 void APickaxe::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	check(ActionComponent);
 	ActionComponent->PrimaryActionDelegate.AddDynamic(this, &APickaxe::Dig);
 }
