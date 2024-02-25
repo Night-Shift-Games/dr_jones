@@ -35,27 +35,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Night Shift|Reputation")
 	void AddReputation(EReputationType Faction, int32 ReputationToAdd);
 	
-	UFUNCTION(BlueprintPure, Category = "Reputation")
+	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
 	int32 GetReputation(EReputationType ReputationType) const;
 
-	UFUNCTION(BlueprintPure, Category = "Reputation")
+	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
+	int32 GetReputationCombined() const { return ArchaeologistReputation + TreasureHunterReputation; }
+	
+	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
 	float GetMorality() const { return Morality; }
+	
 private:
-
 	void SetReputation(EReputationType Faction, int32 NewReputation);
 	
 private:
-	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
-	float Morality = 0.5;
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
+	float Morality = 0.5f;
 	
 	// "Positive" reputation
-	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
 	int32 ArchaeologistReputation = 0;
 
 	// "Negative" reputation
-	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
 	int32 TreasureHunterReputation = 0;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Reputation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Night Shift|Reputation|UI", meta = (AllowPrivateAccess = true))
 	TSubclassOf<UDrJonesWidgetBase> ReputationBarWidgetClass;
 };
