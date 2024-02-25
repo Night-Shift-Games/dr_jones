@@ -82,7 +82,7 @@ namespace Utilities
 		return GetWidgetManager(WorldContextObject).GetWidget(WidgetClass);
 	}
 
-	FHitResult GetPlayerLookingAt(const float Reach, const UObject& WorldContextObject, ECollisionChannel CollisionChannel)
+	FHitResult GetPlayerSightTarget(const float Reach, const UObject& WorldContextObject, ECollisionChannel CollisionChannel)
 	{
 		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)

@@ -18,7 +18,7 @@ namespace Utilities
 	double GetMeshZOffset(const AActor& Actor);
 	UDrJonesWidgetBase* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
-	FHitResult GetPlayerLookingAt(const float Reach,  const UObject& WorldContextObject, ECollisionChannel CollisionChannel = ECC_Visibility);
+	FHitResult GetPlayerSightTarget(const float Reach,  const UObject& WorldContextObject, ECollisionChannel CollisionChannel = ECC_Visibility);
 	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 	
 	template <class TWidgetClass>
@@ -61,7 +61,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static FHitResult GetHitResultOfPlayerSight(const UObject* WorldContextObject, const float Reach = 400.f)
-	{ return WorldContextObject ? Utilities::GetPlayerLookingAt(Reach, *WorldContextObject) : FHitResult(); }
+	{ return WorldContextObject ? Utilities::GetPlayerSightTarget(Reach, *WorldContextObject) : FHitResult(); }
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static UWidgetManager* GetWidgetManager(const UObject* WorldContextObject)

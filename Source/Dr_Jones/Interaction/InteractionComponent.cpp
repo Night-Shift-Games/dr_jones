@@ -51,7 +51,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 		return SelectedInteractiveComponent;
 	}
 	UInteractableComponent* InteractableComponent = nullptr;
-	if (const USceneComponent* FoundSceneComponent = Utilities::GetPlayerLookingAt(InteractionRange, *this).GetComponent())
+	if (const USceneComponent* FoundSceneComponent = Utilities::GetPlayerSightTarget(InteractionRange, *this).GetComponent())
 	{
 		InteractableComponent = GetAttachedInteractableComponent(*FoundSceneComponent);
 		if (InteractableComponent && InteractableComponent->IsInteractionEnabled())
@@ -59,7 +59,7 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 			return InteractableComponent;
 		}
 	}
-	if (const AActor* Actor = Utilities::GetPlayerLookingAt(InteractionRange, *this).GetActor())
+	if (const AActor* Actor = Utilities::GetPlayerSightTarget(InteractionRange, *this).GetActor())
 	{
 		InteractableComponent = Actor->FindComponentByClass<UInteractableComponent>();
 		if (InteractableComponent && InteractableComponent->IsInteractionEnabled() && Actor->GetRootComponent() == InteractableComponent->GetAttachParent())

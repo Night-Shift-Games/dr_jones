@@ -131,7 +131,7 @@ void AShovel::Dump()
 		return;
 	}
 
-	const FHitResult Hit = Utilities::GetPlayerLookingAt(150.0f, *this);
+	const FHitResult Hit = Utilities::GetPlayerSightTarget(150.0f, *this);
 	if (!Hit.bBlockingHit)
 	{
 		return;
@@ -188,7 +188,7 @@ bool AShovel::TraceDig(FHitResult& OutHit) const
 
 bool AShovel::TraceForDesiredDigLocation(FHitResult& OutHit) const
 {
-	OutHit = Utilities::GetPlayerLookingAt(ShovelReach, *this);
+	OutHit = Utilities::GetPlayerSightTarget(ShovelReach, *this);
 	return OutHit.bBlockingHit;
 }
 
