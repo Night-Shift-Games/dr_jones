@@ -26,7 +26,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
-	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	UFUNCTION(BlueprintCallable, Category = "Night Shift")
 	void PickUp(ADrJonesCharacter* Player);
 	
 	UAnimMontage* FindActionMontage(const FName& MontageName) const;

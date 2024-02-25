@@ -10,14 +10,16 @@
 void ATool::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	InteractableComponent->InteractDelegate.AddUniqueDynamic(this, &ATool::PickUp);
 	OwningPlayer = GetOwner<ADrJonesCharacter>();
 }
 
 void ATool::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
 	InteractableComponent->InteractDelegate.RemoveDynamic(this, &ATool::PickUp);
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATool::PickUp(ADrJonesCharacter* Player)
@@ -51,11 +53,11 @@ void ATool::OnRemovedFromEquipment()
 void ATool::OnEquip()
 {
 	Super::OnEquip();
-	GetMeshComponent()->SetVisibility(true);
+	GetMeshComponent()->SetVisibility(true, true);
 }
 
 void ATool::OnUnequip()
 {
 	Super::OnUnequip();
-	GetMeshComponent()->SetVisibility(false);
+	GetMeshComponent()->SetVisibility(false, true);
 }
