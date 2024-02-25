@@ -22,7 +22,7 @@ namespace Utilities
 	{
 		const float Angle = CalculateAngleBetweenTwoVectors(Direction, Second);
 		const float CenterAngle = PI - (2 * Angle);
-		return SphereRadius * 2 * FMath::Sin(CenterAngle / 2);
+		return SphereRadius * 2 * FMath::Sin(CenterAngle / 2.f);
 	}
 
 	bool IsPointInSphere(const FVector& Point, const FVector& SphereOrigin, const float Radius)
@@ -30,7 +30,7 @@ namespace Utilities
 		return (SphereOrigin - Point).SquaredLength() < (Radius * Radius);
 	}
 
-	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore)
+	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<AActor*>& ActorsToIgnore, ECollisionChannel Channel)
 	{
 		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)
@@ -38,10 +38,10 @@ namespace Utilities
 			return FVector::ZeroVector;
 		}
 		FHitResult Hit;
-		const FVector End = StartLocation + FVector(0.f, 0.f, -300.f);
+		const FVector End = StartLocation + FVector(0.0, 0.0, -300.0);
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActors(ActorsToIgnore);
-		World->LineTraceSingleByChannel(Hit, StartLocation, End, ECC_Visibility, QueryParams);
+		World->LineTraceSingleByChannel(Hit, StartLocation, End, Channel, QueryParams);
 		return Hit.Location;
 	}
 
@@ -82,10 +82,9 @@ namespace Utilities
 		return GetWidgetManager(WorldContextObject).GetWidget(WidgetClass);
 	}
 
-	FHitResult GetPlayerLookingAt(const float Reach)
+	FHitResult GetPlayerLookingAt(const float Reach, const UObject& WorldContextObject, ECollisionChannel CollisionChannel)
 	{
-		// TODO: Add WCO
-		UWorld* World = GWorld;
+		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)
 		{
 			return {};
@@ -105,7 +104,7 @@ namespace Utilities
 		FVector LineEnd = WorldLocation + WorldDirection * Reach;
 		FHitResult Hit;
 	
-		World->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, ECC_Visibility);
+		World->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, CollisionChannel);
 
 		if (!Hit.bBlockingHit)
 		{
