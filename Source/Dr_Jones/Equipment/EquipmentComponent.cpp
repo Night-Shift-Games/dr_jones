@@ -177,7 +177,7 @@ void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionV
 
 void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 {
-	if (ItemToAttach.IsAttachedTo(GetOwner()))
+	if (ItemToAttach.IsAttachedTo(Owner))
 	{
 		return;
 	}
@@ -187,7 +187,7 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 
 void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
 {
-	if (!ItemToDetach.IsAttachedTo(GetOwner()))
+	if (!Owner || !ItemToDetach.IsAttachedTo(Owner))
 	{
 		return;
 	}
@@ -200,7 +200,7 @@ void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
 	{
 		QuestItems.Remove(LetterToDetach);
 	}
-	
+	ItemToDetach.SetInstigator(Owner);
 	ItemToDetach.OnRemovedFromEquipment();
 	ItemToDetach.DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
