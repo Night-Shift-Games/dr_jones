@@ -18,29 +18,6 @@ void AItem::SetInteractionEnabled(bool bEnabled) const
 	InteractableComponent->SetInteractionEnabled(bEnabled);
 }
 
-void AItem::OnAddedToEquipment()
-{
-	SetInteractionEnabled(false);
-	SetHandAttachmentPhysics();
-}
-
-void AItem::OnRemovedFromEquipment()
-{
-	SetInteractionEnabled(true);
-	SetWorldPhysics();
-}
-
-void AItem::SetHandAttachmentPhysics()
-{
-	RootComponent->SetMobility(EComponentMobility::Movable);
-	if (UMeshComponent* Mesh = GetMeshComponent())
-	{
-		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-		Mesh->SetSimulatePhysics(false);
-	}
-}
-
 void AItem::SetWorldPhysics()
 {
 	RootComponent->SetMobility(EComponentMobility::Movable);
@@ -54,7 +31,17 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this }, ECC_WorldStatic);
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this });
 	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
 	return GroundLocation;
+}
+
+void AItem::OnAddedToEquipment()
+{
+	SetInteractionEnabled(false);
+}
+
+void AItem::OnRemovedFromEquipment()
+{
+	SetInteractionEnabled(true);
 }

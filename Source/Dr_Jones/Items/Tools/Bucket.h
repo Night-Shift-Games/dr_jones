@@ -14,4 +14,6 @@ class DR_JONES_API ABucket : public ATool
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tool Settings")
 	int BucketCapacity = 5;
+
+	virtual void OnRemovedFromEquipment() override;
 };

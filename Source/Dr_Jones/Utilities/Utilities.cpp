@@ -30,7 +30,7 @@ namespace Utilities
 		return (SphereOrigin - Point).SquaredLength() < (Radius * Radius);
 	}
 
-	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<const AActor*>& ActorsToIgnore, ECollisionChannel Channel)
+	FVector FindGround(const UObject& WorldContextObject, const FVector& StartLocation, const TArray<const AActor*>& ActorsToIgnore)
 	{
 		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)
@@ -39,9 +39,16 @@ namespace Utilities
 		}
 		FHitResult Hit;
 		const FVector End = StartLocation + FVector(0.0, 0.0, -300.0);
+
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActors(ActorsToIgnore);
-		World->LineTraceSingleByChannel(Hit, StartLocation, End, Channel, QueryParams);
+
+		FCollisionObjectQueryParams CollisionObjectQueryParams;
+		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+		World->LineTraceSingleByObjectType(Hit, StartLocation, End, CollisionObjectQueryParams, QueryParams);
+
 		return Hit.Location;
 	}
 

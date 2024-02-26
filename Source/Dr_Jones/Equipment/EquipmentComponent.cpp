@@ -7,6 +7,7 @@
 #include "Items/ActionComponent.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Items/Letter.h"
+#include "Items/Tools/Bucket.h"
 #include "Items/Tools/Tool.h"
 #include "UI/WidgetManager.h"
 #include "Utilities/Utilities.h"
@@ -101,7 +102,7 @@ void UEquipmentComponent::UnequipItem()
 	
 	ItemToUnequip->OnUnequip();
 	
-	if (ItemToUnequip->IsA<AArtifact>())
+	if (ItemToUnequip->IsA<AArtifact>() || ItemToUnequip->IsA<ABucket>())
 	{
 		DetachItemFromHand(*ItemToUnequip);
 	}
@@ -181,8 +182,18 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 	{
 		return;
 	}
-	ItemToAttach.OnAddedToEquipment();
+	
+	USceneComponent* RootComponent = ItemToAttach.GetRootComponent();
+	RootComponent->SetMobility(EComponentMobility::Movable);
+	if (UMeshComponent* Mesh = ItemToAttach.GetMeshComponent())
+	{
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+		Mesh->SetSimulatePhysics(false);
+	}
+	
 	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
+	ItemToAttach.OnAddedToEquipment();
 }
 
 void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
@@ -201,8 +212,11 @@ void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
 		QuestItems.Remove(LetterToDetach);
 	}
 	ItemToDetach.SetInstigator(Owner);
-	ItemToDetach.OnRemovedFromEquipment();
+	
+	ItemToDetach.SetWorldPhysics();
 	ItemToDetach.DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	
+	ItemToDetach.OnRemovedFromEquipment();
 }
 
 void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActionValue)

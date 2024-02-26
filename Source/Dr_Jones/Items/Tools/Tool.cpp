@@ -47,7 +47,7 @@ UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
 void ATool::OnRemovedFromEquipment()
 {
 	Super::OnRemovedFromEquipment();
-	GetMeshComponent()->SetVisibility(true);
+	GetMeshComponent()->SetVisibility(true, true);
 }
 
 void ATool::OnEquip()
