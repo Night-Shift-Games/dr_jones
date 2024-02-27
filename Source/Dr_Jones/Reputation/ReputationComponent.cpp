@@ -2,6 +2,7 @@
 
 #include "ReputationComponent.h"
 #include "UI/DrJonesWidgetBase.h"
+#include "UI/WidgetManager.h"
 
 #include "Utilities/Utilities.h"
 
@@ -31,5 +32,5 @@ void UReputationComponent::SetReputation(EReputationType Faction, int32 NewReput
 		TreasureHunterReputation = NewReputation;
 	}
 	Morality = static_cast<float>(ArchaeologistReputation) / static_cast<float>(GetReputationCombined());
-	Utilities::GetWidget(*this, ReputationBarWidgetClass)->UpdateData();
+	UWidgetManager::UpdateWidget(*this, ReputationBarWidgetClass);
 }

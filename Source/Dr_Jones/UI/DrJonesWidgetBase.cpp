@@ -1,6 +1,14 @@
 #include "DrJonesWidgetBase.h"
 
-#include "Player/DrJonesCharacter.h"
+bool UDrJonesWidgetBase::Initialize()
+{
+	if (!Updater && UpdaterClass)
+	{
+		Updater = NewObject<UWidgetDataObject>(this, UpdaterClass);
+	}
+	
+	return Super::Initialize();
+}
 
 UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {

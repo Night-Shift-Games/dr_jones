@@ -109,20 +109,10 @@ UDrJonesWidgetBase* UWidgetManager::GetWidget(const TSubclassOf<UDrJonesWidgetBa
 	return FoundWidget;
 }
 
-void UWidgetManager::RequestWidgetUpdate(const TSubclassOf<UDrJonesWidgetBase> Widget,
-	TOptional<float> AxisValue) const
+void UWidgetManager::UpdateWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
-	UDrJonesWidgetBase* WidgetToUpdate = GetWidget(Widget);
-	if (!WidgetToUpdate)
+	if (UDrJonesWidgetBase* FoundWidget = Utilities::GetWidget(WorldContextObject, WidgetClass))
 	{
-		return;
-	}
-	if (AxisValue.IsSet())
-	{
-		WidgetToUpdate->UpdateDataAxis(AxisValue.GetValue());	
-	}
-	else
-	{
-		WidgetToUpdate->UpdateData();
+		FoundWidget->UpdateData();
 	}
 }

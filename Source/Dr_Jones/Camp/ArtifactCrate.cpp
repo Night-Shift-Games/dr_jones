@@ -22,21 +22,20 @@ void AArtifactCrate::BeginPlay()
 
 void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 {
-	UWidgetManager* WidgetManager = Player->GetWidgetManager();
-	WidgetManager->AddWidget(ReturnArtifactsWidgetClass);
-	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
-	WidgetManager->ShowWidget(ReturnArtifactsWidgetClass);
-
-	UEquipmentComponent* Equipment = Player->GetEquipment();
+	const UEquipmentComponent* Equipment = Player->GetEquipment();
 	AItem* ItemInHand = Equipment->GetItemInHand();
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr)
 	{
 		AddArtifact(Artifact, Player);
 	}
-
+	
+	UWidgetManager& WidgetManager = Utilities::GetWidgetManager(*this);
+	WidgetManager.AddWidget(ReturnArtifactsWidgetClass);
+	WidgetManager.ShowWidget(ReturnArtifactsWidgetClass);
+	UReturnArtifactWidget* Widget = UWidgetManager::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass);
 	Widget->OwningArtifactCrate = this;
 	Widget->OnShow();
-	Widget->UpdateData();
+	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
 void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Player)
@@ -49,11 +48,8 @@ void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Pl
 	Artifacts.Add(ArtifactToAdd);
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
-
-	if (UReturnArtifactWidget* Widget = Utilities::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass))
-	{
-		Widget->UpdateData();
-	}
+	
+	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
 AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
@@ -81,13 +77,12 @@ void AArtifactCrate::SendArtifacts()
 
 void AArtifactCrate::CloseWidget()
 {
-	UWidgetManager* WidgetManager = Utilities::GetPlayerCharacter(*this).GetWidgetManager();
-	UReturnArtifactWidget* Widget = Cast<UReturnArtifactWidget>(WidgetManager->GetWidget(ReturnArtifactsWidgetClass));
+	UReturnArtifactWidget* Widget = UWidgetManager::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass);
 	if (!Widget)
 	{
 		return;
 	}
+	Utilities::GetWidgetManager(*this).SetWidgetVisibility(ReturnArtifactsWidgetClass, ESlateVisibility::Hidden);
 	Widget->OnHide();
-	WidgetManager->HideWidget(ReturnArtifactsWidgetClass);
 }
 

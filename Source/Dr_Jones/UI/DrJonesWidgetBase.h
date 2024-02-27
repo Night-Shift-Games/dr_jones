@@ -6,12 +6,26 @@
 #include "DrJonesWidgetBase.generated.h"
 
 class ADrJonesCharacter;
+class UWidgetDataObject;
 
 UCLASS()
 class UDrJonesWidgetBase : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	virtual bool Initialize() override;
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDataUpdated();
+
+	virtual void UpdateData() { OnDataUpdated(); }
+	UDrJonesWidgetBase* GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	UWidgetDataObject* GetUpdater() const { return Updater; }
+
+	template<typename WidgetClass>
+	WidgetClass* GetUpdater() const { return Cast<WidgetClass>(Updater); }
+
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<ADrJonesCharacter> Player;
@@ -19,12 +33,18 @@ protected:
 	UPROPERTY(Transient)
 	TMap<TSubclassOf<UDrJonesWidgetBase>, TObjectPtr<UDrJonesWidgetBase>> ChildWidgets;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UWidgetDataObject> UpdaterClass;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UWidgetDataObject> Updater;
+};
+
+UCLASS(BlueprintType)
+class DR_JONES_API UWidgetDataObject : public UObject
+{
+	GENERATED_BODY()
+
 public:
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateData();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateDataAxis(float AxisValue = 0);
-
-	UDrJonesWidgetBase* GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass);
+	virtual void ResetValuesAfterUsage() {}
 };

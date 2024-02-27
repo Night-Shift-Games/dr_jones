@@ -58,7 +58,7 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	AttachItemToHand(*ItemToAdd);
 	EquipItem(ItemToAdd);
 
-	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(ItemInfo);
+	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 
 void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
@@ -88,11 +88,8 @@ void UEquipmentComponent::EquipItem(AItem* NewActiveItem)
 	}
 	
 	Owner->CharacterAnimationComponent->SetActiveItemAnimation(ItemInHand ? ItemInHand->GetItemAnimation() : nullptr);
-	
-	if (UDrJonesWidgetBase* Widget = Utilities::GetWidget(*this, ItemInfo))
-	{
-		Widget->UpdateData();
-	}
+
+	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 
 void UEquipmentComponent::UnequipItem()
@@ -111,7 +108,7 @@ void UEquipmentComponent::UnequipItem()
 		DetachItemFromHand(*ItemToUnequip);
 	}
 
-	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(ItemInfo);
+	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 
 AItem* UEquipmentComponent::TakeOutItemInHand()
@@ -238,5 +235,5 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	}
 	
 	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(InventoryMenu);
+	UWidgetManager::UpdateWidget(*this, InventoryMenu);
 }
