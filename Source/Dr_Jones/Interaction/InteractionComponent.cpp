@@ -119,15 +119,18 @@ bool UInteractionComponent::IsInteractable(const UMeshComponent& ComponentToChec
 UInteractableComponent* UInteractionComponent::GetAttachedInteractableComponent(
 	const USceneComponent& ComponentToCheck)
 {
-	TArray<USceneComponent*> Children;
-	ComponentToCheck.GetChildrenComponents(false, Children);
+	static TArray<USceneComponent*>Children;
+	Children = ComponentToCheck.GetAttachChildren();
+	const AActor* OwnerToCheck = ComponentToCheck.GetOwner();
+
 	for (const auto Child : Children)
 	{
-		if (Child->IsA<UInteractableComponent>())
+		if (Child->IsA<UInteractableComponent>() && Child->GetOwner() == OwnerToCheck)
 		{
-			return Cast<UInteractableComponent> (Child);
+			return Cast<UInteractableComponent>(Child);
 		}
 	}
+	
 	return nullptr;
 }
 
