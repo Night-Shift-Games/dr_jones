@@ -192,7 +192,13 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 		Mesh->SetSimulatePhysics(false);
 	}
 	
-	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, ItemToAttach.GetItemAttachmentSocket());
+	if (Owner->GetMovementBase() == ItemToAttach.GetRootComponent())
+	{
+		Owner->SetBase(nullptr);
+	}
+	
+	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemToAttach.GetItemAttachmentSocket());
+
 	ItemToAttach.OnAddedToEquipment();
 }
 
