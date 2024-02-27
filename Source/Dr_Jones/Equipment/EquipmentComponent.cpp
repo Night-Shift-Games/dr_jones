@@ -61,9 +61,13 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	Utilities::GetWidgetManager(*this).RequestWidgetUpdate(ItemInfo);
 }
 
-void UEquipmentComponent::EquipItemByClass(TSubclassOf<AItem> ItemClass)
+void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
 {
 	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	if (!FoundItem)
+	{
+		return;
+	}
 	EquipItem(*FoundItem);
 }
 
