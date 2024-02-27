@@ -192,7 +192,7 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 		Mesh->SetSimulatePhysics(false);
 	}
 	
-	if (Owner->GetMovementBase() == ItemToAttach.GetRootComponent())
+	if (Owner->GetMovementBase() == ItemToAttach.GetMeshComponent())
 	{
 		Owner->SetBase(nullptr);
 	}
