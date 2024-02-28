@@ -7,6 +7,7 @@
 #include "Interaction/InteractableComponent.h"
 #include "Player/DrJonesCharacter.h"
 #include "UI/WidgetManager.h"
+#include "Utilities/InputTriggerPreventAction.h"
 #include "Utilities/Utilities.h"
 
 UInteractionComponent::UInteractionComponent()
@@ -110,7 +111,12 @@ void UInteractionComponent::AltInteract()
 		return;
 	}
 	
-	SelectedInteractiveComponent->AltInteract(Owner.Get());
+	if (!SelectedInteractiveComponent->AltInteract(Owner.Get()))
+	{
+		UInputTriggerPreventAction* PreventAction = nullptr;
+		AlternativeInteractionAction->Triggers.FindItemByClass<UInputTriggerPreventAction>(&PreventAction);
+		PreventAction->bTriggered = false;
+	}
 }
 
 /*static*/ bool UInteractionComponent::IsInteractable(const AActor& ActorToCheck)

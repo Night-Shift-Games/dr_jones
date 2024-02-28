@@ -7,18 +7,27 @@ UInteractableComponent::UInteractableComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UInteractableComponent::Interact(ADrJonesCharacter* Player)
+bool UInteractableComponent::Interact(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing"));
-	
-	InteractDelegate.Broadcast(Player);
+	if (InteractDelegate.IsBound())
+	{
+		InteractDelegate.Broadcast(Player);
+		return true;
+	}
+	return false;
 }
 
-void UInteractableComponent::AltInteract(ADrJonesCharacter* Player)
+bool UInteractableComponent::AltInteract(ADrJonesCharacter* Player)
 {
 	checkf(Player, TEXT("Player is missing"));
 	
-	AltInteractDelegate.Broadcast(Player);
+	if (AltInteractDelegate.IsBound())
+	{
+		AltInteractDelegate.Broadcast(Player);
+		return true;
+	}
+	return false;
 }
 
 UMeshComponent* UInteractableComponent::GetOwnerMesh() const

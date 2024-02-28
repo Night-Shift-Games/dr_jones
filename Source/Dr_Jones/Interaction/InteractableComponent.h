@@ -19,10 +19,10 @@ public:
 	UInteractableComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void Interact(ADrJonesCharacter* Player);
+	bool Interact(ADrJonesCharacter* Player);
 
 	UFUNCTION(BlueprintCallable)
-	void AltInteract(ADrJonesCharacter* Player);
+	bool AltInteract(ADrJonesCharacter* Player);
 
 	void SetInteractionEnabled(bool bEnabled) { bEnabledInteraction = bEnabled; }
 	bool IsInteractionEnabled() const { return bEnabledInteraction; }
