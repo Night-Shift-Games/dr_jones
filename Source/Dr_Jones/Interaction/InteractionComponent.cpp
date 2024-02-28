@@ -3,6 +3,7 @@
 #include "Interaction/InteractionComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "InteractionWidget.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Interaction/InteractableComponent.h"
 #include "Player/DrJonesCharacter.h"
@@ -88,10 +89,20 @@ void UInteractionComponent::UpdateInteractionUI()
 		PreviousSelectedInteractiveActor->SetRenderPostProcessInteractionOutline(false);
 	}
 
-	if (SelectedInteractiveComponent)
+	if (!SelectedInteractiveComponent)
 	{
-		SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
+		return;
 	}
+	
+	SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
+	const bool bHaveAltInteraction = SelectedInteractiveComponent->AltInteractDelegate.IsBound();
+	UInteractionWidgetDataObject* InteractionUpdater = UWidgetManager::GetWidgetUpdater<UInteractionWidgetDataObject>(*this, InteractionUI);
+	if (!InteractionUpdater)
+	{
+		return;
+	}
+	InteractionUpdater->HasAltInteraction = bHaveAltInteraction;
+	UWidgetManager::UpdateWidget(*this, InteractionUI);
 }
 
 void UInteractionComponent::Interact()
