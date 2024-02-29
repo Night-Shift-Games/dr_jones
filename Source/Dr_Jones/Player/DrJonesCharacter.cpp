@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "Camera/BlendCameraComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractionComponent.h"
 #include "Journal/JournalComponent.h"
@@ -42,6 +43,25 @@ void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	InteractionComponent->SetupPlayerInput(EnhancedInputComponent);
 	EquipmentComponent->SetupPlayerInput(EnhancedInputComponent);
 	JournalComponent->SetupPlayerInputComponent(*EnhancedInputComponent);
+}
+
+void ADrJonesCharacter::StartInspect(AArtifact* ArtifactToInspect)
+{
+	if (!ArtifactOverviewer)
+	{
+		ArtifactOverviewer = NewObject<UArtifactOverviewer>();
+	}
+	ArtifactOverviewer->InitializeOverviewer(FindComponentByClass<UCameraComponent>(), ArtifactToInspect);
+	ArtifactOverviewer->StartOverview();
+}
+
+void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
+{
+	if (!ArtifactOverviewer)
+	{
+		return;
+	}
+	ArtifactOverviewer->EndOverview();
 }
 
 void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)

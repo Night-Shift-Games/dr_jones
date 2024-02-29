@@ -36,6 +36,7 @@ void AArchaeologistDesk::AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Pla
 	SocketPlace = Utilities::FindGround(*this, SocketPlace + FVector (0, 0, 20), {ArtifactOnDesk});
 	ArtifactOnDesk->AttachToComponent(DeskMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("ArtifactSocket"));
 	ArtifactOnDesk->SetActorLocation(SocketPlace - FVector(0,0, ZOffset));
+	ArtifactOnDesk->SetOwner(this);
 	
 	ArtifactOnDesk->OnArtifactPickup.BindUObject(this, &AArchaeologistDesk::RemoveArtifact);
 }

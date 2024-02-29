@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Investigation/ArtifactOverviewer.h"
+#include "Items/Artifacts/Artifact.h"
 
 #include "DrJonesCharacter.generated.h"
 
@@ -35,6 +37,15 @@ public:
 	UEquipmentComponent* GetEquipment() const { return EquipmentComponent; }
 	UBlendCameraComponent* GetCameraBlend() const { return BlendCameraComponent; }
 
+	UFUNCTION(BlueprintCallable)
+	void StartInspect(AArtifact* ArtifactToInspect);
+
+	UFUNCTION(BlueprintCallable)
+	void StopInspect(AArtifact* ArtifactToInspect);
+
+	UPROPERTY(Transient)
+	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
+	
 private:
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
