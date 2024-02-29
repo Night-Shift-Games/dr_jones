@@ -3,6 +3,7 @@
 #include "EquipmentComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "EquipmentWidget.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "Items/ActionComponent.h"
 #include "Items/Artifacts/Artifact.h"
@@ -57,8 +58,6 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	
 	AttachItemToHand(*ItemToAdd);
 	EquipItem(ItemToAdd);
-
-	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 
 void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
@@ -235,5 +234,11 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	}
 	
 	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
+	if (UEquipmentWidgetDataObject* DataObject = UWidgetManager::GetWidgetUpdater<UEquipmentWidgetDataObject>(*this, InventoryMenu))
+	{
+		DataObject->Letters = &QuestItems;
+		DataObject->Tools = &Tools;
+	}
 	UWidgetManager::UpdateWidget(*this, InventoryMenu);
 }
