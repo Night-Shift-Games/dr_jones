@@ -10,6 +10,7 @@
 #include "DigSite.generated.h"
 
 class UDigSiteBorder;
+class UNightShiftDynamicMeshComponent;
 class AArtifact;
 
 namespace NSVE
@@ -98,6 +99,9 @@ protected:
 	TObjectPtr<UDynamicMeshComponent> DynamicMeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
+	TObjectPtr<UNightShiftDynamicMeshComponent> NightShiftDynamicMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	TObjectPtr<UVoxelGrid> VoxelGrid;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Dig Site")
@@ -108,7 +112,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	int ArtifactSpawnRate = 15.f;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
+	bool bUseNightShiftMesh = true;
+
 	double Width = 1500.0;
 	double Height = 1500.0;
 };

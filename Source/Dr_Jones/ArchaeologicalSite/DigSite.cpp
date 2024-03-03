@@ -3,6 +3,7 @@
 #include "DigSite.h"
 
 #include "DigSiteBorder.h"
+#include "Geometry/NightShiftDynamicMeshComponent.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utilities/Utilities.h"
@@ -10,12 +11,14 @@
 
 ADigSite::ADigSite()
 {
-	PrimaryActorTick.bCanEverTick = false;
-	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
 	DynamicMeshComponent = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMesh"));
 	DynamicMeshComponent->SetupAttachment(RootComponent);
-	
+
+	NightShiftDynamicMeshComponent = CreateDefaultSubobject<UNightShiftDynamicMeshComponent>(TEXT("NightShiftDynamicMeshComponent"));
+	NightShiftDynamicMeshComponent->SetupAttachment(RootComponent);
+
 	VoxelGrid = CreateDefaultSubobject<UVoxelGrid>(TEXT("VoxelGrid"));
 }
 
@@ -70,21 +73,50 @@ void ADigSite::UnDig(const FVector& Location, float DigRadius)
 
 void ADigSite::UpdateMesh(bool bAsync)
 {
-	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
-	const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
-	int32 VerticesCount;
-	int32 TriangleCount;
-	auto UpdateMeshComponentFn = [this, bAsync]
+	if (bUseNightShiftMesh)
 	{
-		DynamicMeshComponent->bUseAsyncCooking = bAsync;
-		DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
-		DynamicMeshComponent->UpdateCollision(true);
-	};
-	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
+		const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
+
+		TArray<FVector> Vertices;
+		TArray<UE::Geometry::FIndex3i> Triangles;
+		TArray<NS::SurfaceNets::FMaterialWeights> MaterialWeights;
+
+		NS::SurfaceNets::Debug::FDebugContext* DebugContext = VoxelGrid->GridVisualizer->SurfaceNetsDebugContext.Get();
+		NS::SurfaceNets::TriangulateVoxelGrid(Grid, Vertices, Triangles, MaterialWeights, DebugContext);
+
+		NightShiftDynamicMeshComponent->Vertices = MoveTemp(Vertices);
+		NightShiftDynamicMeshComponent->Triangles = MoveTemp(Triangles);
+		NightShiftDynamicMeshComponent->Colors.Reset();
+		for (const NS::SurfaceNets::FMaterialWeights& Weights : MaterialWeights)
+		{
+			FLinearColor Color;
+			Color.R = Weights.Weights[0];
+			Color.G = Weights.Weights[1];
+			Color.B = Weights.Weights[2];
+			Color.A = Weights.Weights[7];
+			NightShiftDynamicMeshComponent->Colors.Add(Color.ToFColorSRGB());
+		}
+
+		NightShiftDynamicMeshComponent->MarkRenderStateDirty();
+	}
+	else
+	{
+		UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
+		const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
+		int32 VerticesCount;
+		int32 TriangleCount;
+		auto UpdateMeshComponentFn = [this, bAsync]
+		{
+			DynamicMeshComponent->bUseAsyncCooking = bAsync;
+			DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
+			DynamicMeshComponent->UpdateCollision(true);
+		};
+		UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
 #if WITH_EDITORONLY_DATA
-		, VoxelGrid->GridVisualizer->SurfaceNetsDebugContext
+			, VoxelGrid->GridVisualizer->SurfaceNetsDebugContext
 #endif
-	);
+		);
+	}
 }
 
 void ADigSite::GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks) const
@@ -110,6 +142,9 @@ void ADigSite::BeginPlay()
 	InitializeVoxelGrid();
 
 	DynamicMeshComponent->SetWorldTransform(FTransform{});
+	NightShiftDynamicMeshComponent->SetWorldTransform(FTransform{});
+	NightShiftDynamicMeshComponent->SetMaterial(0, MeshMaterial);
+
 	UpdateMesh(false);
 
 	TArray<UMaterialInterface*> MaterialSet;
