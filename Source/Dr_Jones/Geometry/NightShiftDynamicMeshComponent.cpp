@@ -5,6 +5,7 @@
 #include "DynamicMeshBuilder.h"
 #include "MaterialDomain.h"
 #include "Materials/MaterialRenderProxy.h"
+#include "PhysicsEngine/BodySetup.h"
 
 class FNightShiftDynamicMeshSceneProxy final : public FPrimitiveSceneProxy
 {
@@ -87,7 +88,7 @@ public:
 
 	virtual void GetDynamicMeshElements(const TArray<const FSceneView*>& Views, const FSceneViewFamily& ViewFamily, uint32 VisibilityMap, FMeshElementCollector& Collector) const override
 	{
-		QUICK_SCOPE_CYCLE_COUNTER( STAT_CustomMeshSceneProxy_GetDynamicMeshElements );
+		QUICK_SCOPE_CYCLE_COUNTER(STAT_NightShiftDynamicMeshSceneProxy_GetDynamicMeshElements);
 
 		const bool bWireframe = AllowDebugViewmodes() && ViewFamily.EngineShowFlags.Wireframe;
 		FMaterialRenderProxy* MaterialProxy;
@@ -163,12 +164,10 @@ public:
 	SIZE_T GetAllocatedSize() const { return FPrimitiveSceneProxy::GetAllocatedSize(); }
 
 private:
-
 	UMaterialInterface* Material;
 	FStaticMeshVertexBuffers VertexBuffers;
 	FDynamicMeshIndexBuffer32 IndexBuffer;
 	FLocalVertexFactory VertexFactory;
-
 	FMaterialRelevance MaterialRelevance;
 };
 
@@ -194,4 +193,72 @@ FBoxSphereBounds UNightShiftDynamicMeshComponent::CalcBounds(const FTransform& L
 		BoundingBox += LocalToWorld.TransformPosition(Vertex);
 	}
 	return FBoxSphereBounds(BoundingBox);
+}
+
+bool UNightShiftDynamicMeshComponent::ContainsPhysicsTriMeshData(bool InUseAllTriData) const
+{
+	return !Triangles.IsEmpty();
+}
+
+bool UNightShiftDynamicMeshComponent::GetPhysicsTriMeshData(FTriMeshCollisionData* CollisionData, bool InUseAllTriData)
+{
+	static_assert(sizeof(int) == sizeof(int32));
+	check(CollisionData);
+	if (Triangles.IsEmpty())
+	{
+		return false;
+	}
+
+	for (const FVector& Vertex : Vertices)
+	{
+		CollisionData->Vertices.Add(FVector3f(Vertex));
+	}
+
+	for (const UE::Geometry::FIndex3i& Triangle : Triangles)
+	{
+		CollisionData->Indices.Add(*reinterpret_cast<const FTriIndices*>(&Triangle));
+	}
+
+	CollisionData->bFlipNormals = true;
+	CollisionData->bDeformableMesh = true;
+	CollisionData->bFastCook = true;
+
+	return true;
+}
+
+UBodySetup* UNightShiftDynamicMeshComponent::CreateBodySetupHelper()
+{
+	UBodySetup* NewBodySetup;
+	{
+		FGCScopeGuard Scope;
+		// Both UDynamicMeshComponent and UProceduralMeshComponent do this flag stuff, so we might do it as well to prevent any random errors in the future.
+		NewBodySetup = NewObject<UBodySetup>(this, NAME_None, (IsTemplate() ? RF_Public | RF_ArchetypeObject : RF_NoFlags));
+	}
+	NewBodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;
+	NewBodySetup->bGenerateMirroredCollision = false;
+	NewBodySetup->DefaultInstance.SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+	// TODO: Support physical material masks
+	NewBodySetup->bSupportUVsAndFaceRemap = false;
+	return NewBodySetup;
+}
+
+void UNightShiftDynamicMeshComponent::UpdateCollision()
+{
+	SCOPED_NAMED_EVENT(NightShiftDynamicMeshComponent_UpdateCollision, FColorList::GreenYellow);
+
+	UBodySetup* NewBodySetup = GetBodySetup();
+	NewBodySetup->BodySetupGuid = FGuid::NewGuid();
+	NewBodySetup->bHasCookedCollisionData = true;
+	NewBodySetup->InvalidatePhysicsData();
+	NewBodySetup->CreatePhysicsMeshes();
+	RecreatePhysicsState();
+}
+
+UBodySetup* UNightShiftDynamicMeshComponent::GetBodySetup()
+{
+	if (!BodySetup)
+	{
+		BodySetup = CreateBodySetupHelper();
+	}
+	return BodySetup;
 }

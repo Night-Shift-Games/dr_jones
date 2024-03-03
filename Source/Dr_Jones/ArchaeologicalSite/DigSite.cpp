@@ -98,6 +98,7 @@ void ADigSite::UpdateMesh(bool bAsync)
 		}
 
 		NightShiftDynamicMeshComponent->MarkRenderStateDirty();
+		NightShiftDynamicMeshComponent->UpdateCollision();
 	}
 	else
 	{
