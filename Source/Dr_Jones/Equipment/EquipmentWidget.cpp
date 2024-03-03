@@ -2,6 +2,8 @@
 
 #include "EquipmentWidget.h"
 
+#include "EquipmentComponent.h"
+
 bool UEquipmentWidget::Initialize()
 {
 	if (!UpdaterClass)
@@ -18,9 +20,37 @@ void UEquipmentWidget::UpdateData()
 	{
 		Letters.Reset();
 		Tools.Reset();
+		QuickSlotsItems.Reset();
 		Algo::Copy(*CastedUpdater->Letters.GetValue(), Letters);
 		Algo::Copy(*CastedUpdater->Tools.GetValue(), Tools);
+		Algo::Copy(*CastedUpdater->QuickSlotsItems.GetValue(), QuickSlotsItems);
 	}
 	
 	Super::UpdateData();
+}
+
+void UEquipmentWidget::AddItemToSlot(AItem* Item)
+{
+	if (!OwningEquipment)
+	{
+		return;
+	}
+	if (!Item)
+	{
+		return;
+	}
+	OwningEquipment->AddToQuickSlot(*Item);
+}
+
+void UEquipmentWidget::RemoveItemFromQuickSlot(AItem* Item)
+{
+	if (!OwningEquipment)
+	{
+		return;
+	}
+	if (!Item)
+	{
+		return;
+	}
+	OwningEquipment->RemoveFromQuickSlot(*Item);
 }

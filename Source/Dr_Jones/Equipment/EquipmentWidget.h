@@ -20,6 +20,12 @@ class DR_JONES_API UEquipmentWidget : public UDrJonesWidgetBase
 public:
 	virtual bool Initialize() override;
 	virtual void UpdateData() override;
+
+	UFUNCTION(BlueprintCallable)
+	void AddItemToSlot(AItem* Item);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveItemFromQuickSlot(AItem* Item);
 	
 public:
 	UPROPERTY(BlueprintReadOnly)

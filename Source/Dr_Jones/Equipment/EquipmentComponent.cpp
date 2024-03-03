@@ -157,10 +157,28 @@ void UEquipmentComponent::CallSecondaryItemAction()
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
 }
 
+void UEquipmentComponent::AddToQuickSlot(AItem& ItemToAdd)
+{
+	if (QuickSlotItems.Find(&ItemToAdd))
+	{
+		return;
+	}
+	QuickSlotItems.Add(&ItemToAdd);
+}
+
+void UEquipmentComponent::RemoveFromQuickSlot(AItem& ItemToRemove)
+{
+	if (!QuickSlotItems.Find(&ItemToRemove))
+	{
+		return;
+	}
+	QuickSlotItems.Remove(&ItemToRemove);
+}
+
 void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
 {
 	const float Value = InputActionValue.Get<float>();
-	if (Value == 0 || Tools.IsEmpty())
+	if (Value == 0 || QuickSlotItems.IsEmpty())
 	{
 		return;
 	}
@@ -169,8 +187,8 @@ void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionV
 		return;
 	}
 	int32 ActiveItemID;
-	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
-	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
+	QuickSlotItems.Find(ItemInHand, ActiveItemID);
+	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? QuickSlotItems[Utilities::WrapIndexToArray(ActiveItemID + Value, QuickSlotItems)] : QuickSlotItems[0])
 	{
 		EquipItem(ActiveItem);
 	}
@@ -208,7 +226,8 @@ void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
 	{
 		return;
 	}
-	
+
+	RemoveFromQuickSlot(ItemToDetach);
 	if (ATool* ToolToDetach = Cast<ATool>(&ItemToDetach))
 	{
 		Tools.Remove(ToolToDetach);
@@ -239,6 +258,7 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	{
 		DataObject->Letters = &QuestItems;
 		DataObject->Tools = &Tools;
+		DataObject->QuickSlotsItems = &QuickSlotItems;
 	}
 	UWidgetManager::UpdateWidget(*this, InventoryMenu);
 }
