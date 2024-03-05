@@ -28,6 +28,11 @@ void UEquipmentComponent::BeginPlay()
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
 	}
+	if (UEquipmentWidgetDataObject* Updater = UWidgetManager::GetWidgetUpdater<UEquipmentWidgetDataObject>(*this, InventoryMenu))
+	{
+		Updater->UpdatingEquipment = this;
+		UWidgetManager::UpdateWidget(*this, InventoryMenu);
+	}
 }
 
 void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
@@ -157,13 +162,13 @@ void UEquipmentComponent::CallSecondaryItemAction()
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
 }
 
-void UEquipmentComponent::AddToQuickSlot(AItem& ItemToAdd)
+void UEquipmentComponent::AddToQuickSlot(AItem& ItemToAdd, int Index)
 {
 	if (QuickSlotItems.Find(&ItemToAdd))
 	{
 		return;
 	}
-	QuickSlotItems.Add(&ItemToAdd);
+	QuickSlotItems.Insert(&ItemToAdd, Index);
 }
 
 void UEquipmentComponent::RemoveFromQuickSlot(AItem& ItemToRemove)

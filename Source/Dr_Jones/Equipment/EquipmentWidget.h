@@ -22,16 +22,16 @@ public:
 	virtual void UpdateData() override;
 
 	UFUNCTION(BlueprintCallable)
-	void AddItemToSlot(AItem* Item);
+	void AddItemToSlot(AItem* Item, int Index);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveItemFromQuickSlot(AItem* Item);
 	
-public:
-	UPROPERTY(BlueprintReadOnly)
+protected:
+	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<ATool>> Tools;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<ALetter>> Letters;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -47,6 +47,7 @@ class UEquipmentWidgetDataObject : public UWidgetDataObject
 	GENERATED_BODY()
 	
 public:
+	TOptional<TWeakObjectPtr<UEquipmentComponent>> UpdatingEquipment;
 	TOptional<TArray<TObjectPtr<ATool>>*> Tools;
 	TOptional<TArray<TObjectPtr<ALetter>>*> Letters;
 	TOptional<TArray<TObjectPtr<AItem>>*> QuickSlotsItems;

@@ -57,7 +57,7 @@ public:
 	void CallPrimaryItemAction();
 	void CallSecondaryItemAction();
 	
-	void AddToQuickSlot(AItem& ItemToAdd);
+	void AddToQuickSlot(AItem& ItemToAdd, int Index);
 	void RemoveFromQuickSlot(AItem& ItemToRemove);
 
 	void ChangeActiveItem(const FInputActionValue& InputActionValue);

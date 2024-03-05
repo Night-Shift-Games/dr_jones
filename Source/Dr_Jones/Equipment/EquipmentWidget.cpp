@@ -16,20 +16,35 @@ bool UEquipmentWidget::Initialize()
 
 void UEquipmentWidget::UpdateData()
 {
-	if (UEquipmentWidgetDataObject* CastedUpdater = Cast<UEquipmentWidgetDataObject>(Updater))
+	UEquipmentWidgetDataObject* CastedUpdater = Cast<UEquipmentWidgetDataObject>(Updater);
+	if (!CastedUpdater)
+	{
+		Super::UpdateData();
+		return;
+	}
+	if (CastedUpdater->UpdatingEquipment.IsSet())
+	{
+		OwningEquipment = CastedUpdater->UpdatingEquipment.GetValue().Get();
+	}
+	if (CastedUpdater->Letters.IsSet())
 	{
 		Letters.Reset();
-		Tools.Reset();
-		QuickSlotsItems.Reset();
 		Algo::Copy(*CastedUpdater->Letters.GetValue(), Letters);
+	}
+	if (CastedUpdater->Tools.IsSet())
+	{
+		Tools.Reset();
 		Algo::Copy(*CastedUpdater->Tools.GetValue(), Tools);
+	}
+	if (CastedUpdater->QuickSlotsItems.IsSet())
+	{
+		QuickSlotsItems.Reset();
 		Algo::Copy(*CastedUpdater->QuickSlotsItems.GetValue(), QuickSlotsItems);
 	}
-	
 	Super::UpdateData();
 }
 
-void UEquipmentWidget::AddItemToSlot(AItem* Item)
+void UEquipmentWidget::AddItemToSlot(AItem* Item, int Index)
 {
 	if (!OwningEquipment)
 	{
@@ -39,7 +54,7 @@ void UEquipmentWidget::AddItemToSlot(AItem* Item)
 	{
 		return;
 	}
-	OwningEquipment->AddToQuickSlot(*Item);
+	OwningEquipment->AddToQuickSlot(*Item, Index);
 }
 
 void UEquipmentWidget::RemoveItemFromQuickSlot(AItem* Item)
