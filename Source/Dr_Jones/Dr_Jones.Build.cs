@@ -17,6 +17,7 @@ public class Dr_Jones : ModuleRules
 			"InputCore", 
 			"ProceduralMeshComponent", 
 			"UMG", 
+			"RenderCore",
 			"RHI",
 			"Slate", 
 			"SlateCore",
