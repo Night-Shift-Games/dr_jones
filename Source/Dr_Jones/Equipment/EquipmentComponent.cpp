@@ -28,11 +28,11 @@ void UEquipmentComponent::BeginPlay()
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
 	}
-	if (UEquipmentWidgetDataObject* Updater = UWidgetManager::GetWidgetUpdater<UEquipmentWidgetDataObject>(*this, InventoryMenu))
+	
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
 	{
-		Updater->UpdatingEquipment = this;
-		UWidgetManager::UpdateWidget(*this, InventoryMenu);
-	}
+		DataObject.UpdatingEquipment = this;
+	});
 }
 
 void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
@@ -259,11 +259,10 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	
 	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
-	if (UEquipmentWidgetDataObject* DataObject = UWidgetManager::GetWidgetUpdater<UEquipmentWidgetDataObject>(*this, InventoryMenu))
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
 	{
-		DataObject->Letters = &QuestItems;
-		DataObject->Tools = &Tools;
-		DataObject->QuickSlotsItems = &QuickSlotItems;
-	}
-	UWidgetManager::UpdateWidget(*this, InventoryMenu);
+		DataObject.Letters = &QuestItems;
+		DataObject.Tools = &Tools;
+		DataObject.QuickSlotsItems = &QuickSlotItems;
+	});
 }
