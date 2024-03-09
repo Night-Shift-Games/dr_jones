@@ -14,43 +14,68 @@ UWidgetRendererComponent::UWidgetRendererComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
+UWidgetRendererComponent::UWidgetRendererComponent(FVTableHelper& Helper)
+	: Super(Helper)
+{
+}
+
+UWidgetRendererComponent::~UWidgetRendererComponent()
+{
+}
+
 void UWidgetRendererComponent::OnRegister()
 {
-	if (!IsRegistered())
-	{
-		if (!WidgetRenderer)
-		{
-			WidgetRenderer = new FWidgetRenderer;
-		}
-		if (!RenderTarget)
-		{
-			RenderTarget = FWidgetRenderer::CreateTargetFor(DrawSize, TF_Default, false);
-		}
-	}
-	CreateAndRenderWidget();
 	Super::OnRegister();
+
+	if (!WidgetRenderer)
+	{
+		WidgetRenderer = new FWidgetRenderer;
+	}
+	if (!RenderTarget)
+	{
+		RenderTarget = FWidgetRenderer::CreateTargetFor(DrawSize, TF_Default, false);
+	}
+
+	CreateInternalWidget();
+	RenderInternalWidget();
 }
 
 void UWidgetRendererComponent::OnUnregister()
 {
 	Super::OnUnregister();
+
 	ReleaseResources();
 }
 
 void UWidgetRendererComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
 	SetComponentTickEnabled(bRenderOnTick);
-	CreateAndRenderWidget();
+
+	CreateInternalWidget();
+	RenderInternalWidget();
 }
 
 void UWidgetRendererComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (bRenderOnTick && UMGWidget)
+
+	if (bRenderOnTick)
 	{
-		RenderWidget(UMGWidget);
+		RenderInternalWidget();
 	}
+}
+
+void UWidgetRendererComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	const FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
+	if (MemberPropertyName == GET_MEMBER_NAME_CHECKED(UWidgetRendererComponent, DrawSize))
+	{
+		RenderInternalWidget();
+	}
+
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 void UWidgetRendererComponent::RenderWidget(UWidget* Widget)
@@ -60,7 +85,7 @@ void UWidgetRendererComponent::RenderWidget(UWidget* Widget)
 		return;
 	}
 
-	if (!Widget || !RenderTarget || !WidgetRenderer)
+	if (!Widget || !WidgetRenderer)
 	{
 		return;
 	}
@@ -70,10 +95,69 @@ void UWidgetRendererComponent::RenderWidget(UWidget* Widget)
 		return;
 	}
 
-	// TODO: Make a SVirtualWindow from this because the DrawWidget below will do that every time
+	if (!VirtualWindow)
+	{
+		VirtualWindow = SNew(SVirtualWindow);
+	}
+
+	if (!RenderTarget)
+	{
+		RenderTarget = FWidgetRenderer::CreateTargetFor(DrawSize, TF_Default, false);
+	}
+	if (RenderTarget->SizeX != DrawSize.X || RenderTarget->SizeY != DrawSize.Y)
+	{
+		DrawSize.X = FMath::Max(DrawSize.X, 1);
+		DrawSize.Y = FMath::Max(DrawSize.Y, 1);
+		RenderTarget->ResizeTarget(DrawSize.X, DrawSize.Y);
+	}
+	check(IsValid(RenderTarget));
+
 	const TSharedRef<SWidget> SlateWidget = Widget->TakeWidget();
+	const TSharedPtr<SWidget> ParentWidget = SlateWidget->GetParentWidget();
+
+	VirtualWindow->SetContent(SlateWidget);
+	VirtualWindow->Resize(TargetSize * PPU);
+
+	const FScale2D Scale(DrawSize / (TargetSize * PPU));
+	const FGeometry WindowGeometryRoot = FGeometry::MakeRoot(TargetSize * PPU, FSlateLayoutTransform());
+	const FGeometry WindowGeometry = WindowGeometryRoot.MakeChild(TargetSize * PPU, FSlateLayoutTransform(), FSlateRenderTransform(Scale), FVector2D());
 	// TODO: For some reason bDeferRenderTargetUpdate=true kills unreal
-	WidgetRenderer->DrawWidget(RenderTarget, SlateWidget, DrawSize, FApp::GetDeltaTime(), false);
+	WidgetRenderer->DrawWindow(RenderTarget->GameThread_GetRenderTargetResource(),
+		VirtualWindow->GetHittestGrid(),
+		VirtualWindow.ToSharedRef(),
+		WindowGeometry,
+		WindowGeometry.GetRenderBoundingRect(),
+		FApp::GetDeltaTime(),
+		false);
+
+	if (Widget != InternalWidget)
+	{
+		SlateWidget->AssignParentWidget(ParentWidget);
+		VirtualWindow->SetContent(InternalSlateWidget.IsValid() ? InternalSlateWidget.ToSharedRef() : SNullWidget::NullWidget);
+	}
+}
+
+void UWidgetRendererComponent::RenderInternalWidget()
+{
+	if (InternalWidget)
+	{
+		RenderWidget(InternalWidget);
+	}
+}
+
+void UWidgetRendererComponent::SetInternalWidget(TSubclassOf<UUserWidget> WidgetClass)
+{
+	InternalWidgetClass = WidgetClass;
+	CreateInternalWidget();
+	if (VirtualWindow && InternalSlateWidget.IsValid())
+	{
+		VirtualWindow->SetContent(InternalSlateWidget.ToSharedRef());
+	}
+}
+
+UUserWidget* UWidgetRendererComponent::GetInternalWidget() const
+{
+	return InternalWidget;
 }
 
 void UWidgetRendererComponent::ReleaseResources()
@@ -85,9 +169,16 @@ void UWidgetRendererComponent::ReleaseResources()
 	}
 }
 
-void UWidgetRendererComponent::CreateAndRenderWidget()
+void UWidgetRendererComponent::CreateInternalWidget()
 {
-	if (!UMGWidgetClass)
+	if (InternalWidget)
+	{
+		InternalWidget->RemoveFromParent();
+		InternalWidget = nullptr;
+		InternalSlateWidget = nullptr;
+	}
+
+	if (!InternalWidgetClass)
 	{
 		return;
 	}
@@ -98,11 +189,6 @@ void UWidgetRendererComponent::CreateAndRenderWidget()
 		return;
 	}
 
-	UMGWidget = CreateWidget(World, UMGWidgetClass);
-	if (!UMGWidget)
-	{
-		return;
-	}
-
-	RenderWidget(UMGWidget);
+	InternalWidget = CreateWidget(World, InternalWidgetClass);
+	InternalSlateWidget = InternalWidget->TakeWidget();
 }
