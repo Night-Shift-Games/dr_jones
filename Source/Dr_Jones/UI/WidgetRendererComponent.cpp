@@ -14,15 +14,6 @@ UWidgetRendererComponent::UWidgetRendererComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-UWidgetRendererComponent::UWidgetRendererComponent(FVTableHelper& Helper)
-	: Super(Helper)
-{
-}
-
-UWidgetRendererComponent::~UWidgetRendererComponent()
-{
-}
-
 void UWidgetRendererComponent::OnRegister()
 {
 	Super::OnRegister();
@@ -116,11 +107,11 @@ void UWidgetRendererComponent::RenderWidget(UWidget* Widget)
 	const TSharedPtr<SWidget> ParentWidget = SlateWidget->GetParentWidget();
 
 	VirtualWindow->SetContent(SlateWidget);
-	VirtualWindow->Resize(TargetSize * PPU);
+	VirtualWindow->Resize(WindowSize);
 
-	const FScale2D Scale(DrawSize / (TargetSize * PPU));
-	const FGeometry WindowGeometryRoot = FGeometry::MakeRoot(TargetSize * PPU, FSlateLayoutTransform());
-	const FGeometry WindowGeometry = WindowGeometryRoot.MakeChild(TargetSize * PPU, FSlateLayoutTransform(), FSlateRenderTransform(Scale), FVector2D());
+	const FScale2D Scale(DrawSize / WindowSize);
+	const FGeometry WindowGeometryRoot = FGeometry::MakeRoot(WindowSize, FSlateLayoutTransform());
+	const FGeometry WindowGeometry = WindowGeometryRoot.MakeChild(WindowSize, FSlateLayoutTransform(), FSlateRenderTransform(Scale), FVector2D());
 	// TODO: For some reason bDeferRenderTargetUpdate=true kills unreal
 	WidgetRenderer->DrawWindow(RenderTarget->GameThread_GetRenderTargetResource(),
 		VirtualWindow->GetHittestGrid(),
@@ -173,7 +164,13 @@ void UWidgetRendererComponent::CreateInternalWidget()
 {
 	if (InternalWidget)
 	{
-		InternalWidget->RemoveFromParent();
+		check(InternalSlateWidget);
+		InternalSlateWidget->AssignParentWidget(nullptr);
+		if (VirtualWindow.IsValid())
+		{
+			VirtualWindow->SetContent(SNullWidget::NullWidget);
+		}
+
 		InternalWidget = nullptr;
 		InternalSlateWidget = nullptr;
 	}

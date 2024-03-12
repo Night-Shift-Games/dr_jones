@@ -19,8 +19,6 @@ class DR_JONES_API UWidgetRendererComponent : public UActorComponent
 
 public:
 	UWidgetRendererComponent();
-	UWidgetRendererComponent(FVTableHelper& Helper);
-	virtual ~UWidgetRendererComponent() override;
 
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
@@ -50,17 +48,14 @@ protected:
 
 public:
 	// Render target size
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D DrawSize = FVector2D(2048, 1024);
 
-	// Size of the surface rect the widget will be drawn on
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ForceUnits = Centimeters))
-	FVector2D TargetSize = FVector2D(100, 50);
-
-	// Pixels Per (Unreal) Unit - the actual desired resolution of the widget before rendering = TargetSize * PPU
-	// Default: 20.48 - 2048 pixels per 1m
+	// Size of the window the widget will be drawn in
+	// This can be calculated using a target surface size * PPU
+	// PPU: Pixels Per (Unreal) Unit - the actual desired resolution of the widget before rendering
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D PPU = FVector2D(20.48f);
+	FVector2D WindowSize = FVector2D(800, 600);
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> InternalWidgetClass;
