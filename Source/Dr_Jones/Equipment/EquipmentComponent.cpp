@@ -67,7 +67,10 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 
 void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
 {
-	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	TArray<AItem*> Items;
+	Algo::Copy(Tools, Items);
+	Algo::Copy(QuestItems, Items);
+	const auto FoundItem = Items.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
 	if (!FoundItem)
 	{
 		return;
