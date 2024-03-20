@@ -27,6 +27,10 @@ void UEquipmentComponent::BeginPlay()
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
+		if (Tools.Num() < 3)
+		{
+			AddToQuickSlot(NewTool->GetClass(), Tools.Num() - 1);
+		}
 	}
 	
 	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
@@ -165,18 +169,44 @@ void UEquipmentComponent::CallSecondaryItemAction()
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
 }
 
-void UEquipmentComponent::AddToQuickSlot(AItem& ItemToAdd, int Index)
+void UEquipmentComponent::AddToQuickSlot(TSubclassOf<AItem> ItemClass, int Index)
 {
-	if (QuickSlotItems.Find(&ItemToAdd))
+	if (AItem* ItemToRemove = QuickSlotItems.IsValidIndex(Index) ? QuickSlotItems[Index] : nullptr)
+	{
+		RemoveFromQuickSlot(*ItemToRemove);
+		if (ItemToRemove->GetClass() == ItemClass)
+		{
+			return;
+		}
+	}
+	TArray<AItem*> Items;
+	Algo::Copy(Tools, Items);
+	Algo::Copy(QuestItems, Items);
+	const auto FoundItem = Items.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	if (!FoundItem)
 	{
 		return;
 	}
-	QuickSlotItems.Insert(&ItemToAdd, Index);
+	QuickSlotItems.Reserve(3);
+	if (QuickSlotItems.IsValidIndex(Index))
+	{
+		QuickSlotItems.Insert(*FoundItem, Index);
+	}
+	else
+	{
+		QuickSlotItems.Add(*FoundItem);
+	}
+
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& Data)
+	{
+		Data.QuickSlotsItems = &QuickSlotItems;
+	});
 }
 
 void UEquipmentComponent::RemoveFromQuickSlot(AItem& ItemToRemove)
 {
-	if (!QuickSlotItems.Find(&ItemToRemove))
+	int OutId;
+	if (!QuickSlotItems.Find(&ItemToRemove, OutId))
 	{
 		return;
 	}
@@ -190,7 +220,7 @@ void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionV
 	{
 		return;
 	}
-	if (ItemInHand && !ItemInHand->IsA<ATool>())
+	if (ItemInHand && ItemInHand->IsA<AArtifact>())
 	{
 		return;
 	}
@@ -267,5 +297,6 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 		DataObject.Letters = &QuestItems;
 		DataObject.Tools = &Tools;
 		DataObject.QuickSlotsItems = &QuickSlotItems;
+		DataObject.UpdatingEquipment = this;
 	});
 }

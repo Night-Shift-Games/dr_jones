@@ -44,28 +44,11 @@ void UEquipmentWidget::UpdateData()
 	Super::UpdateData();
 }
 
-void UEquipmentWidget::AddItemToSlot(AItem* Item, int Index)
+void UEquipmentWidget::AddItemToSlot(const TSubclassOf<AItem> Item, int Index)
 {
 	if (!OwningEquipment)
 	{
 		return;
 	}
-	if (!Item)
-	{
-		return;
-	}
-	OwningEquipment->AddToQuickSlot(*Item, Index);
-}
-
-void UEquipmentWidget::RemoveItemFromQuickSlot(AItem* Item)
-{
-	if (!OwningEquipment)
-	{
-		return;
-	}
-	if (!Item)
-	{
-		return;
-	}
-	OwningEquipment->RemoveFromQuickSlot(*Item);
+	OwningEquipment->AddToQuickSlot(Item, Index);
 }

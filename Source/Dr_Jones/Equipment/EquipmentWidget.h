@@ -22,10 +22,7 @@ public:
 	virtual void UpdateData() override;
 
 	UFUNCTION(BlueprintCallable)
-	void AddItemToSlot(AItem* Item, int Index);
-
-	UFUNCTION(BlueprintCallable)
-	void RemoveItemFromQuickSlot(AItem* Item);
+	void AddItemToSlot(const TSubclassOf<AItem> Item, int Index);
 	
 protected:
 	UPROPERTY(BlueprintReadWrite)
