@@ -57,6 +57,9 @@ public:
 	void CallPrimaryItemAction();
 	void CallSecondaryItemAction();
 	
+	void AddToQuickSlot(TSubclassOf<AItem> Item, int Index);
+	void RemoveFromQuickSlot(AItem& Item);
+
 	void ChangeActiveItem(const FInputActionValue& InputActionValue);
 	void AttachItemToHand(AItem& ItemToAttach);
 	void DetachItemFromHand(AItem& ItemToDetach);
@@ -104,6 +107,9 @@ private:
 
 	UPROPERTY(SaveGame)
 	TArray<TObjectPtr<ALetter>> QuestItems;
+
+	UPROPERTY(SaveGame)
+	TArray<TObjectPtr<AItem>> QuickSlotItems;
 	
 	UPROPERTY(SaveGame)
 	TObjectPtr<ADrJonesCharacter> Owner;

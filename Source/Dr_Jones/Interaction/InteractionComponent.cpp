@@ -96,13 +96,11 @@ void UInteractionComponent::UpdateInteractionUI()
 	
 	SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
 	const bool bHaveAltInteraction = SelectedInteractiveComponent->AltInteractDelegate.IsBound();
-	UInteractionWidgetDataObject* InteractionUpdater = UWidgetManager::GetWidgetUpdater<UInteractionWidgetDataObject>(*this, InteractionUI);
-	if (!InteractionUpdater)
+
+	UWidgetManager::RequestUpdateWidget<UInteractionWidgetDataObject>(*this, InteractionUI, [&](UInteractionWidgetDataObject& Data)
 	{
-		return;
-	}
-	InteractionUpdater->HasAltInteraction = bHaveAltInteraction;
-	UWidgetManager::UpdateWidget(*this, InteractionUI);
+		Data.HasAltInteraction = bHaveAltInteraction;
+	});
 }
 
 void UInteractionComponent::Interact()

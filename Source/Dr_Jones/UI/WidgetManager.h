@@ -48,6 +48,21 @@ public:
 		return FoundWidget ? FoundWidget->GetUpdater<TUpdaterClass>() : nullptr;
 	}
 	
+	template<typename TUpdaterClass>
+	static void RequestUpdateWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass, const TFunction<void(TUpdaterClass&)>Function)
+	{
+		ON_SCOPE_EXIT
+		{
+			UpdateWidget(WorldContextObject, WidgetClass);
+		};
+		TUpdaterClass* Updater = GetWidgetUpdater<TUpdaterClass>(WorldContextObject, WidgetClass);
+		if (!Updater)
+		{
+			return;
+		}
+		Function(*Updater);
+	}
+	
 public:
 	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (DisplayName = "Widgets"))
 	TSet<TSubclassOf<UDrJonesWidgetBase>> BeginPlayWidgets;
