@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "UI/DrJonesWidgetBase.h"
 #include "UObject/Object.h"
 
@@ -20,16 +21,23 @@ public:
 	void InitializeOverviewer(UCameraComponent* Camera, AArtifact* Artifact);
 	void StartOverview();
 	void EndOverview();
-	
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyControl(const FInputActionValue& InputActionValue);
+
+	void SetupInputComponent(UInputComponent& InputComponent);
 public:
 	UPROPERTY()
 	AActor* PreviousActorOwner;
+	
 	FName PreviousAttachmentSocket;
 	FTransform ActorTransformBeforeOverview;
 
 	UPROPERTY()
 	TObjectPtr<AArtifact> ArtifactToOverview;
+	
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> CameraComponent;
+	
 	TSubclassOf<UDrJonesWidgetBase> OverviewUI;
 };

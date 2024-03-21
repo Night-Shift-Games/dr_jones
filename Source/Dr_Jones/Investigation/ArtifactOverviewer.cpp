@@ -4,6 +4,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Items/Artifacts/Artifact.h"
+#include "Utilities/Utilities.h"
 
 void UArtifactOverviewer::InitializeOverviewer(UCameraComponent* Camera, AArtifact* Artifact)
 {
@@ -33,4 +34,22 @@ void UArtifactOverviewer::EndOverview()
 	}
 	ArtifactToOverview->SetActorTransform(ActorTransformBeforeOverview);
 	ArtifactToOverview->SetInteractionEnabled(true);
+}
+
+void UArtifactOverviewer::ApplyControl(const FInputActionValue& InputActionValue)
+{
+	const FVector2D ControlRotationDelta = InputActionValue.Get<FVector2D>();
+	const FRotator DeltaRotation = FRotator(ControlRotationDelta.Y, ControlRotationDelta.X,0.0);
+	const ADrJonesCharacter* DrJonesPawn = &Utilities::GetPlayerCharacter(*this);
+	FRotator ViewRotation = DrJonesPawn->GetViewRotation();
+	ViewRotation.Add(DeltaRotation.Pitch, DeltaRotation.Yaw, DeltaRotation.Roll);
+	
+	if (ArtifactToOverview)
+	{
+		ArtifactToOverview->SetActorRotation(ViewRotation);
+	}
+}
+
+void UArtifactOverviewer::SetupInputComponent(UInputComponent& InputComponent)
+{
 }

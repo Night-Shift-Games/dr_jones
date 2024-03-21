@@ -43,7 +43,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopInspect(AArtifact* ArtifactToInspect);
 
-	UPROPERTY(Transient)
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
 	
 private:
