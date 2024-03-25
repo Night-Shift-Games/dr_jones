@@ -164,9 +164,8 @@ void UWidgetRendererComponent::CreateInternalWidget()
 {
 	if (InternalWidget)
 	{
-		check(InternalSlateWidget);
-		InternalSlateWidget->AssignParentWidget(nullptr);
-		if (VirtualWindow.IsValid())
+		ensureMsgf(InternalSlateWidget, TEXT("An internal widget is present, but the internal slate widget is not set."));
+		if (VirtualWindow)
 		{
 			VirtualWindow->SetContent(SNullWidget::NullWidget);
 		}
