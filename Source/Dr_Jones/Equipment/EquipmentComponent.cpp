@@ -3,6 +3,7 @@
 #include "EquipmentComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "EquipmentWidget.h"
 #include "Animation/CharacterAnimationComponent.h"
 #include "Items/ActionComponent.h"
 #include "Items/Artifacts/Artifact.h"
@@ -26,7 +27,16 @@ void UEquipmentComponent::BeginPlay()
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
+		if (Tools.Num() < 3)
+		{
+			AddToQuickSlot(NewTool->GetClass(), Tools.Num() - 1);
+		}
 	}
+	
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
+	{
+		DataObject.UpdatingEquipment = this;
+	});
 }
 
 void UEquipmentComponent::SetupPlayerInput(UEnhancedInputComponent* EnhancedInputComponent)
@@ -57,13 +67,14 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	
 	AttachItemToHand(*ItemToAdd);
 	EquipItem(ItemToAdd);
-
-	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 
 void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
 {
-	const auto FoundItem = Tools.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	TArray<AItem*> Items;
+	Algo::Copy(Tools, Items);
+	Algo::Copy(QuestItems, Items);
+	const auto FoundItem = Items.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
 	if (!FoundItem)
 	{
 		return;
@@ -158,20 +169,64 @@ void UEquipmentComponent::CallSecondaryItemAction()
 	ReactionComponent->CallSecondaryAction(GetOwner<ADrJonesCharacter>());
 }
 
-void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
+void UEquipmentComponent::AddToQuickSlot(TSubclassOf<AItem> ItemClass, int Index)
 {
-	const float Value = InputActionValue.Get<float>();
-	if (Value == 0 || Tools.IsEmpty())
+	if (AItem* ItemToRemove = QuickSlotItems.IsValidIndex(Index) ? QuickSlotItems[Index] : nullptr)
+	{
+		RemoveFromQuickSlot(*ItemToRemove);
+		if (ItemToRemove->GetClass() == ItemClass)
+		{
+			return;
+		}
+	}
+	TArray<AItem*> Items;
+	Algo::Copy(Tools, Items);
+	Algo::Copy(QuestItems, Items);
+	const auto FoundItem = Items.FindByPredicate([&](const AItem* ItemToCheck) { return ItemToCheck->IsA(ItemClass);});
+	if (!FoundItem)
 	{
 		return;
 	}
-	if (ItemInHand && !ItemInHand->IsA<ATool>())
+	QuickSlotItems.Reserve(3);
+	if (QuickSlotItems.IsValidIndex(Index))
+	{
+		QuickSlotItems.Insert(*FoundItem, Index);
+	}
+	else
+	{
+		QuickSlotItems.Add(*FoundItem);
+	}
+
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& Data)
+	{
+		Data.QuickSlotsItems = &QuickSlotItems;
+	});
+}
+
+void UEquipmentComponent::RemoveFromQuickSlot(AItem& ItemToRemove)
+{
+	int OutId;
+	if (!QuickSlotItems.Find(&ItemToRemove, OutId))
+	{
+		return;
+	}
+	QuickSlotItems.Remove(&ItemToRemove);
+}
+
+void UEquipmentComponent::ChangeActiveItem(const FInputActionValue& InputActionValue)
+{
+	const float Value = InputActionValue.Get<float>();
+	if (Value == 0 || QuickSlotItems.IsEmpty())
+	{
+		return;
+	}
+	if (ItemInHand && ItemInHand->IsA<AArtifact>())
 	{
 		return;
 	}
 	int32 ActiveItemID;
-	Tools.Find(Cast<ATool>(ItemInHand), ActiveItemID);
-	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? Tools[Utilities::WrapIndexToArray(ActiveItemID + Value, Tools)] : Tools[0])
+	QuickSlotItems.Find(ItemInHand, ActiveItemID);
+	if (AItem* ActiveItem = ActiveItemID != INDEX_NONE ? QuickSlotItems[Utilities::WrapIndexToArray(ActiveItemID + Value, QuickSlotItems)] : QuickSlotItems[0])
 	{
 		EquipItem(ActiveItem);
 	}
@@ -209,7 +264,8 @@ void UEquipmentComponent::DetachItemFromHand(AItem& ItemToDetach)
 	{
 		return;
 	}
-	
+
+	RemoveFromQuickSlot(ItemToDetach);
 	if (ATool* ToolToDetach = Cast<ATool>(&ItemToDetach))
 	{
 		Tools.Remove(ToolToDetach);
@@ -235,5 +291,12 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	}
 	
 	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	UWidgetManager::UpdateWidget(*this, InventoryMenu);
+
+	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
+	{
+		DataObject.Letters = &QuestItems;
+		DataObject.Tools = &Tools;
+		DataObject.QuickSlotsItems = &QuickSlotItems;
+		DataObject.UpdatingEquipment = this;
+	});
 }
