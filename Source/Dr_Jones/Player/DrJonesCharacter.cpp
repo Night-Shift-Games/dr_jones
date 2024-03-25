@@ -49,7 +49,7 @@ void ADrJonesCharacter::StartInspect(AArtifact* ArtifactToInspect)
 {
 	if (!ArtifactOverviewer)
 	{
-		ArtifactOverviewer = NewObject<UArtifactOverviewer>();
+		ArtifactOverviewer = NewObject<UArtifactOverviewer>(this);
 	}
 	ArtifactOverviewer->InitializeOverviewer(FindComponentByClass<UCameraComponent>(), ArtifactToInspect);
 	ArtifactOverviewer->StartOverview();

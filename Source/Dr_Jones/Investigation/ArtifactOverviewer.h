@@ -26,7 +26,20 @@ public:
 	void ApplyControl(const FInputActionValue& InputActionValue);
 
 	void SetupInputComponent(UInputComponent& InputComponent);
+
+	void RequestRotate(FVector& Direction);
+
+	void Rotate();
+	
 public:
+	FQuat StartingRotation = FQuat::Identity;
+	FVector TargetRotation = FVector::ZeroVector;
+
+	bool bIsRotating = false;
+
+	FTimerHandle RotationTimer;
+	FTimerHandle RotationTime;
+	
 	UPROPERTY()
 	AActor* PreviousActorOwner;
 	
