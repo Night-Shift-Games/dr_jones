@@ -31,7 +31,7 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this });
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this, GetInstigator() });
 	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
 	return GroundLocation;
 }
