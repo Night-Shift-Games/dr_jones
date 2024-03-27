@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputAction.h"
 #include "InputActionValue.h"
+#include "InputMappingContext.h"
 #include "UI/DrJonesWidgetBase.h"
 #include "UObject/Object.h"
 
@@ -18,39 +20,42 @@ class DR_JONES_API UArtifactOverviewer : public UObject
 	GENERATED_BODY()
 
 public:
-	void InitializeOverviewer(UCameraComponent* Camera, AArtifact* Artifact);
+	void InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact);
 	void StartOverview();
+
+	UFUNCTION(BlueprintCallable)
 	void EndOverview();
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyControl(const FInputActionValue& InputActionValue);
-
-	void SetupInputComponent(UInputComponent& InputComponent);
-
 	void RequestRotate(FVector& Direction);
-
-	void Rotate();
+	
+protected:
+	void SetMappingContext(UInputMappingContext& InOverviewMappingContext);
+	void FetchPreOverviewActorProperties();
+	void SetActorOverviewProperties();
+	void AddOverviewMappingContext();
+	void RemoveOverviewMappingContext();
+	void SetOverviewFixedAxis();
+	void RestoreActorToPreOverviewState();
 	
 public:
-	FQuat StartingRotation = FQuat::Identity;
-	FVector TargetRotation = FVector::ZeroVector;
-
-	bool bIsRotating = false;
-
-	FTimerHandle RotationTimer;
-	FTimerHandle RotationTime;
-	
-	UPROPERTY()
-	AActor* PreviousActorOwner;
-	
+	FTransform OverviewFixedTransform = FTransform::Identity;
 	FName PreviousAttachmentSocket;
 	FTransform ActorTransformBeforeOverview;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<AActor> PreviousActorOwner;
 
-	UPROPERTY()
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<AArtifact> ArtifactToOverview;
 	
-	UPROPERTY()
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UCameraComponent> CameraComponent;
-	
-	TSubclassOf<UDrJonesWidgetBase> OverviewUI;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UInputMappingContext> OverviewMappingContext;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<ADrJonesCharacter> Viewer;
 };

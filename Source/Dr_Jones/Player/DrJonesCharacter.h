@@ -43,9 +43,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopInspect(AArtifact* ArtifactToInspect);
 
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
-	
 private:
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
@@ -80,4 +77,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
+
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UInputMappingContext> OverviewMappingContext;
 };
