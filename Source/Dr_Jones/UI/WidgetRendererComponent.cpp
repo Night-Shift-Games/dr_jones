@@ -153,6 +153,20 @@ UUserWidget* UWidgetRendererComponent::GetInternalWidget() const
 
 void UWidgetRendererComponent::ReleaseResources()
 {
+	if (InternalWidget)
+	{
+		InternalWidget->RemoveFromParent();
+		InternalWidget = nullptr;
+	}
+	if (InternalSlateWidget)
+	{
+		InternalSlateWidget.Reset();
+	}
+	if (VirtualWindow)
+	{
+		VirtualWindow->SetContent(SNullWidget::NullWidget);
+		VirtualWindow.Reset();
+	}
 	if (WidgetRenderer)
 	{
 		BeginCleanup(WidgetRenderer);
