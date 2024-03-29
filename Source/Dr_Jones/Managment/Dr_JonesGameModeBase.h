@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Items/Artifacts/ArtifactDatabase.h"
 
 #include "Dr_JonesGameModeBase.generated.h"
 
@@ -25,18 +26,21 @@ public:
 	virtual void InitGameState() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	UQuestSystemLogic* GetQuestSystem() const;
+	UQuestSystemLogic* GetQuestSystem() const { return QuestSystem; }
 	
 	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
 	UFUNCTION(BlueprintCallable, Category = "Quest System")
 	void ExecutePostQuestSystemLoad(UPARAM(DisplayName="Event") const FQuestSystemInitializedDynamicDelegate& Delegate);
 
 	UFUNCTION(BlueprintPure)
-	UWorldData* GetGlobalWorldData() const;
+	UWorldData* GetGlobalWorldData() const { return GlobalWorldData; }
 
 	UFUNCTION(BlueprintPure)
-	AIlluminati* GetIlluminati() const;
+	AIlluminati* GetIlluminati() const { return Illuminati; }
 
+	UFUNCTION(BlueprintPure)
+	UArtifactDatabase* GetArtifactDataBase() const { return ArtifactDatabase; }
+	
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UWorldData> GlobalWorldData;
@@ -48,6 +52,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AIlluminati> IlluminatiClass;
 
+	// NOTE: Temp solution to get rid of BP based artifacts. In long term we need find better place for it. Settings?
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UArtifactDatabase> ArtifactDatabase;
+	
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
 
@@ -55,18 +63,3 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UQuestSystemLogic> QuestSystem;
 };
-
-FORCEINLINE UQuestSystemLogic* ADr_JonesGameModeBase::GetQuestSystem() const
-{
-	return QuestSystem;
-}
-
-FORCEINLINE UWorldData* ADr_JonesGameModeBase::GetGlobalWorldData() const
-{
-	return GlobalWorldData;
-}
-
-FORCEINLINE AIlluminati* ADr_JonesGameModeBase::GetIlluminati() const
-{
-	return Illuminati;
-}

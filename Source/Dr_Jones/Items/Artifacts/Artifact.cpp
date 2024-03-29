@@ -4,6 +4,7 @@
 
 #include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
+#include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestMessages.h"
 #include "Utilities/Utilities.h"
 #include "World/Illuminati.h"
@@ -79,7 +80,12 @@ void AArtifact::PickUp(ADrJonesCharacter* Taker)
 
 void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 {
-	ArtifactStaticMesh = ArtifactData.ArtifactMesh;
+	ArtifactID = ArtifactData.ArtifactID;
+	ArtifactStaticMesh = !ArtifactData.ArtifactMesh.IsEmpty() ? ArtifactData.ArtifactMesh[FMath::RandRange(0, ArtifactData.ArtifactMesh.Num() - 1)].LoadSynchronous() : nullptr;
+	if (ArtifactStaticMesh)
+	{
+		Cast<UStaticMeshComponent>(ArtifactMeshComponent)->SetStaticMesh(ArtifactStaticMesh);
+	}
 	ArtifactName = ArtifactData.Name;
 	ArtifactDescription = ArtifactData.Description;
 	ArtifactAge = FMath::RandRange(ArtifactData.AgeMin, ArtifactData.AgeMax);
@@ -122,7 +128,7 @@ AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldC
 FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(const FName& ArtifactID)
 {
 	// Get a database.
-	UArtifactDatabase* ArtifactDatabase = nullptr;
+	UArtifactDatabase* ArtifactDatabase = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : nullptr;
 	if (!ArtifactDatabase)
 	{
 		return nullptr;
@@ -148,12 +154,15 @@ AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject
 
 AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData)
 {
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Name = MakeUniqueObjectName(WorldContextObject.GetWorld(), ArtifactData.CustomClass ? ArtifactData.CustomClass : AArtifact::StaticClass(), ArtifactData.ArtifactID, EUniqueObjectNameOptions::GloballyUnique);
+	
 	if (ArtifactData.CustomClass)
 	{
 		return ConstructArtifact(WorldContextObject, ArtifactData.CustomClass);
 	}
-
-	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>();
+	
+	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>(SpawnParameters);
 
 	if (NewArtifact)
 	{

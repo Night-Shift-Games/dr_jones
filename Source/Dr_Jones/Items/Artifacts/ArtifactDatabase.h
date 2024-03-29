@@ -42,8 +42,17 @@ struct FArtifactData
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	FName ArtifactID = NAME_None;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
-	TObjectPtr<UStaticMesh> ArtifactMesh;
+	FText Name = FText::AsCultureInvariant(TEXT("None"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data", meta = (MultiLine = true))
+	FText Description = FText::AsCultureInvariant(TEXT("None"));
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	TArray<TSoftObjectPtr<UStaticMesh>> ArtifactMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	TSubclassOf<AArtifact> CustomClass;
@@ -68,12 +77,6 @@ struct FArtifactData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	EArtifactSize Size = EArtifactSize::Normal;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
-	FText Name = FText::AsCultureInvariant(TEXT("None"));
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
-	FText Description = FText::AsCultureInvariant(TEXT("None"));
 };
 
 UCLASS(Blueprintable)
@@ -82,9 +85,23 @@ class UArtifactDatabase : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ForceInlineRow))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ForceInlineRow, TitleProperty = "Name"))
 	TMap<FName, FArtifactData> ArtifactDataEntries;
+
+#if WITH_EDITORONLY_DATA
+	virtual void Serialize(FStructuredArchive::FRecord Record) override;
+#endif
 };
+#if WITH_EDITORONLY_DATA
+inline void UArtifactDatabase::Serialize(FStructuredArchive::FRecord Record)
+{
+	for (auto & KV : ArtifactDataEntries)
+	{
+		KV.Value.ArtifactID = KV.Key;
+	}
+	Super::Serialize(Record);
+}
+#endif
 
 USTRUCT(BlueprintType)
 struct FArtifactDatabaseRow : public FTableRowBase

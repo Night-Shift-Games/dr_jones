@@ -5,6 +5,7 @@
 #include "DigSiteBorder.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Managment/Dr_JonesGameModeBase.h"
 #include "Utilities/Utilities.h"
 #include "Voxel/VoxelEngineUObjectInterface.h"
 
@@ -274,18 +275,21 @@ void ADigSite::InitializeVoxelGrid()
 
 void ADigSite::SpawnArtifacts()
 {
-	if (Artifacts.IsEmpty())
+	const UArtifactDatabase* ArtifactDatabase = GetWorld()->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase();
+	if (!ArtifactDatabase)
 	{
 		return;
 	}
+
+	const auto ArtifactMap = ArtifactDatabase->ArtifactDataEntries;
+	TArray<FName> ArtifactNameArray;
+	ArtifactMap.GenerateKeyArray(ArtifactNameArray);
+	
 	for (int i = 0; i <= ArtifactSpawnRate; i++)
 	{
-		UClass* ArtifactClass = Artifacts[FMath::RandRange(0, Artifacts.Num() - 1)];
-		const FVector ArtifactSpawner = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation() + FVector(0.0,0.0,-80.0), FVector(500.0, 500.0, 50.0));
-		AArtifact* SpawnedArtifact = GWorld->SpawnActor<AArtifact>(ArtifactClass);
+		FName ArtifactID =  ArtifactNameArray[FMath::RandRange(0, ArtifactNameArray.Num() - 1)];
+		AArtifact* SpawnedArtifact = UArtifactFactory::ConstructArtifactFromDatabase(*this, ArtifactID);
+		const FVector ArtifactSpawner = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation() + FVector(0.0,0.0,-140.0), FVector(500.0, 500.0, 100.0));
 		SpawnedArtifact->SetActorLocationAndRotation(ArtifactSpawner, FRotator(FMath::RandRange(0.0, 360.0)));
 	}
 }
-
-
-
