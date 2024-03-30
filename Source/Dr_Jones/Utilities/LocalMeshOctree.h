@@ -50,6 +50,9 @@ struct FLocalMeshOctreeVertex
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Normal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Index;
 };
 
 UCLASS(Blueprintable)

@@ -103,3 +103,33 @@ void UArtifactOverviewer::RequestRotate(FVector& Direction)
 	
 	ArtifactToOverview->AddActorWorldRotation(Rotation);
 }
+
+void UArtifactOverviewer::StartPrimaryAction()
+{
+	// TODO: we need some overview modes that would make it do different things to the artifact
+
+	if (!ensure(ArtifactToOverview && Viewer))
+	{
+		return;
+	}
+
+	if (!ArtifactToOverview->IsDynamic())
+	{
+		return;
+	}
+
+	FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this);
+	if (HitResult.IsValidBlockingHit())
+	{
+		const FVector LocalPosition = ArtifactToOverview->GetActorTransform().InverseTransformPosition(HitResult.Location);
+		ArtifactToOverview->VertexPaint(LocalPosition, FColor(0));
+	}
+}
+
+void UArtifactOverviewer::StopPrimaryAction()
+{
+	if (!ensure(ArtifactToOverview))
+	{
+		return;
+	}
+}

@@ -35,6 +35,8 @@ void AArtifact::BeginPlay()
 	Super::BeginPlay();
 
 	InteractableComponent->InteractDelegate.AddDynamic(this, &AArtifact::PickUp);
+
+	SetupDynamicArtifact();
 }
 
 void AArtifact::OnConstruction(const FTransform& Transform)
@@ -87,6 +89,18 @@ void AArtifact::PickUp(ADrJonesCharacter* Taker)
 	{
 		ArtifactCollectedMessage->Artifact = this;
 	});
+}
+
+UMeshComponent* AArtifact::GetMeshComponent() const
+{
+	if (IsDynamic())
+	{
+		return ArtifactDynamicMesh;
+	}
+	else
+	{
+		return ArtifactMeshComponent;
+	}
 }
 
 void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
@@ -153,6 +167,64 @@ void AArtifact::Clear()
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Artifact Cleared!"));
 }
 
+void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, float BrushRadiusWS, float BrushFalloff)
+{
+	check(IsInGameThread());
+
+	if (!IsDynamic())
+	{
+		return;
+	}
+
+	static TArray<FLocalMeshOctreeVertex> Vertices;
+	Vertices.Reset();
+
+	check(LocalMeshOctree);
+	LocalMeshOctree->FindVerticesInBoundingBox(LocalPosition, FVector(BrushRadiusWS), Vertices);
+
+	ArtifactDynamicMesh->EditMesh([&](FDynamicMesh3& Mesh)
+	{
+		using namespace UE::Geometry;
+		if (!Mesh.HasAttributes())
+		{
+			Mesh.EnableAttributes();
+		}
+		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
+
+		bool bInitColors = false;
+		if (!Attributes->HasPrimaryColors())
+		{
+			Attributes->EnablePrimaryColors();
+			bInitColors = true;
+		}
+		FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
+		if (bInitColors)
+		{
+			for (int32 TriID = 0; TriID < Mesh.TriangleCount(); ++TriID)
+			{
+				const int32 A = ColorOverlay->AppendElement(FVector4f(1));
+				const int32 B = ColorOverlay->AppendElement(FVector4f(1));
+				const int32 C = ColorOverlay->AppendElement(FVector4f(1));
+				ColorOverlay->SetTriangle(TriID, FIndex3i(A, B, C));
+			}
+		}
+
+		for (const FLocalMeshOctreeVertex& Vertex : Vertices)
+		{
+			for (const int32 Tri : Mesh.VtxTrianglesItr(Vertex.Index))
+			{
+				const int32 Elem = ColorOverlay->GetElementIDAtVertex(Tri, Vertex.Index);
+				if (!ensure(Elem >= 0))
+				{
+					continue;
+				}
+				const FLinearColor LinearColor(Color);
+				ColorOverlay->SetElement(Elem, LinearColor);
+			}
+		}
+	});
+}
+
 void AArtifact::OnRemovedFromEquipment()
 {
 	Super::OnRemovedFromEquipment();
@@ -162,6 +234,11 @@ void AArtifact::OnRemovedFromEquipment()
 	const FRotator Rotation = Player ? FRotator(0.0, Player->GetActorRotation().Yaw, 0.0) : FRotator::ZeroRotator; 
 
 	SetActorLocationAndRotation(GroundLocation, Rotation);
+}
+
+bool AArtifact::IsDynamic() const
+{
+	return ArtifactDynamicMesh->GetMesh() && LocalMeshOctree->MeshVertexOctree.GetNumNodes() > 0;
 }
 
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)

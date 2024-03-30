@@ -56,5 +56,6 @@ void ULocalMeshOctree::FindVerticesInBoundingBox(const FVector& Center, const FV
 		FLocalMeshOctreeVertex& OutVertex = Vertices.Emplace_GetRef();
 		OutVertex.Position = FVector(Vertex.Position);
 		OutVertex.Normal = FVector(Vertex.Normal);
+		OutVertex.Index = Vertex.Index;
 	});
 }

@@ -48,13 +48,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnArtifactPickedUp(APawn* Taker);
 
-	virtual UMeshComponent* GetMeshComponent() const override { return ArtifactMeshComponent; }
-	
+	virtual UMeshComponent* GetMeshComponent() const override;
+	UDynamicMeshComponent* GetDynamicMeshComponent() const { return ArtifactDynamicMesh; }
 	void SetupArtifact(const FArtifactData& ArtifactData);
 	void SetupDynamicArtifact();
 	void Clear();
+
+	void VertexPaint(const FVector& LocalPosition, const FColor& Color, float BrushRadiusWS = 10.0f, float BrushFalloff = 1.0f);
 	
 	virtual void OnRemovedFromEquipment() override;
+
+	bool IsDynamic() const;
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Artifact", meta = (DisplayPriority = 1))
