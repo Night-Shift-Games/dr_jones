@@ -238,10 +238,12 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 	{
 		return;
 	}
-	
-	USceneComponent* RootComponent = ItemToAttach.GetRootComponent();
-	RootComponent->SetMobility(EComponentMobility::Movable);
-	if (UMeshComponent* Mesh = ItemToAttach.GetMeshComponent())
+
+	USceneComponent* ItemRootComponent = ItemToAttach.GetRootComponent();
+	ItemRootComponent->SetMobility(EComponentMobility::Movable);
+	TInlineComponentArray<UMeshComponent*> Components;
+	ItemToAttach.GetComponents<UMeshComponent>(Components);
+	for (UMeshComponent* Mesh : Components)
 	{
 		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);

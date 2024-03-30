@@ -21,7 +21,9 @@ void AItem::SetInteractionEnabled(bool bEnabled) const
 void AItem::SetWorldPhysics()
 {
 	RootComponent->SetMobility(EComponentMobility::Movable);
-	if (UMeshComponent* Mesh = GetMeshComponent())
+	TInlineComponentArray<UMeshComponent*> Components;
+	GetComponents<UMeshComponent>(Components);
+	for (UMeshComponent* Mesh : Components)
 	{
 		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
