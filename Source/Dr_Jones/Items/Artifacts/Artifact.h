@@ -8,6 +8,8 @@
 
 #include "Artifact.generated.h"
 
+class ULocalMeshOctree;
+class UDynamicMeshComponent;
 class ADrJonesCharacter;
 
 DECLARE_DELEGATE_OneParam(FOnArtifactAttached, AArtifact*)
@@ -49,6 +51,7 @@ public:
 	virtual UMeshComponent* GetMeshComponent() const override { return ArtifactMeshComponent; }
 	
 	void SetupArtifact(const FArtifactData& ArtifactData);
+	void SetupDynamicArtifact();
 	void Clear();
 	
 	virtual void OnRemovedFromEquipment() override;
@@ -90,6 +93,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMaterialInstanceDynamic> ArtifactDynamicMaterial;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Artifact")
+	TObjectPtr<ULocalMeshOctree> LocalMeshOctree;
+
 	FOnArtifactAttached OnArtifactPickup;
 	
 	bool bArtifactCleared = false;
@@ -97,6 +103,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact")
 	TObjectPtr<UMeshComponent> ArtifactMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Artifact")
+	TObjectPtr<UDynamicMeshComponent> ArtifactDynamicMesh;
 };
 
 UCLASS()

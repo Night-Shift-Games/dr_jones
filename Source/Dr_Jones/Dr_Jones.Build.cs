@@ -26,7 +26,12 @@ public class Dr_Jones : ModuleRules
 			"zlib"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "AnimGraphRuntime" });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"AnimGraphRuntime",
+			"GeometryScriptingCore",
+			"MeshConversionEngineTypes",
+		});
 
 		PublicIncludePaths.AddRange(new string[] { "Dr_Jones" });
 

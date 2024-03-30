@@ -2,10 +2,14 @@
 
 #include "Artifact.h"
 
+#include "StaticMeshLODResourcesToDynamicMesh.h"
+#include "Components/DynamicMeshComponent.h"
 #include "Equipment/EquipmentComponent.h"
+#include "GeometryScript/MeshAssetFunctions.h"
 #include "Interaction/InteractableComponent.h"
 #include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestMessages.h"
+#include "Utilities/LocalMeshOctree.h"
 #include "Utilities/Utilities.h"
 #include "World/Illuminati.h"
 
@@ -13,6 +17,11 @@ AArtifact::AArtifact()
 {
 	ArtifactMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArtifactMesh"));
 	SetRootComponent(ArtifactMeshComponent);
+
+	ArtifactDynamicMesh = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("ArtifactDynamicMesh"));
+	ArtifactDynamicMesh->SetupAttachment(ArtifactMeshComponent);
+
+	LocalMeshOctree = CreateDefaultSubobject<ULocalMeshOctree>(TEXT("ArtifactMeshOctree"));
 
 	if (ArtifactStaticMesh)
 	{
@@ -30,10 +39,12 @@ void AArtifact::BeginPlay()
 
 void AArtifact::OnConstruction(const FTransform& Transform)
 {
+	SetupDynamicArtifact();
+
 	if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ArtifactMeshComponent))
 	{
 		StaticMeshComponent->SetStaticMesh(ArtifactStaticMesh);
-		ArtifactDynamicMaterial = StaticMeshComponent->CreateDynamicMaterialInstance(0);
+		// ArtifactDynamicMaterial = StaticMeshComponent->CreateDynamicMaterialInstance(0);
 	}
 }
 
@@ -96,6 +107,40 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	ArtifactRarity = ArtifactData.Rarity;
 	// TODO: Artifact Wear should be rand based on Age.
 	ArtifactWear = ArtifactData.Wear;
+
+	SetupDynamicArtifact();
+}
+
+void AArtifact::SetupDynamicArtifact()
+{
+	using namespace UE::Geometry;
+
+	if (!ArtifactStaticMesh)
+	{
+		return;
+	}
+
+	FStaticMeshRenderData* RenderData = ArtifactStaticMesh->GetRenderData();
+	if (!RenderData || RenderData->LODResources.IsEmpty())
+	{
+		return;
+	}
+
+	const FStaticMeshLODResources* LODResources = &RenderData->LODResources[0];
+	FDynamicMesh3 DynamicMesh;
+	FStaticMeshLODResourcesToDynamicMesh Converter;
+	Converter.Convert(LODResources, {}, DynamicMesh);
+
+	check(ArtifactDynamicMesh);
+	ArtifactDynamicMesh->SetMesh(MoveTemp(DynamicMesh));
+
+	check(ArtifactMeshComponent);
+	ArtifactMeshComponent->SetVisibility(false);
+
+	ArtifactDynamicMaterial = UMaterialInstanceDynamic::Create(ArtifactStaticMesh->GetMaterial(0), ArtifactDynamicMesh);
+	ArtifactDynamicMesh->SetMaterial(0, ArtifactDynamicMaterial);
+
+	LocalMeshOctree->BuildFromMesh(ArtifactStaticMesh);
 }
 
 void AArtifact::Clear()
