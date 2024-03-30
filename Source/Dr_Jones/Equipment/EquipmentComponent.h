@@ -66,40 +66,40 @@ public:
 	
 	void OpenEquipmentWheel(const FInputActionValue& InputActionValue);
 
-	UPROPERTY(BlueprintAssignable, Category = "Tools")
+	UPROPERTY(BlueprintAssignable, Category = "DrJones|Tools")
 	FOnToolAddedDelegate OnToolAdded;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Tools")
+	UPROPERTY(EditDefaultsOnly, Category = "DrJones|Tools")
 	TArray<TSubclassOf<ATool>> DefaultTools;
 	
 	// UI
 	
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditAnywhere, Category = "DrJones|UI")
 	TSubclassOf<UDrJonesWidgetBase> ItemInfo;
 
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditAnywhere, Category = "DrJones|UI")
 	TSubclassOf<UDrJonesWidgetBase> InventoryMenu;
 	
 	// Input Actions
 	
-	UPROPERTY(EditAnywhere, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Input")
 	TObjectPtr<UInputAction> ChangeItemAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Input")
 	TObjectPtr<UInputAction> OpenEquipmentAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Input")
 	TObjectPtr<UInputAction> PrimaryAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Input")
 	TObjectPtr<UInputAction> SecondaryAction;
 	
-	UPROPERTY(EditAnywhere, Category = "Input")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Input")
 	TObjectPtr<UInputAction> UnequipItemAction;
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	UPROPERTY(EditDefaultsOnly, Category = "DrJones|Item")
 	TObjectPtr<AItem> ItemInHand;
 	
 	UPROPERTY(SaveGame)

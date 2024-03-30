@@ -52,16 +52,16 @@ protected:
 protected:
 	TWeakObjectPtr<ADrJonesCharacter> Owner;
 	
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction")
 	float InteractionRange = 150.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
 	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
 
-	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
 	TObjectPtr<UInputAction> InteractionAction;
 
-	UPROPERTY(EditAnywhere, Category = "Interaction|UI")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
 	TObjectPtr<UInputAction> AlternativeInteractionAction;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)

@@ -32,10 +32,10 @@ public:
 	bool IsInteractionInProgress() const { return bInteractionInProgress; }
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	UPROPERTY(BlueprintAssignable, Category = "DrJones|Interaction")
 	FOnInteract InteractDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	UPROPERTY(BlueprintAssignable, Category = "DrJones|Interaction")
 	FOnInteract AltInteractDelegate;
 
 	bool bInteractionInProgress = false;

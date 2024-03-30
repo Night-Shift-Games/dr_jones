@@ -29,7 +29,7 @@ public:
 	UQuestSystemLogic* GetQuestSystem() const { return QuestSystem; }
 	
 	/** Call an event only when the quest system gets loaded, or immediately, if it already is. */
-	UFUNCTION(BlueprintCallable, Category = "Quest System")
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Quest System")
 	void ExecutePostQuestSystemLoad(UPARAM(DisplayName="Event") const FQuestSystemInitializedDynamicDelegate& Delegate);
 
 	UFUNCTION(BlueprintPure)
@@ -60,6 +60,6 @@ private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest System", meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DrJones|Quest System", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UQuestSystemLogic> QuestSystem;
 };

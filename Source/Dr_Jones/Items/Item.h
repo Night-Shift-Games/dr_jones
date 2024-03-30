@@ -40,7 +40,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
 	TObjectPtr<UActionComponent> ActionComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Item")
 	FName AttachmentSocket = TEXT("RightHandSocket");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Animation")
