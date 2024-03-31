@@ -38,7 +38,7 @@ enum class EArtifactSize : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FArtifactData
+struct FArtifactData : public FTableRowBase
 {
 	GENERATED_BODY()
 
