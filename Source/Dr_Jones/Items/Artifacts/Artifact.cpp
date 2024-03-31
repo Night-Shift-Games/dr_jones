@@ -2,6 +2,7 @@
 
 #include "Artifact.h"
 
+#include "ArtifactFactory.h"
 #include "StaticMeshLODResourcesToDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
 #include "Equipment/EquipmentComponent.h"
@@ -157,16 +158,6 @@ void AArtifact::SetupDynamicArtifact()
 	LocalMeshOctree->BuildFromMesh(ArtifactStaticMesh);
 }
 
-void AArtifact::Clear()
-{
-	if (bArtifactCleared)
-	{
-		return;
-	}
-	bArtifactCleared = true;
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, TEXT("Artifact Cleared!"));
-}
-
 void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, float BrushRadiusWS, float BrushFalloff)
 {
 	check(IsInGameThread());
@@ -239,58 +230,4 @@ void AArtifact::OnRemovedFromEquipment()
 bool AArtifact::IsDynamic() const
 {
 	return ArtifactDynamicMesh->GetMesh() && LocalMeshOctree->MeshVertexOctree.GetNumNodes() > 0;
-}
-
-AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)
-{
-	const FArtifactData* ArtifactData = PullArtifactDataFromDatabase(ArtifactID);
-	return ConstructArtifact(WorldContextObject, *ArtifactData);
-}
-
-FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(const FName& ArtifactID)
-{
-	// Get a database.
-	UArtifactDatabase* ArtifactDatabase = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : nullptr;
-	if (!ArtifactDatabase)
-	{
-		return nullptr;
-	}
-	// Find object in database.
-	FArtifactData* ArtifactData = ArtifactDatabase->ArtifactDataEntries.Find(ArtifactID);
-	if (!ArtifactData)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Artifact named %s not found in the Database!"), *ArtifactID.ToString());
-		return nullptr;
-	}
-	return ArtifactData;
-}
-
-AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, TSubclassOf<AArtifact> ArtifactClass)
-{
-	// Get world
-	UWorld* World = WorldContextObject.GetWorld();
-	check(World);
-	
-	return World->SpawnActor<AArtifact>(ArtifactClass);
-}
-
-AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData)
-{
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Name = MakeUniqueObjectName(WorldContextObject.GetWorld(), ArtifactData.CustomClass ? ArtifactData.CustomClass : AArtifact::StaticClass(), ArtifactData.ArtifactID, EUniqueObjectNameOptions::GloballyUnique);
-	
-	if (ArtifactData.CustomClass)
-	{
-		return ConstructArtifact(WorldContextObject, ArtifactData.CustomClass);
-	}
-	
-	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>(SpawnParameters);
-	NewArtifact->SetActorLabel(SpawnParameters.Name.ToString());
-
-	if (NewArtifact)
-	{
-		NewArtifact->SetupArtifact(ArtifactData);
-	}
-	
-	return NewArtifact;
 }

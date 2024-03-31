@@ -59,8 +59,6 @@ void AArchaeologistDesk::OnInteract(ADrJonesCharacter* Player)
 	}
 	else if (ArtifactOnDesk)
 	{
-		ArtifactOnDesk->Clear();
-
 		AIlluminati::SendQuestMessage<UArtifactCleanedQuestMessage>(this, [this](UArtifactCleanedQuestMessage* Message)
 		{
 			Message->Artifact = ArtifactOnDesk;

@@ -4,6 +4,7 @@
 
 #include "DigSiteBorder.h"
 #include "Items/Artifacts/Artifact.h"
+#include "Items/Artifacts/ArtifactFactory.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Managment/Dr_JonesGameModeBase.h"
 #include "Utilities/Utilities.h"

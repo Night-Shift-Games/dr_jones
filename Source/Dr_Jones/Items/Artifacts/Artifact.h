@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "ArtifactDatabase.h"
+#include "CoreMinimal.h"
 #include "Items/Item.h"
 
 #include "Artifact.generated.h"
 
-class ULocalMeshOctree;
-class UDynamicMeshComponent;
 class ADrJonesCharacter;
+class UDynamicMeshComponent;
+class ULocalMeshOctree;
 
 DECLARE_DELEGATE_OneParam(FOnArtifactAttached, AArtifact*)
 
@@ -52,7 +52,6 @@ public:
 	UDynamicMeshComponent* GetDynamicMeshComponent() const { return ArtifactDynamicMesh; }
 	void SetupArtifact(const FArtifactData& ArtifactData);
 	void SetupDynamicArtifact();
-	void Clear();
 
 	void VertexPaint(const FVector& LocalPosition, const FColor& Color, float BrushRadiusWS = 10.0f, float BrushFalloff = 1.0f);
 	
@@ -110,16 +109,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Artifact")
 	TObjectPtr<UDynamicMeshComponent> ArtifactDynamicMesh;
-};
-
-UCLASS()
-class UArtifactFactory : public UObject
-{
-	GENERATED_BODY()
-	
-public:
-	static AArtifact* ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID);
-	static FArtifactData* PullArtifactDataFromDatabase(const FName& ArtifactID);
-	static AArtifact* ConstructArtifact(const UObject& WorldContextObject, TSubclassOf<AArtifact> ArtifactClass);
-	static AArtifact* ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData);
 };
