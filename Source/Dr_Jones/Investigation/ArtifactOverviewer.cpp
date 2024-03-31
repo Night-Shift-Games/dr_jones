@@ -7,7 +7,7 @@
 #include "Items/Artifacts/Artifact.h"
 #include "Utilities/Utilities.h"
 
-void UArtifactOverviewer::InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact)
+void UArtifactOverviewer::InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact, TFunctionRef<void(AArtifact&)> CallbackFunc)
 {
 	CameraComponent = &Camera;
 	ArtifactToOverview = &Artifact;

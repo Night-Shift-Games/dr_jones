@@ -20,7 +20,7 @@ class DR_JONES_API UArtifactOverviewer : public UObject
 	GENERATED_BODY()
 
 public:
-	void InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact);
+	void InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact, TFunctionRef<void(AArtifact&)> CallbackFunc = [](AArtifact&){});
 	void StartOverview();
 
 	UFUNCTION(BlueprintCallable)
