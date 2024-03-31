@@ -285,6 +285,7 @@ AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject
 	}
 	
 	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>(SpawnParameters);
+	NewArtifact->SetActorLabel(SpawnParameters.Name.ToString());
 
 	if (NewArtifact)
 	{
