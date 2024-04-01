@@ -12,9 +12,6 @@ AMap::AMap() : Super()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
 
-	MapWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WorldWidget"));
-	MapWidgetComponent->SetupAttachment(StaticMeshComponent);
-
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(StaticMeshComponent);
 

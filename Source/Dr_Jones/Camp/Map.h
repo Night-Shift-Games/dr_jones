@@ -39,9 +39,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UWidgetComponent> MapWidgetComponent;
-
 	UPROPERTY(Transient)
 	TObjectPtr<UBlendCameraComponent> BlendCameraComponent;
 
