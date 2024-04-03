@@ -123,7 +123,11 @@ void UInteractionComponent::AltInteract()
 	if (!SelectedInteractiveComponent->AltInteract(Owner.Get()))
 	{
 		UInputTriggerPreventAction* PreventAction = nullptr;
-		AlternativeInteractionAction->Triggers.FindItemByClass<UInputTriggerPreventAction>(&PreventAction);
+		InteractionAction->Triggers.FindItemByClass<UInputTriggerPreventAction>(&PreventAction);
+		if (!PreventAction)
+		{
+			return;	
+		}
 		PreventAction->bTriggered = false;
 	}
 }
