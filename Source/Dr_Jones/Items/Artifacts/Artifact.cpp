@@ -385,6 +385,11 @@ void UArtifactCleaningMode::TickBrushStroke()
 		return;
 	}
 
+	if (CleaningProgress >= 1.0f)
+	{
+		return;
+	}
+
 	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this);
 	if (HitResult.IsValidBlockingHit())
 	{
