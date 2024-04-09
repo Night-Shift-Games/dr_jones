@@ -30,12 +30,6 @@ public:
 	void ApplyControl(const FInputActionValue& InputActionValue);
 	void RequestRotate(FVector& Direction);
 
-	UFUNCTION(BlueprintCallable)
-	void StartPrimaryAction();
-
-	UFUNCTION(BlueprintCallable)
-	void StopPrimaryAction();
-
 protected:
 	void SetMappingContext(UInputMappingContext& InOverviewMappingContext);
 	void FetchPreOverviewActorProperties();

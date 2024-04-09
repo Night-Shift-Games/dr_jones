@@ -3,6 +3,7 @@
 #include "Artifact.h"
 
 #include "ArtifactFactory.h"
+#include "EnhancedInputSubsystems.h"
 #include "StaticMeshLODResourcesToDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
 #include "Equipment/EquipmentComponent.h"
@@ -123,12 +124,22 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	// TODO: Artifact Wear should be rand based on Age.
 	ArtifactWear = ArtifactData.Wear;
 
+	// TODO: Generate these from the above values?
+	DirtData.RustAmount = FMath::FRand();
+	DirtData.MudAmount = FMath::FRand();
+	DirtData.DustAmount = FMath::FRand();
+
 	SetupDynamicArtifact();
 }
 
 void AArtifact::SetupDynamicArtifact()
 {
 	using namespace UE::Geometry;
+
+	// TODO: Generate these from the above values?
+	DirtData.RustAmount = FMath::FRand();
+	DirtData.MudAmount = FMath::FRand();
+	DirtData.DustAmount = FMath::FRand();
 
 	if (!ArtifactStaticMesh)
 	{
@@ -148,6 +159,41 @@ void AArtifact::SetupDynamicArtifact()
 
 	check(ArtifactDynamicMesh);
 	ArtifactDynamicMesh->SetMesh(MoveTemp(DynamicMesh));
+	ArtifactDynamicMesh->EditMesh([&](FDynamicMesh3& Mesh)
+	{
+		using namespace UE::Geometry;
+		if (!Mesh.HasAttributes())
+		{
+			Mesh.EnableAttributes();
+		}
+		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
+
+		if (!Attributes->HasPrimaryColors())
+		{
+			Attributes->EnablePrimaryColors();
+		}
+		else
+		{
+			Attributes->PrimaryColors()->ClearElements();
+		}
+		FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
+
+		for (int32 TriID = 0; TriID < Mesh.TriangleCount(); ++TriID)
+		{
+			// TODO: Take the probability mask into consideration
+
+			FVector4f Color;
+			Color.X = DirtData.RustAmount;
+			Color.Y = DirtData.MudAmount;
+			Color.Z = DirtData.DustAmount;
+			Color.W = 0.0f;
+
+			const int32 A = ColorOverlay->AppendElement(FVector4f(Color));
+			const int32 B = ColorOverlay->AppendElement(FVector4f(Color));
+			const int32 C = ColorOverlay->AppendElement(FVector4f(Color));
+			ColorOverlay->SetTriangle(TriID, FIndex3i(A, B, C));
+		}
+	});
 
 	check(ArtifactMeshComponent);
 	ArtifactMeshComponent->SetVisibility(false);
@@ -155,14 +201,23 @@ void AArtifact::SetupDynamicArtifact()
 	ArtifactDynamicMaterial = UMaterialInstanceDynamic::Create(ArtifactStaticMesh->GetMaterial(0), ArtifactDynamicMesh);
 	ArtifactDynamicMesh->SetMaterial(0, ArtifactDynamicMaterial);
 
+	ArtifactDynamicMaterial->SetScalarParameterValueByInfo(DirtData.RustMPI, 1.0f);
+	ArtifactDynamicMaterial->SetScalarParameterValueByInfo(DirtData.MudMPI, 1.0f);
+	ArtifactDynamicMaterial->SetScalarParameterValueByInfo(DirtData.DustMPI, 1.0f);
+
 	LocalMeshOctree->BuildFromMesh(ArtifactStaticMesh);
 }
 
-void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, float BrushRadiusWS, float BrushFalloff)
+void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, const FVector4f& ChannelMask, float BrushRadiusWS, float BrushFalloffPow) const
 {
 	check(IsInGameThread());
 
 	if (!IsDynamic())
+	{
+		return;
+	}
+
+	if (!ensureMsgf(BrushRadiusWS > 0.0f, TEXT("Zero or less radius is not going to produce any result.")))
 	{
 		return;
 	}
@@ -176,32 +231,29 @@ void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, f
 	ArtifactDynamicMesh->EditMesh([&](FDynamicMesh3& Mesh)
 	{
 		using namespace UE::Geometry;
-		if (!Mesh.HasAttributes())
+		if (!ensure(Mesh.HasAttributes()))
 		{
 			Mesh.EnableAttributes();
 		}
 		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
 
-		bool bInitColors = false;
-		if (!Attributes->HasPrimaryColors())
+		if (!ensure(Attributes->HasPrimaryColors()))
 		{
 			Attributes->EnablePrimaryColors();
-			bInitColors = true;
 		}
 		FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
-		if (bInitColors)
-		{
-			for (int32 TriID = 0; TriID < Mesh.TriangleCount(); ++TriID)
-			{
-				const int32 A = ColorOverlay->AppendElement(FVector4f(1));
-				const int32 B = ColorOverlay->AppendElement(FVector4f(1));
-				const int32 C = ColorOverlay->AppendElement(FVector4f(1));
-				ColorOverlay->SetTriangle(TriID, FIndex3i(A, B, C));
-			}
-		}
 
 		for (const FLocalMeshOctreeVertex& Vertex : Vertices)
 		{
+			const double DistanceSquaredToVertex = FVector::DistSquared(Vertex.Position, LocalPosition);
+			const double BrushRadiusSquared = FMath::Square(BrushRadiusWS);
+			if (DistanceSquaredToVertex > BrushRadiusSquared)
+			{
+				continue;
+			}
+
+			const float Alpha = FMath::Pow(static_cast<float>((BrushRadiusSquared - DistanceSquaredToVertex) / BrushRadiusSquared), BrushFalloffPow);
+
 			for (const int32 Tri : Mesh.VtxTrianglesItr(Vertex.Index))
 			{
 				const int32 Elem = ColorOverlay->GetElementIDAtVertex(Tri, Vertex.Index);
@@ -209,9 +261,40 @@ void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, f
 				{
 					continue;
 				}
-				const FLinearColor LinearColor(Color);
-				ColorOverlay->SetElement(Elem, LinearColor);
+				FLinearColor LinearColor(Color);
+				LinearColor *= ChannelMask;
+				FLinearColor ElemValue = ColorOverlay->GetElement(Elem);
+				ColorOverlay->SetElement(Elem, FMath::Lerp(ElemValue, LinearColor, Alpha));
 			}
+		}
+	});
+}
+
+void AArtifact::CleanCompletely() const
+{
+	if (!IsDynamic())
+	{
+		return;
+	}
+
+	ArtifactDynamicMesh->EditMesh([&](FDynamicMesh3& Mesh)
+	{
+		using namespace UE::Geometry;
+		if (!ensure(Mesh.HasAttributes()))
+		{
+			Mesh.EnableAttributes();
+		}
+		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
+
+		if (!ensure(Attributes->HasPrimaryColors()))
+		{
+			Attributes->EnablePrimaryColors();
+		}
+		FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
+
+		for (const int32 Elem : ColorOverlay->ElementIndicesItr())
+		{
+			ColorOverlay->SetElement(Elem, FVector4f(0));
 		}
 	});
 }
@@ -230,4 +313,132 @@ void AArtifact::OnRemovedFromEquipment()
 bool AArtifact::IsDynamic() const
 {
 	return ArtifactDynamicMesh->GetMesh() && LocalMeshOctree->MeshVertexOctree.GetNumNodes() > 0;
+}
+
+UWorld* UArtifactCleaningMode::GetWorld() const
+{
+	if (CurrentArtifact)
+	{
+		return CurrentArtifact->GetWorld();
+	}
+	return UObject::GetWorld();
+}
+
+void UArtifactCleaningMode::Begin(const ADrJonesCharacter& Character, AArtifact& Artifact)
+{
+	if (!ensureMsgf(!CurrentArtifact, TEXT("The artifact cleaning mode is already active.")))
+	{
+		return;
+	}
+
+	CurrentArtifact = &Artifact;
+
+	// TODO: Switch on different cleaning tools
+	CurrentPaintChannelMask = FVector4f(1);
+
+	if (!InputMappingContext)
+	{
+		return;
+	}
+
+	if (const APlayerController* Controller = Character.GetController<APlayerController>())
+	{
+		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
+		{
+			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(InputMappingContext, 690000);
+		}
+	}
+}
+
+void UArtifactCleaningMode::End(const ADrJonesCharacter& Character)
+{
+	if (!ensureMsgf(CurrentArtifact, TEXT("The artifact cleaning mode is not active.")))
+	{
+		return;
+	}
+
+	CurrentArtifact = nullptr;
+
+	if (!InputMappingContext)
+	{
+		return;
+	}
+
+	if (const APlayerController* Controller = Character.GetController<APlayerController>())
+	{
+		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
+		{
+			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(InputMappingContext);
+		}
+	}
+}
+
+void UArtifactCleaningMode::TickBrushStroke()
+{
+	if (!ensure(CurrentArtifact))
+	{
+		return;
+	}
+
+	if (!CurrentArtifact->IsDynamic())
+	{
+		return;
+	}
+
+	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this);
+	if (HitResult.IsValidBlockingHit())
+	{
+		const FVector LocalPosition = CurrentArtifact->GetActorTransform().InverseTransformPosition(HitResult.Location);
+		CurrentArtifact->VertexPaint(LocalPosition, FColor(0), CurrentPaintChannelMask);
+	}
+
+	float TotalDirtValue = 0.0f;
+	float CurrentDirtValue = 0.0f;
+	check(CurrentArtifact->GetDynamicMeshComponent());
+	CurrentArtifact->GetDynamicMeshComponent()->ProcessMesh([&](const FDynamicMesh3& Mesh)
+	{
+		using namespace UE::Geometry;
+		if (!ensure(Mesh.HasAttributes()))
+		{
+			return;
+		}
+		const FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
+
+		if (!ensure(Attributes->HasPrimaryColors()))
+		{
+			return;
+		}
+		const FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
+
+		for (const int32 Elem : ColorOverlay->ElementIndicesItr())
+		{
+			const FVector4f Color = ColorOverlay->GetElement(Elem);
+			// TODO: Unhardcode the component count
+			TotalDirtValue += 3.0f;
+			CurrentDirtValue += Color.X;
+			CurrentDirtValue += Color.Y;
+			CurrentDirtValue += Color.Z;
+		}
+	});
+
+	if (!ensureMsgf(TotalDirtValue > 0, TEXT("Total dirt value was 0, which probably means the mesh has no vertices.")))
+	{
+		return;
+	}
+
+	if (TotalDirtValue > 0)
+	{
+		CleaningProgress = FMath::Clamp(1.0f - CurrentDirtValue / TotalDirtValue, 0.0f, 1.0f);
+	}
+	else
+	{
+		CleaningProgress = 1.0f;
+	}
+
+	if (CleaningProgress >= CleaningCompletedThreshold)
+	{
+		CleaningProgress = 1.0f;
+		CurrentArtifact->CleanCompletely();
+		OnArtifactCleaned.Broadcast(CurrentArtifact);
+	}
 }

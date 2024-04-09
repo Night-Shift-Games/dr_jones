@@ -81,6 +81,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
 
+	UPROPERTY(Instanced, EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
+	TObjectPtr<UArtifactCleaningMode> ArtifactCleaningMode;
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UInputMappingContext> OverviewMappingContext;
 };

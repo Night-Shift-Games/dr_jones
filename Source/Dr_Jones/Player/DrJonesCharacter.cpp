@@ -24,6 +24,7 @@ ADrJonesCharacter::ADrJonesCharacter()
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 	BlendCameraComponent = CreateDefaultSubobject<UBlendCameraComponent>(TEXT("BlendCameraComponent"));
+	ArtifactCleaningMode = CreateDefaultSubobject<UArtifactCleaningMode>(TEXT("ArtifactCleaningMode"));
 }
 
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -57,6 +58,9 @@ void ADrJonesCharacter::StartInspect(AArtifact* ArtifactToInspect)
 	}
 	ArtifactOverviewer->InitializeOverviewer(*this,*FindComponentByClass<UCameraComponent>(), *ArtifactToInspect);
 	ArtifactOverviewer->StartOverview();
+
+	check(ArtifactCleaningMode);
+	ArtifactCleaningMode->Begin(*this, *ArtifactToInspect);
 }
 
 void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
@@ -66,6 +70,9 @@ void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
 		return;
 	}
 	ArtifactOverviewer->EndOverview();
+
+	check(ArtifactCleaningMode);
+	ArtifactCleaningMode->End(*this);
 }
 
 void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)
