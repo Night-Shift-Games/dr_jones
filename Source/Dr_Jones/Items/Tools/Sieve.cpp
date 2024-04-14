@@ -21,7 +21,16 @@ void ASieve::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ASieve::Shake()
 {
-	UDrJonesAnimNotify* DrJonesAnimNotify = Cast<UDrJonesAnimNotify>(ShakeMontage->Notifies[0].Notify);
+	UDrJonesAnimNotify* DrJonesAnimNotify = nullptr;
+	ShakeMontage->Notifies.FindByPredicate([&](const FAnimNotifyEvent& Event)
+	{
+		DrJonesAnimNotify = Cast<UDrJonesAnimNotify>(Event.Notify);
+		return IsValid(DrJonesAnimNotify);
+	});
+	if (!DrJonesAnimNotify)
+	{
+		return;
+	}
 	DrJonesAnimNotify->OnNotifyHit.AddWeakLambda(this, [&, DrJonesAnimNotify]()
 	{
 		SpawnArtifacts();
