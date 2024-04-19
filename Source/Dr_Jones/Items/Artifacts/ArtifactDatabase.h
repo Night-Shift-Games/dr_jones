@@ -77,7 +77,36 @@ struct FArtifactData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	EArtifactSize Size = EArtifactSize::Normal;
+
+#if WITH_EDITORONLY_DATA
+	virtual void OnPostDataImport(const UDataTable* InDataTable, const FName InRowName, TArray<FString>& OutCollectedImportProblems) override;
+#endif
 };
+
+#if WITH_EDITORONLY_DATA
+inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const FName InRowName,
+	TArray<FString>& OutCollectedImportProblems)
+{
+	FTableRowBase::OnPostDataImport(InDataTable, InRowName, OutCollectedImportProblems);
+
+	// Get data from database
+	FArtifactData* Data = InDataTable->FindRow<FArtifactData>(InRowName, TEXT("Context"));
+	
+	// Set Artifact ID
+	Data->ArtifactID = InRowName;
+
+	// Find and set Static Mesh
+	const FName StaticMeshAssetName = "Test";
+	const FName AssetSearchPath = StaticMeshAssetName;
+	UStaticMesh* FoundMesh = nullptr;
+
+	Data->ArtifactMesh = { MakeSoftObjectPtr<UStaticMesh>(FoundMesh) };
+	// Find Icon
+	// Find and set overriden BP
+	// Find and set Memories audio and text
+	
+}
+#endif
 
 UCLASS(Blueprintable)
 class UArtifactDatabase : public UDataAsset
@@ -92,6 +121,7 @@ public:
 	virtual void Serialize(FStructuredArchive::FRecord Record) override;
 #endif
 };
+
 #if WITH_EDITORONLY_DATA
 inline void UArtifactDatabase::Serialize(FStructuredArchive::FRecord Record)
 {
