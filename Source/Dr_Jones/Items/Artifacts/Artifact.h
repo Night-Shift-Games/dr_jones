@@ -21,6 +21,12 @@ struct FArtifactDirtData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
+	float MoldAmount = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FMaterialParameterInfo MoldMPI;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0.0f, ClampMax = 1.0f, UIMin = 0.0f, UIMax = 1.0f))
 	float RustAmount = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

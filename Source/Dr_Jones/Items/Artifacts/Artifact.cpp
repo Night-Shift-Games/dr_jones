@@ -125,9 +125,10 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	ArtifactWear = ArtifactData.Wear;
 
 	// TODO: Generate these from the above values?
-	DirtData.RustAmount = FMath::FRand();
-	DirtData.MudAmount = FMath::FRand();
 	DirtData.DustAmount = FMath::FRand();
+	DirtData.MudAmount = FMath::FRand();
+	DirtData.RustAmount = FMath::FRand();
+	DirtData.MoldAmount = FMath::FRand();
 
 	SetupDynamicArtifact();
 }
@@ -136,10 +137,14 @@ void AArtifact::SetupDynamicArtifact()
 {
 	using namespace UE::Geometry;
 
+	// TODO: Unhardcode and fill out the rest.
+	DirtData.MudMPI = FMaterialParameterInfo(TEXT("DirtIntensity"), BlendParameter, 0);
+
 	// TODO: Generate these from the above values?
-	DirtData.RustAmount = FMath::FRand();
-	DirtData.MudAmount = FMath::FRand();
 	DirtData.DustAmount = FMath::FRand();
+	DirtData.MudAmount = FMath::FRand();
+	DirtData.RustAmount = FMath::FRand();
+	DirtData.MoldAmount = FMath::FRand();
 
 	if (!ArtifactStaticMesh)
 	{
@@ -162,36 +167,61 @@ void AArtifact::SetupDynamicArtifact()
 	ArtifactDynamicMesh->EditMesh([&](FDynamicMesh3& Mesh)
 	{
 		using namespace UE::Geometry;
-		if (!Mesh.HasAttributes())
+		if (!ensure(Mesh.HasAttributes()))
 		{
 			Mesh.EnableAttributes();
 		}
 		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
 
-		if (!Attributes->HasPrimaryColors())
+		// Don't worry if this triggers - it's just a remainder to opierdolic patryk G.
+		if (!ensure(Attributes->HasPrimaryColors()))
 		{
 			Attributes->EnablePrimaryColors();
-		}
-		else
-		{
-			Attributes->PrimaryColors()->ClearElements();
+			FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
+			for (int32 TriID = 0; TriID < Mesh.TriangleCount(); ++TriID)
+			{
+				FVector4f Color = FLinearColor::White;
+				const int32 A = ColorOverlay->AppendElement(FVector4f(Color));
+				const int32 B = ColorOverlay->AppendElement(FVector4f(Color));
+				const int32 C = ColorOverlay->AppendElement(FVector4f(Color));
+				ColorOverlay->SetTriangle(TriID, FIndex3i(A, B, C));
+			}
 		}
 		FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();
 
-		for (int32 TriID = 0; TriID < Mesh.TriangleCount(); ++TriID)
+		TArray<int32> VertexElements;
+		for (int32 VtxID : Mesh.VertexIndicesItr())
 		{
-			// TODO: Take the probability mask into consideration
+			FVector4f AvgColor = FVector4f::Zero();
+			ColorOverlay->GetVertexElements(VtxID, VertexElements);
+			for (int32 Elem : VertexElements)
+			{
+				FVector4f ElemColor;
+				ColorOverlay->GetElement(Elem, ElemColor);
+				AvgColor += ElemColor;
+			}
+			AvgColor /= VertexElements.Num();
 
-			FVector4f Color;
-			Color.X = DirtData.RustAmount;
-			Color.Y = DirtData.MudAmount;
-			Color.Z = DirtData.DustAmount;
-			Color.W = 0.0f;
+			FVector4f FinalColor;
 
-			const int32 A = ColorOverlay->AppendElement(FVector4f(Color));
-			const int32 B = ColorOverlay->AppendElement(FVector4f(Color));
-			const int32 C = ColorOverlay->AppendElement(FVector4f(Color));
-			ColorOverlay->SetTriangle(TriID, FIndex3i(A, B, C));
+			// For now treat Red as probability
+			const float RandVal = FMath::FRand();
+			if (RandVal <= AvgColor.X)
+			{
+				FinalColor.X = RandVal <= DirtData.DustAmount ? 1.0f : 0.0f;
+				FinalColor.Y = RandVal <= DirtData.MudAmount ? 1.0f : 0.0f;
+				FinalColor.Z = RandVal <= DirtData.RustAmount ? 1.0f : 0.0f;
+				FinalColor.W = RandVal <= DirtData.MoldAmount ? 1.0f : 0.0f;
+			}
+			else
+			{
+				FinalColor = FVector4f::Zero();
+			}
+
+			for (int32 Elem : VertexElements)
+			{
+				ColorOverlay->SetElement(Elem, FinalColor);
+			}
 		}
 	});
 
