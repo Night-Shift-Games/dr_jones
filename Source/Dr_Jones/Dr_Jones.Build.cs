@@ -14,6 +14,7 @@ public class Dr_Jones : ModuleRules
 			"CoreUObject", 
 			"Engine",
 			"EnhancedInput",
+			"DeveloperSettings",
 			"InputCore", 
 			"ProceduralMeshComponent", 
 			"UMG", 
