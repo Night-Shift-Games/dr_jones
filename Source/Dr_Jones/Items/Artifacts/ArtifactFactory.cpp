@@ -3,6 +3,7 @@
 #include "Artifact.h"
 #include "ArtifactDatabase.h"
 #include "Managment/Dr_JonesGameModeBase.h"
+#include "Utilities/NightShiftSettings.h"
 
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)
 {
@@ -13,7 +14,7 @@ AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldC
 FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(const FName& ArtifactID)
 {
 	// Get a database.
-	const UDataTable* ArtifactDataTable = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : nullptr;
+	const UDataTable* ArtifactDataTable = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : GetDefault<UNightShiftSettings>()->ArtifactDataTable.LoadSynchronous();
 	if (!ArtifactDataTable)
 	{
 		return nullptr;

@@ -93,7 +93,7 @@ public:
 	bool IsDynamic() const;
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = 1))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = 1))
 	FName ArtifactID = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = -1))
