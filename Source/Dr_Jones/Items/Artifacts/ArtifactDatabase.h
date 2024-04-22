@@ -5,6 +5,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
+#include "Utilities/NightShiftSettings.h"
 
 #include "ArtifactDatabase.generated.h"
 

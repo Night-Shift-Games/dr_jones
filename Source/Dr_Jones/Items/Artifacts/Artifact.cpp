@@ -345,6 +345,12 @@ bool AArtifact::IsDynamic() const
 	return ArtifactDynamicMesh->GetMesh() && LocalMeshOctree->MeshVertexOctree.GetNumNodes() > 0;
 }
 
+TArray<FName> AArtifact::GetArtifactIDs()
+{
+	const UDataTable* ArtifactDatabase = GetDefault<UNightShiftSettings>()->ArtifactDataTable.LoadSynchronous();
+	return ArtifactDatabase->GetRowNames();
+}
+
 UWorld* UArtifactCleaningMode::GetWorld() const
 {
 	if (CurrentArtifact)

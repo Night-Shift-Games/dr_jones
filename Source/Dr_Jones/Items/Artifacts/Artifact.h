@@ -92,8 +92,11 @@ public:
 
 	bool IsDynamic() const;
 
+	UFUNCTION(CallInEditor)
+	static TArray<FName> GetArtifactIDs();
+	
 public:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = 1))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = 1, GetOptions = "Dr_Jones.Artifact.GetArtifactIDs"))
 	FName ArtifactID = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones|Artifact", meta = (DisplayPriority = -1))
