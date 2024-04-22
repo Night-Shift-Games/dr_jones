@@ -104,9 +104,6 @@ protected:
 	TObjectPtr<UDigSiteBorder> BorderGenerator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
-	TArray<TSubclassOf<AArtifact>> Artifacts;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	int ArtifactSpawnRate = 15.f;
 	
 	double Width = 1500.0;
