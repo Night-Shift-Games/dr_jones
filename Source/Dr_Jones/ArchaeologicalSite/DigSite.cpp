@@ -276,19 +276,19 @@ void ADigSite::InitializeVoxelGrid()
 
 void ADigSite::SpawnArtifacts()
 {
-	const UArtifactDatabase* ArtifactDatabase = GetWorld()->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase();
+	const UDataTable* ArtifactDatabase = GetWorld()->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase();
 	if (!ArtifactDatabase)
 	{
 		return;
 	}
 
-	const auto ArtifactMap = ArtifactDatabase->ArtifactDataEntries;
+	const auto ArtifactMap = ArtifactDatabase->GetRowMap();
 	TArray<FName> ArtifactNameArray;
 	ArtifactMap.GenerateKeyArray(ArtifactNameArray);
 	
 	for (int i = 0; i <= ArtifactSpawnRate; i++)
 	{
-		FName ArtifactID =  ArtifactNameArray[FMath::RandRange(0, ArtifactNameArray.Num() - 1)];
+		FName ArtifactID = ArtifactNameArray[FMath::RandRange(0, ArtifactNameArray.Num() - 1)];
 		AArtifact* SpawnedArtifact = UArtifactFactory::ConstructArtifactFromDatabase(*this, ArtifactID);
 		const FVector ArtifactSpawner = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation() + FVector(0.0,0.0,-140.0), FVector(500.0, 500.0, 100.0));
 		SpawnedArtifact->SetActorLocationAndRotation(ArtifactSpawner, FRotator(FMath::RandRange(0.0, 360.0)));

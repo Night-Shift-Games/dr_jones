@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
 
@@ -15,6 +16,7 @@ enum class EArtifactRarity : uint8
 	Common = 0,
 	Uncommon,
 	Rare,
+	VeryRare,
 	Legendary,
 	Story,
 };
@@ -94,17 +96,46 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 	
 	// Set Artifact ID
 	Data->ArtifactID = InRowName;
+	
+	const FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	TArray<FAssetData> AssetData;
+	FARFilter Filter;
+	Filter.bRecursivePaths = true;
+	Filter.ClassPaths = {
+		UStaticMesh::StaticClass()->GetClassPathName(),
+		UTexture2D::StaticClass()->GetClassPathName()
+	};
+	Filter.PackagePaths.Add(TEXT("/Game/DrJones/Regions"));
+	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
 
 	// Find and set Static Mesh
-	const FName StaticMeshAssetName = "Test";
-	const FName AssetSearchPath = StaticMeshAssetName;
-	UStaticMesh* FoundMesh = nullptr;
+	const FName ArtifactStaticMeshPrefix = TEXT("SM_A_");
+	const FName ArtifactStaticMeshAssetName = FName(ArtifactStaticMeshPrefix.ToString() + Data->ArtifactID.ToString());
 
-	Data->ArtifactMesh = { MakeSoftObjectPtr<UStaticMesh>(FoundMesh) };
 	// Find Icon
-	// Find and set overriden BP
-	// Find and set Memories audio and text
+	const FName ArtifactIconPrefix = TEXT("I_A_");
 	
+	Data->ArtifactMesh.Empty();
+
+	for (auto& Object : AssetData)
+	{
+		FString AssetNameWithoutSuffix = Object.AssetName.ToString().LeftChop(2);
+		if (AssetNameWithoutSuffix.Equals(ArtifactStaticMeshAssetName.ToString()))
+		{
+			TSoftObjectPtr<UStaticMesh> StaticMesh = TSoftObjectPtr<UStaticMesh>(Object.GetSoftObjectPath());
+			Data->ArtifactMesh.AddUnique(StaticMesh);
+		}
+	}
+
+	// Check and report errors
+	if (Data->ArtifactMesh.IsEmpty())
+	{
+		OutCollectedImportProblems.Add(Data->ArtifactID.ToString() + TEXT(" do not have any properly named mesh!"));
+	}
+	if (Data->AgeMax < Data->AgeMin)
+	{
+		OutCollectedImportProblems.Add(Data->ArtifactID.ToString() + TEXT(" have invalid years data."));
+	}
 }
 #endif
 

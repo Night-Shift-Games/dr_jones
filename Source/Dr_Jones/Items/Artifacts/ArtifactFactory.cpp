@@ -13,13 +13,13 @@ AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldC
 FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(const FName& ArtifactID)
 {
 	// Get a database.
-	UArtifactDatabase* ArtifactDatabase = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : nullptr;
-	if (!ArtifactDatabase)
+	const UDataTable* ArtifactDataTable = GWorld && GWorld->IsGameWorld() ? GWorld->GetAuthGameMode<ADr_JonesGameModeBase>()->GetArtifactDataBase() : nullptr;
+	if (!ArtifactDataTable)
 	{
 		return nullptr;
 	}
 	// Find object in database.
-	FArtifactData* ArtifactData = ArtifactDatabase->ArtifactDataEntries.Find(ArtifactID);
+	FArtifactData* ArtifactData = ArtifactDataTable->FindRow<FArtifactData>(ArtifactID, TEXT("Context"));
 	if (!ArtifactData)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Artifact named %s not found in the Database!"), *ArtifactID.ToString());

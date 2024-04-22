@@ -39,7 +39,7 @@ public:
 	AIlluminati* GetIlluminati() const { return Illuminati; }
 
 	UFUNCTION(BlueprintPure)
-	UArtifactDatabase* GetArtifactDataBase() const { return ArtifactDatabase; }
+	UDataTable* GetArtifactDataBase() const { return ArtifactDatabase; }
 	
 protected:
 	UPROPERTY(EditAnywhere)
@@ -54,7 +54,7 @@ protected:
 
 	// NOTE: Temp solution to get rid of BP based artifacts. In long term we need find better place for it. Settings?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UArtifactDatabase> ArtifactDatabase;
+	TObjectPtr<UDataTable> ArtifactDatabase;
 	
 private:
 	FQuestSystemInitializedMCDelegate OnQuestSystemInitializedDelegate;
