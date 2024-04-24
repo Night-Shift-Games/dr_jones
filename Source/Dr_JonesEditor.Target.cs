@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
-using System.Collections.Generic;
 
 public class Dr_JonesEditorTarget : TargetRules
 {
@@ -9,7 +8,8 @@ public class Dr_JonesEditorTarget : TargetRules
 	{
 		Name = "Dr_JonesEditor";
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.V5;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 		ExtraModuleNames.AddRange( new string[] { "Dr_Jones", "DrJonesEditor" } );
 	}
 }

@@ -3,6 +3,7 @@
 #include "DigSite.h"
 
 #include "DigSiteBorder.h"
+#include "Engine/OverlapResult.h"
 #include "Items/Artifacts/Artifact.h"
 #include "Items/Artifacts/ArtifactFactory.h"
 #include "Kismet/KismetMathLibrary.h"

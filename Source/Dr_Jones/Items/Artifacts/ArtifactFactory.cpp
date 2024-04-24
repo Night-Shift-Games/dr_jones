@@ -41,7 +41,7 @@ AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject
 AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject, const FArtifactData& ArtifactData)
 {
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Name = MakeUniqueObjectName(WorldContextObject.GetWorld(), ArtifactData.CustomClass ? ArtifactData.CustomClass : AArtifact::StaticClass(), ArtifactData.ArtifactID, EUniqueObjectNameOptions::GloballyUnique);
+	SpawnParameters.Name = MakeUniqueObjectName(WorldContextObject.GetWorld(), ArtifactData.CustomClass ? ArtifactData.CustomClass : TSubclassOf<AArtifact>(AArtifact::StaticClass()), ArtifactData.ArtifactID, EUniqueObjectNameOptions::GloballyUnique);
 	
 	if (ArtifactData.CustomClass)
 	{

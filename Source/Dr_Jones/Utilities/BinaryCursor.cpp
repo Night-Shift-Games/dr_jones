@@ -1,6 +1,6 @@
 ﻿#include "BinaryCursor.h"
 
-#include "zlib/1.2.12/include/zlib.h"
+#include "zlib.h"
 
 bool FBinaryCursor::ReadCompressed(size_t ReadSize, void* OutBuffer, size_t BufferSize)
 {
