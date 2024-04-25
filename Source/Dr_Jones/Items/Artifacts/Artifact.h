@@ -152,25 +152,46 @@ protected:
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArtifactCleanedDynamic, AArtifact*, Artifact);
 
-UCLASS(Blueprintable)
-class DR_JONES_API UArtifactCleaningMode : public UObject
+UCLASS(Blueprintable, Abstract)
+class UArtifactInteractionMode : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	virtual UWorld* GetWorld() const override;
 
-	void Begin(const ADrJonesCharacter& Character, AArtifact& Artifact);
-	void End(const ADrJonesCharacter& Character);
+	void Begin(ADrJonesCharacter& Character, AArtifact& Artifact);
+	void End(ADrJonesCharacter& Character);
+	bool IsActive() const { return CurrentArtifact != nullptr; }
+
+	virtual void OnBegin() PURE_VIRTUAL(UArtifactInteractionMode::OnBegin)
+	virtual void OnEnd() PURE_VIRTUAL(UArtifactInteractionMode::OnEnd)
+
+	ADrJonesCharacter* GetControllingCharacter() const { return ControllingCharacter; }
+	AArtifact* GetCurrentArtifact() const { return CurrentArtifact; }
+
+private:
+	UPROPERTY(Transient, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TObjectPtr<ADrJonesCharacter> ControllingCharacter;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TObjectPtr<AArtifact> CurrentArtifact;
+};
+
+UCLASS(Blueprintable)
+class DR_JONES_API UArtifactCleaningMode : public UArtifactInteractionMode
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnBegin() override;
+	virtual void OnEnd() override;
 
 	UFUNCTION(BlueprintCallable)
 	void TickBrushStroke();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnArtifactCleanedDynamic OnArtifactCleaned;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<AArtifact> CurrentArtifact;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UInputMappingContext> InputMappingContext;
@@ -182,4 +203,14 @@ public:
 	float CleaningCompletedThreshold = 0.95f;
 
 	FVector4f CurrentPaintChannelMask;
+};
+
+UCLASS(Blueprintable)
+class UArtifactIdentificationMode : public UArtifactInteractionMode
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnBegin() override;
+	virtual void OnEnd() override;
 };

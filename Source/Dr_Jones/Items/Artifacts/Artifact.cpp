@@ -351,7 +351,7 @@ TArray<FName> AArtifact::GetArtifactIDs()
 	return ArtifactDatabase->GetRowNames();
 }
 
-UWorld* UArtifactCleaningMode::GetWorld() const
+UWorld* UArtifactInteractionMode::GetWorld() const
 {
 	if (CurrentArtifact)
 	{
@@ -360,7 +360,7 @@ UWorld* UArtifactCleaningMode::GetWorld() const
 	return UObject::GetWorld();
 }
 
-void UArtifactCleaningMode::Begin(const ADrJonesCharacter& Character, AArtifact& Artifact)
+void UArtifactInteractionMode::Begin(ADrJonesCharacter& Character, AArtifact& Artifact)
 {
 	if (!ensureMsgf(!CurrentArtifact, TEXT("The artifact cleaning mode is already active.")))
 	{
@@ -368,6 +368,29 @@ void UArtifactCleaningMode::Begin(const ADrJonesCharacter& Character, AArtifact&
 	}
 
 	CurrentArtifact = &Artifact;
+	ControllingCharacter = &Character;
+
+	OnBegin();
+}
+
+void UArtifactInteractionMode::End(ADrJonesCharacter& Character)
+{
+	if (!ensureMsgf(CurrentArtifact, TEXT("The artifact cleaning mode is not active.")))
+	{
+		return;
+	}
+
+	ensure(&Character == ControllingCharacter);
+	OnEnd();
+
+	CurrentArtifact = nullptr;
+	ControllingCharacter = nullptr;
+}
+
+void UArtifactCleaningMode::OnBegin()
+{
+	check(GetControllingCharacter());
+	check(GetCurrentArtifact());
 
 	// TODO: Switch on different cleaning tools
 	CurrentPaintChannelMask = FVector4f(1);
@@ -377,7 +400,7 @@ void UArtifactCleaningMode::Begin(const ADrJonesCharacter& Character, AArtifact&
 		return;
 	}
 
-	if (const APlayerController* Controller = Character.GetController<APlayerController>())
+	if (const APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
 	{
 		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
 		{
@@ -386,21 +409,17 @@ void UArtifactCleaningMode::Begin(const ADrJonesCharacter& Character, AArtifact&
 	}
 }
 
-void UArtifactCleaningMode::End(const ADrJonesCharacter& Character)
+void UArtifactCleaningMode::OnEnd()
 {
-	if (!ensureMsgf(CurrentArtifact, TEXT("The artifact cleaning mode is not active.")))
-	{
-		return;
-	}
-
-	CurrentArtifact = nullptr;
+	check(GetControllingCharacter());
+	check(GetCurrentArtifact());
 
 	if (!InputMappingContext)
 	{
 		return;
 	}
 
-	if (const APlayerController* Controller = Character.GetController<APlayerController>())
+	if (const APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
 	{
 		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
 		{
@@ -411,12 +430,13 @@ void UArtifactCleaningMode::End(const ADrJonesCharacter& Character)
 
 void UArtifactCleaningMode::TickBrushStroke()
 {
-	if (!ensure(CurrentArtifact))
+	if (!ensure(GetCurrentArtifact()))
 	{
 		return;
 	}
 
-	if (!CurrentArtifact->IsDynamic())
+	AArtifact* Artifact = GetCurrentArtifact();
+	if (!Artifact->IsDynamic())
 	{
 		return;
 	}
@@ -429,14 +449,14 @@ void UArtifactCleaningMode::TickBrushStroke()
 	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this);
 	if (HitResult.IsValidBlockingHit())
 	{
-		const FVector LocalPosition = CurrentArtifact->GetActorTransform().InverseTransformPosition(HitResult.Location);
-		CurrentArtifact->VertexPaint(LocalPosition, FColor(0), CurrentPaintChannelMask);
+		const FVector LocalPosition = Artifact->GetActorTransform().InverseTransformPosition(HitResult.Location);
+		Artifact->VertexPaint(LocalPosition, FColor(0), CurrentPaintChannelMask);
 	}
 
 	float TotalDirtValue = 0.0f;
 	float CurrentDirtValue = 0.0f;
-	check(CurrentArtifact->GetDynamicMeshComponent());
-	CurrentArtifact->GetDynamicMeshComponent()->ProcessMesh([&](const FDynamicMesh3& Mesh)
+	check(Artifact->GetDynamicMeshComponent());
+	Artifact->GetDynamicMeshComponent()->ProcessMesh([&](const FDynamicMesh3& Mesh)
 	{
 		using namespace UE::Geometry;
 		if (!ensure(Mesh.HasAttributes()))
@@ -479,7 +499,17 @@ void UArtifactCleaningMode::TickBrushStroke()
 	if (CleaningProgress >= CleaningCompletedThreshold)
 	{
 		CleaningProgress = 1.0f;
-		CurrentArtifact->CleanCompletely();
-		OnArtifactCleaned.Broadcast(CurrentArtifact);
+		Artifact->CleanCompletely();
+		OnArtifactCleaned.Broadcast(Artifact);
 	}
+}
+
+void UArtifactIdentificationMode::OnBegin()
+{
+	Super::OnBegin();
+}
+
+void UArtifactIdentificationMode::OnEnd()
+{
+	Super::OnEnd();
 }
