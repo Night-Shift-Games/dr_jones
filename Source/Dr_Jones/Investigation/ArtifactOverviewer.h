@@ -58,4 +58,7 @@ public:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<ADrJonesCharacter> Viewer;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsOverviewing = false;
 };

@@ -24,12 +24,14 @@ void UArtifactOverviewer::StartOverview()
 	SetActorOverviewProperties();
 	SetOverviewFixedAxis();
 	AddOverviewMappingContext();
+	bIsOverviewing = true;
 }
 
 void UArtifactOverviewer::EndOverview()
 {
 	RestoreActorToPreOverviewState();
 	RemoveOverviewMappingContext();
+	bIsOverviewing = false;
 }
 
 void UArtifactOverviewer::ApplyControl(const FInputActionValue& InputActionValue)

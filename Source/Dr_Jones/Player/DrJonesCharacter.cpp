@@ -24,7 +24,6 @@ ADrJonesCharacter::ADrJonesCharacter()
 	ReputationComponent = CreateDefaultSubobject<UReputationComponent>(TEXT("ReputationComponent"));
 	CharacterAnimationComponent = CreateDefaultSubobject<UCharacterAnimationComponent>(TEXT("CharacterAnimationComponent"));
 	BlendCameraComponent = CreateDefaultSubobject<UBlendCameraComponent>(TEXT("BlendCameraComponent"));
-	ArtifactCleaningMode = CreateDefaultSubobject<UArtifactCleaningMode>(TEXT("ArtifactCleaningMode"));
 }
 
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -59,8 +58,7 @@ void ADrJonesCharacter::StartInspect(AArtifact* ArtifactToInspect)
 	ArtifactOverviewer->InitializeOverviewer(*this,*FindComponentByClass<UCameraComponent>(), *ArtifactToInspect);
 	ArtifactOverviewer->StartOverview();
 
-	check(ArtifactCleaningMode);
-	ArtifactCleaningMode->Begin(*this, *ArtifactToInspect);
+	ChangeArtifactInteractionMode<UArtifactCleaningMode>();
 }
 
 void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
@@ -70,9 +68,31 @@ void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
 		return;
 	}
 	ArtifactOverviewer->EndOverview();
+}
 
-	check(ArtifactCleaningMode);
-	ArtifactCleaningMode->End(*this);
+void ADrJonesCharacter::ChangeArtifactInteractionMode(UArtifactInteractionMode* Mode)
+{
+	if (CurrentArtifactInteractionMode)
+	{
+		CurrentArtifactInteractionMode->End(*this);
+	}
+
+	if (!ArtifactOverviewer || !ArtifactOverviewer->bIsOverviewing || !ArtifactOverviewer->ArtifactToOverview)
+	{
+		return;
+	}
+
+	CurrentArtifactInteractionMode = Mode;
+	CurrentArtifactInteractionMode->Begin(*this, *ArtifactOverviewer->ArtifactToOverview);
+}
+
+UArtifactInteractionMode* ADrJonesCharacter::FindArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> ModeClass)
+{
+	TObjectPtr<UArtifactInteractionMode>* FoundMode = ArtifactInteractionModes.FindByPredicate([&](UArtifactInteractionMode* Mode)
+	{
+		return Mode->IsA(ModeClass);
+	});
+	return FoundMode ? *FoundMode : nullptr;
 }
 
 void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)

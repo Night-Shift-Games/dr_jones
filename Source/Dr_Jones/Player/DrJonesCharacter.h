@@ -43,6 +43,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopInspect(AArtifact* ArtifactToInspect);
 
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	void ChangeArtifactInteractionMode(UArtifactInteractionMode* Mode);
+	template <typename T> requires TIsDerivedFrom<T, UArtifactInteractionMode>::Value
+	void ChangeArtifactInteractionMode() { ChangeArtifactInteractionMode(FindArtifactInteractionMode<T>()); }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones", meta = (DeterminesOutputType = "ModeClass"))
+	UArtifactInteractionMode* FindArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> ModeClass);
+	template <typename T> requires TIsDerivedFrom<T, UArtifactInteractionMode>::Value
+	T* FindArtifactInteractionMode() { return static_cast<T*>(FindArtifactInteractionMode(T::StaticClass())); }
+
 private:
 	void Move(const FInputActionValue& InputActionValue);
 	void Look(const FInputActionValue& InputActionValue);
@@ -81,8 +91,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UArtifactOverviewer> ArtifactOverviewer;
 
-	UPROPERTY(Instanced, EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TObjectPtr<UArtifactCleaningMode> ArtifactCleaningMode;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UArtifactInteractionMode> CurrentArtifactInteractionMode;
+
+	UPROPERTY(Instanced, EditAnywhere, BlueprintReadOnly)
+	TArray<TObjectPtr<UArtifactInteractionMode>> ArtifactInteractionModes;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UInputMappingContext> OverviewMappingContext;

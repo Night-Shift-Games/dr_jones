@@ -150,9 +150,7 @@ protected:
 	TObjectPtr<UDynamicMeshComponent> ArtifactDynamicMesh;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArtifactCleanedDynamic, AArtifact*, Artifact);
-
-UCLASS(Blueprintable, Abstract)
+UCLASS(Blueprintable, Abstract, EditInlineNew)
 class UArtifactInteractionMode : public UObject
 {
 	GENERATED_BODY()
@@ -178,6 +176,8 @@ private:
 	TObjectPtr<AArtifact> CurrentArtifact;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArtifactCleanedDynamic, AArtifact*, Artifact);
+
 UCLASS(Blueprintable)
 class DR_JONES_API UArtifactCleaningMode : public UArtifactInteractionMode
 {
@@ -200,13 +200,13 @@ public:
 	float CleaningProgress = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1))
-	float CleaningCompletedThreshold = 0.95f;
+	float CleaningCompletedThreshold = 0.8f;
 
 	FVector4f CurrentPaintChannelMask;
 };
 
 UCLASS(Blueprintable)
-class UArtifactIdentificationMode : public UArtifactInteractionMode
+class DR_JONES_API UArtifactIdentificationMode : public UArtifactInteractionMode
 {
 	GENERATED_BODY()
 
