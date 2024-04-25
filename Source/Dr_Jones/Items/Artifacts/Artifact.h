@@ -4,10 +4,12 @@
 
 #include "ArtifactDatabase.h"
 #include "CoreMinimal.h"
+#include "EnhancedInputComponent.h"
 #include "Items/Item.h"
 
 #include "Artifact.generated.h"
 
+class UInputAction;
 class UInputMappingContext;
 class ADrJonesCharacter;
 class UDynamicMeshComponent;
@@ -156,17 +158,26 @@ class UArtifactInteractionMode : public UObject
 	GENERATED_BODY()
 
 public:
+	static constexpr int32 ArtifactInteractionMappingContextPriority = 690000;
+
 	virtual UWorld* GetWorld() const override;
 
 	void Begin(ADrJonesCharacter& Character, AArtifact& Artifact);
 	void End(ADrJonesCharacter& Character);
 	bool IsActive() const { return CurrentArtifact != nullptr; }
 
-	virtual void OnBegin() PURE_VIRTUAL(UArtifactInteractionMode::OnBegin)
-	virtual void OnEnd() PURE_VIRTUAL(UArtifactInteractionMode::OnEnd)
+	virtual void OnBegin() {}
+	virtual void OnEnd() {}
+
+	virtual void OnBindInput(APlayerController& Controller);
+	virtual void OnUnbindInput(APlayerController& Controller);
 
 	ADrJonesCharacter* GetControllingCharacter() const { return ControllingCharacter; }
 	AArtifact* GetCurrentArtifact() const { return CurrentArtifact; }
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	TObjectPtr<UInputMappingContext> InputMappingContext;
 
 private:
 	UPROPERTY(Transient, BlueprintReadOnly, meta = (AllowPrivateAccess))
@@ -186,6 +197,8 @@ class DR_JONES_API UArtifactCleaningMode : public UArtifactInteractionMode
 public:
 	virtual void OnBegin() override;
 	virtual void OnEnd() override;
+	virtual void OnBindInput(APlayerController& Controller) override;
+	virtual void OnUnbindInput(APlayerController& Controller) override;
 
 	UFUNCTION(BlueprintCallable)
 	void TickBrushStroke();
@@ -193,13 +206,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnArtifactCleanedDynamic OnArtifactCleaned;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UInputMappingContext> InputMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> BrushStrokeAction;
+	int32 BrushStrokeActionBindingHandle;
 
 	UPROPERTY(BlueprintReadOnly)
 	float CleaningProgress = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1), Category = "Config")
 	float CleaningCompletedThreshold = 0.8f;
 
 	FVector4f CurrentPaintChannelMask;

@@ -3,6 +3,7 @@
 #include "Artifact.h"
 
 #include "ArtifactFactory.h"
+#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "StaticMeshLODResourcesToDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
@@ -370,6 +371,11 @@ void UArtifactInteractionMode::Begin(ADrJonesCharacter& Character, AArtifact& Ar
 	CurrentArtifact = &Artifact;
 	ControllingCharacter = &Character;
 
+	if (APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
+	{
+		OnBindInput(*Controller);
+	}
+
 	OnBegin();
 }
 
@@ -380,6 +386,11 @@ void UArtifactInteractionMode::End(ADrJonesCharacter& Character)
 		return;
 	}
 
+	if (APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
+	{
+		OnUnbindInput(*Controller);
+	}
+
 	ensure(&Character == ControllingCharacter);
 	OnEnd();
 
@@ -387,44 +398,68 @@ void UArtifactInteractionMode::End(ADrJonesCharacter& Character)
 	ControllingCharacter = nullptr;
 }
 
-void UArtifactCleaningMode::OnBegin()
+void UArtifactInteractionMode::OnBindInput(APlayerController& Controller)
 {
-	check(GetControllingCharacter());
-	check(GetCurrentArtifact());
-
-	// TODO: Switch on different cleaning tools
-	CurrentPaintChannelMask = FVector4f(1);
-
 	if (!InputMappingContext)
 	{
 		return;
 	}
 
-	if (const APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
+	const ULocalPlayer* LocalPlayer = Controller.GetLocalPlayer();
+	if (!LocalPlayer)
 	{
-		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
-		{
-			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(InputMappingContext, 690000);
-		}
+		return;
 	}
+
+	LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->AddMappingContext(InputMappingContext, ArtifactInteractionMappingContextPriority);
+}
+
+void UArtifactInteractionMode::OnUnbindInput(APlayerController& Controller)
+{
+	if (!InputMappingContext)
+	{
+		return;
+	}
+
+	const ULocalPlayer* LocalPlayer = Controller.GetLocalPlayer();
+	if (!LocalPlayer)
+	{
+		return;
+	}
+
+	LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(InputMappingContext);
+}
+
+void UArtifactCleaningMode::OnBegin()
+{
+	// TODO: Switch on different cleaning tools
+	CurrentPaintChannelMask = FVector4f(1);
 }
 
 void UArtifactCleaningMode::OnEnd()
 {
-	check(GetControllingCharacter());
-	check(GetCurrentArtifact());
+}
 
-	if (!InputMappingContext)
-	{
-		return;
-	}
+void UArtifactCleaningMode::OnBindInput(APlayerController& Controller)
+{
+	Super::OnBindInput(Controller);
 
-	if (const APlayerController* Controller = GetControllingCharacter()->GetController<APlayerController>())
+	if (UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(Controller.InputComponent); ensure(InputComponent))
 	{
-		if (const ULocalPlayer* LocalPlayer = Controller->GetLocalPlayer())
+		if (BrushStrokeAction)
 		{
-			LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>()->RemoveMappingContext(InputMappingContext);
+			BrushStrokeActionBindingHandle = InputComponent->BindAction(BrushStrokeAction, ETriggerEvent::Triggered, this, &UArtifactCleaningMode::TickBrushStroke).GetHandle();
 		}
+	}
+}
+
+void UArtifactCleaningMode::OnUnbindInput(APlayerController& Controller)
+{
+	Super::OnUnbindInput(Controller);
+
+	if (UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(Controller.InputComponent); ensure(InputComponent))
+	{
+		InputComponent->RemoveBindingByHandle(BrushStrokeActionBindingHandle);
 	}
 }
 
