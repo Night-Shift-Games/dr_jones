@@ -61,7 +61,7 @@ void URestPlaceComponent::Rest(const FWorldClockTimeOffset& TimeOffset, ADrJones
 	PlayerController->PlayerCameraManager->StartCameraFade(0.0f, 1.0f, RestFadeTime, FLinearColor::Black, false, true);
 
 	// Fade back in, with a slight delay for the time skip
-	// Clock tick should always be 1 second, the same as the Clock's interval, but make it 2, because it won't necessarily happen right when we rest.
+	// DEPRECATED_Clock tick should always be 1 second, the same as the DEPRECATED_Clock's interval, but make it 2, because it won't necessarily happen right when we rest.
 	TimerManager.SetTimer(FadeInTimerHandle, FTimerDelegate::CreateWeakLambda(this, [this, Player, PlayerController]
 	{
 		if (Player->IsValidLowLevel() && PlayerController->IsValidLowLevel())

@@ -41,9 +41,9 @@ struct DR_JONES_API FWorldClockTime
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FDateTime DateTime;
 
-	FClockTime ToClockTime() const;
-	void InitFromClockTime(const FClockTime& ClockTime);
-	static FWorldClockTime MakeFromClockTime(const FClockTime& ClockTime);
+	DrJones::Deprecated::FClockTime ToClockTime() const;
+	void InitFromClockTime(const DrJones::Deprecated::FClockTime& ClockTime);
+	static FWorldClockTime MakeFromClockTime(const DrJones::Deprecated::FClockTime& ClockTime);
 };
 
 // TODO: Refactor this so it is possible to specify if the events are reoccurring every day / hour etc.
@@ -122,18 +122,18 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	FClock& GetClock() { return Clock; }
+	DrJones::Deprecated::FClock& GetClock() { return DEPRECATED_Clock; }
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Clock")
+	UFUNCTION(BlueprintImplementableEvent, Category = "DEPRECATED_Clock")
 	void OnClockTickEvent(const FWorldClockTime& ClockTime, bool bInitialTick);
 
-	UFUNCTION(BlueprintPure, Category = "Clock")
+	UFUNCTION(BlueprintPure, Category = "DEPRECATED_Clock")
 	static float GetClockSecondsPerRealSecond();
 
-	UFUNCTION(BlueprintCallable, Category = "Clock", meta = (AutoCreateRefTerm = "WorldClockTime"))
+	UFUNCTION(BlueprintCallable, Category = "DEPRECATED_Clock", meta = (AutoCreateRefTerm = "WorldClockTime"))
 	void SetCurrentClockTime(const FWorldClockTime& WorldClockTime);
 
-	UFUNCTION(BlueprintPure, Category = "Clock")
+	UFUNCTION(BlueprintPure, Category = "DEPRECATED_Clock")
 	FWorldClockTime GetCurrentClockTime() const;
 
 	UFUNCTION(BlueprintCallable, Category = "World Event", meta = (AutoCreateRefTerm = "Time, Event"))
@@ -167,13 +167,21 @@ public:
 	void FillArchaeologicalSites();
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Locations")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame, Category = "DrJones|Clock")
+	TObjectPtr<UClock> Clock; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Clock")
+	FDateTime InitialTime;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Locations")
 	TArray<FArchaeologicalSiteFactoryData> DefaultSites;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Locations")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Locations")
 	TMap<FName, TObjectPtr<UArchaeologicalSite>> ArchaeologicalSites;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Clock")
+	////////////////////
+	
+	UPROPERTY(BlueprintAssignable, Category = "DEPRECATED_Clock")
 	FWorldClockTickDelegate ClockTickDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "Global Event")
@@ -183,13 +191,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Quest")
 	TObjectPtr<UQuestSystemComponent> QuestSystemComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
-	FDateTime InitialTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clock")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DEPRECATED_Clock")
 	uint8 bDisableFirstClockTick : 1;
 
 private:
-	FClock Clock = FClock(*this);
-	TMap<FWorldEventHandle, TArray<FClockTaskHandle>> WorldEventCollection;
+	DrJones::Deprecated::FClock DEPRECATED_Clock = DrJones::Deprecated::FClock(*this);
+	TMap<FWorldEventHandle, TArray<DrJones::Deprecated::FClockTaskHandle>> WorldEventCollection;
 };

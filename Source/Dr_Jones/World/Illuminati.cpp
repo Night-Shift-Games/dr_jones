@@ -10,17 +10,17 @@ int32 FWorldClockTimeOffset::ToSeconds() const
 	return Timespan.GetTicks() / ETimespan::TicksPerSecond;
 }
 
-FClockTime FWorldClockTime::ToClockTime() const
+DrJones::Deprecated::FClockTime FWorldClockTime::ToClockTime() const
 {
-	return FClockTime(DateTime);
+	return DrJones::Deprecated::FClockTime(DateTime);
 }
 
-void FWorldClockTime::InitFromClockTime(const FClockTime& ClockTime)
+void FWorldClockTime::InitFromClockTime(const DrJones::Deprecated::FClockTime& ClockTime)
 {
 	DateTime = ClockTime.GetDateTime();
 }
 
-FWorldClockTime FWorldClockTime::MakeFromClockTime(const FClockTime& ClockTime)
+FWorldClockTime FWorldClockTime::MakeFromClockTime(const DrJones::Deprecated::FClockTime& ClockTime)
 {
 	FWorldClockTime WorldClockTime;
 	WorldClockTime.InitFromClockTime(ClockTime);
@@ -36,22 +36,24 @@ bool UWorldEventRule::CanEventExecute_Implementation() const
 AIlluminati::AIlluminati()
 {
 	QuestSystemComponent = CreateDefaultSubobject<UQuestSystemComponent>(TEXT("QuestSystem"));
+	Clock = CreateDefaultSubobject<UClock>(TEXT("WorldClock"));
 }
 
 void AIlluminati::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Clock.SetWorldContext(*GetWorld());
-	Clock.ClockTickDelegate.BindWeakLambda(this, [this](const FClockTime& ClockTime)
+	Clock->InitializeClock(InitialTime);
+	
+	DEPRECATED_Clock.SetWorldContext(*GetWorld());
+	DEPRECATED_Clock.ClockTickDelegate.BindWeakLambda(this, [this](const DrJones::Deprecated::FClockTime& ClockTime)
 	{
 		const FWorldClockTime WorldClockTime = FWorldClockTime::MakeFromClockTime(ClockTime);
-		FIlluminatiDelegates::OnWorldClockTick.Broadcast(WorldClockTime, Clock.IsInitializeTick());
-		ClockTickDelegate.Broadcast(WorldClockTime, Clock.IsInitializeTick());
-		OnClockTickEvent(WorldClockTime, Clock.IsInitializeTick());
+		FIlluminatiDelegates::OnWorldClockTick.Broadcast(WorldClockTime, DEPRECATED_Clock.IsInitializeTick());
+		ClockTickDelegate.Broadcast(WorldClockTime, DEPRECATED_Clock.IsInitializeTick());
+		OnClockTickEvent(WorldClockTime, DEPRECATED_Clock.IsInitializeTick());
 	});
-	Clock.SetTime(FClockTime(InitialTime));
-	Clock.Start(bDisableFirstClockTick);
+	DEPRECATED_Clock.Start(bDisableFirstClockTick);
 }
 
 void AIlluminati::Tick(float DeltaSeconds)
@@ -61,28 +63,27 @@ void AIlluminati::Tick(float DeltaSeconds)
 
 float AIlluminati::GetClockSecondsPerRealSecond()
 {
-	return FClock::ClockSecondsPerRealSecond;
+	return DrJones::Deprecated::FClock::ClockSecondsPerRealSecond;
 }
 
 void AIlluminati::SetCurrentClockTime(const FWorldClockTime& WorldClockTime)
 {
-	Clock.SetTime(WorldClockTime.ToClockTime());
+	DEPRECATED_Clock.SetTime(WorldClockTime.ToClockTime());
 }
 
 FWorldClockTime AIlluminati::GetCurrentClockTime() const
 {
-	return FWorldClockTime::MakeFromClockTime(Clock.GetTime());
+	return FWorldClockTime::MakeFromClockTime(DEPRECATED_Clock.GetTime());
 }
 
 FWorldEventHandle AIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
-	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
-	const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTaskOnce(Time.ToClockTime(),
-		FClockTickDelegate::CreateWeakLambda(this, [Event](const FClockTime& ClockTime)
-		{
-			(void)Event.ExecuteIfBound();
-		}));
+	TArray<DrJones::Deprecated::FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
+	const auto& ClockTaskHandle = DEPRECATED_Clock.ScheduleTaskOnce(Time.ToClockTime(), DrJones::Deprecated::FClockTickDelegate::CreateWeakLambda(this, [Event](const DrJones::Deprecated::FClockTime& ClockTime)
+	{
+		Event.ExecuteIfBound();
+	}));
 	ClockTaskHandles.Add(ClockTaskHandle);
 	return Handle;
 }
@@ -90,17 +91,16 @@ FWorldEventHandle AIlluminati::ScheduleEventOnce(const FWorldClockTime& Time, co
 FWorldEventHandle AIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
-	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
+	TArray<DrJones::Deprecated::FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
 	ClockTaskHandles.Reserve(Schedule.ScheduleTimes.Num());
 	for (const FWorldClockTime& Time : Schedule.ScheduleTimes)
 	{
-		FClockTime ClockTime = Time.ToClockTime();
+		DrJones::Deprecated::FClockTime ClockTime = Time.ToClockTime();
 		ClockTime += (FMath::RandRange(0.0f, Schedule.DeviationMinutes) - Schedule.DeviationMinutes / 2.0f) * 60;
-		const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTask(ClockTime,
-			FClockTickDelegate::CreateWeakLambda(this, [Event](const FClockTime& ClockTime)
-			{
-				(void)Event.ExecuteIfBound();
-			}));
+		const auto ClockTaskHandle = DEPRECATED_Clock.ScheduleTask(ClockTime, DrJones::Deprecated::FClockTickDelegate::CreateWeakLambda(this, [Event](const DrJones::Deprecated::FClockTime& ClockTime)
+		{
+			Event.ExecuteIfBound();
+		}));
 		ClockTaskHandles.Add(ClockTaskHandle);
 	}
 	return Handle;
@@ -109,20 +109,19 @@ FWorldEventHandle AIlluminati::ScheduleEvent(const FWorldEventSchedule& Schedule
 FWorldEventHandle AIlluminati::ScheduleEventWithRule(const FWorldEventSchedule& Schedule, UWorldEventRule* EventRule, const FWorldEventDelegate& Event)
 {
 	const FWorldEventHandle Handle;
-	TArray<FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
+	TArray<DrJones::Deprecated::FClockTaskHandle>& ClockTaskHandles = WorldEventCollection.Add(Handle);
 	ClockTaskHandles.Reserve(Schedule.ScheduleTimes.Num());
 	for (const FWorldClockTime& Time : Schedule.ScheduleTimes)
 	{
-		FClockTime ClockTime = Time.ToClockTime();
+		DrJones::Deprecated::FClockTime ClockTime = Time.ToClockTime();
 		ClockTime += (FMath::RandRange(0.0f, Schedule.DeviationMinutes) - Schedule.DeviationMinutes / 2.0f) * 60;
-		const FClockTaskHandle ClockTaskHandle = Clock.ScheduleTask(ClockTime,
-			FClockTickDelegate::CreateWeakLambda(this, [Event, EventRule](const FClockTime& ClockTime)
+		const DrJones::Deprecated::FClockTaskHandle ClockTaskHandle = DEPRECATED_Clock.ScheduleTask(ClockTime, DrJones::Deprecated::FClockTickDelegate::CreateWeakLambda(this, [Event, EventRule](const DrJones::Deprecated::FClockTime& ClockTime)
+		{
+			if (EventRule->CanEventExecute())
 			{
-				if (EventRule->CanEventExecute())
-				{
-					(void)Event.ExecuteIfBound();
-				}
-			}));
+				Event.ExecuteIfBound();
+			}
+		}));
 		ClockTaskHandles.Add(ClockTaskHandle);
 	}
 	return Handle;
