@@ -57,7 +57,7 @@ void UWidgetRendererComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 		RenderInternalWidget();
 	}
 }
-
+#if WITH_EDITOR
 void UWidgetRendererComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	const FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
@@ -68,6 +68,7 @@ void UWidgetRendererComponent::PostEditChangeProperty(FPropertyChangedEvent& Pro
 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
+#endif
 
 void UWidgetRendererComponent::RenderWidget(UWidget* Widget)
 {

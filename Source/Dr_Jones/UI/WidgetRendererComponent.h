@@ -24,8 +24,9 @@ public:
 	virtual void OnUnregister() override;
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-
+#endif 
 	UFUNCTION(BlueprintCallable)
 	void RenderWidget(UWidget* Widget);
 

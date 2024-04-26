@@ -49,8 +49,10 @@ AArtifact* UArtifactFactory::ConstructArtifact(const UObject& WorldContextObject
 	}
 	
 	AArtifact* NewArtifact = WorldContextObject.GetWorld()->SpawnActor<AArtifact>(SpawnParameters);
+#if WITH_EDITOR
 	NewArtifact->SetActorLabel(SpawnParameters.Name.ToString());
-
+#endif
+	
 	if (NewArtifact)
 	{
 		NewArtifact->SetupArtifact(ArtifactData);
