@@ -7,6 +7,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "StaticMeshLODResourcesToDynamicMesh.h"
 #include "Components/DynamicMeshComponent.h"
+#include "Components/SphereComponent.h"
+#include "Engine/StaticMeshSocket.h"
 #include "Equipment/EquipmentComponent.h"
 #include "GeometryScript/MeshAssetFunctions.h"
 #include "Interaction/InteractableComponent.h"
@@ -150,6 +152,21 @@ void AArtifact::SetupDynamicArtifact()
 	if (!ArtifactStaticMesh)
 	{
 		return;
+	}
+
+	WhispersOfThePastData.Interactables.Reset();
+
+	FString SocketName;
+	for (UStaticMeshSocket* Socket : ArtifactStaticMesh->Sockets)
+	{
+		// TODO: Unhardcode socket prefix
+		static const FString SocketPrefix = TEXT("ACS_");
+
+		Socket->SocketName.ToString(SocketName);
+		if (SocketName.StartsWith(SocketPrefix))
+		{
+			WhispersOfThePastData.Interactables.Add(FTransform(Socket->RelativeRotation, Socket->RelativeLocation, Socket->RelativeScale));
+		}
 	}
 
 	FStaticMeshRenderData* RenderData = ArtifactStaticMesh->GetRenderData();
@@ -541,10 +558,63 @@ void UArtifactCleaningMode::TickBrushStroke()
 
 void UArtifactIdentificationMode::OnBegin()
 {
-	Super::OnBegin();
+	check(GetCurrentArtifact());
+	for (const FTransform& Transform : GetCurrentArtifact()->WhispersOfThePastData.Interactables)
+	{
+		USphereComponent* Sphere = ExactCast<USphereComponent>(GetCurrentArtifact()->AddComponentByClass(USphereComponent::StaticClass(), true, Transform, true));
+		check(Sphere);
+
+		Sphere->SetupAttachment(GetCurrentArtifact()->GetMeshComponent());
+		// TODO: Unhardcode sphere radius
+		Sphere->InitSphereRadius(3.0f);
+		GetCurrentArtifact()->FinishAddComponent(Sphere, true, Transform);
+		GetCurrentArtifact()->AddInstanceComponent(Sphere);
+
+		Sphere->ComponentTags.Add(SphereComponentTag);
+	}
 }
 
 void UArtifactIdentificationMode::OnEnd()
 {
-	Super::OnEnd();
+	check(GetCurrentArtifact());
+	TArray<USphereComponent*, TInlineAllocator<8>> Spheres;
+	GetCurrentArtifact()->GetComponents(Spheres);
+	for (USphereComponent* Sphere : Spheres)
+	{
+		if (!Sphere->ComponentHasTag(SphereComponentTag))
+		{
+			continue;
+		}
+
+		GetCurrentArtifact()->RemoveInstanceComponent(Sphere);
+		Sphere->DestroyComponent();
+	}
+}
+
+void UArtifactIdentificationMode::OnBindInput(APlayerController& Controller)
+{
+	Super::OnBindInput(Controller);
+
+	if (UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(Controller.InputComponent); ensure(InputComponent))
+	{
+		if (InteractAction)
+		{
+			InteractActionBindingHandle = InputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UArtifactIdentificationMode::Interact).GetHandle();
+		}
+	}
+}
+
+void UArtifactIdentificationMode::OnUnbindInput(APlayerController& Controller)
+{
+	Super::OnUnbindInput(Controller);
+
+	if (UEnhancedInputComponent* InputComponent = Cast<UEnhancedInputComponent>(Controller.InputComponent); ensure(InputComponent))
+	{
+		InputComponent->RemoveBindingByHandle(InteractActionBindingHandle);
+	}
+}
+
+void UArtifactIdentificationMode::Interact()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Interacted with artifact during identification!"));
 }

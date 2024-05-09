@@ -62,6 +62,15 @@ struct FProceduralArtifactData
 	float GeometryDamage = 0.0f;
 };
 
+USTRUCT(BlueprintType)
+struct FArtifactWhispersOfThePastData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FTransform> Interactables;
+};
+
 UCLASS(Blueprintable)
 class DR_JONES_API AArtifact : public AItem
 {
@@ -130,6 +139,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Artifact")
 	FArtifactDirtData DirtData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Artifact")
+	FArtifactWhispersOfThePastData WhispersOfThePastData;
 
 	UPROPERTY(EditAnywhere, Category = "DrJones|Artifact")
 	TObjectPtr<UStaticMesh> ArtifactStaticMesh;
@@ -225,6 +237,17 @@ class DR_JONES_API UArtifactIdentificationMode : public UArtifactInteractionMode
 	GENERATED_BODY()
 
 public:
+	static constexpr TCHAR SphereComponentTag[] = TEXT("_ArtifactIdentificationMode");
+
 	virtual void OnBegin() override;
 	virtual void OnEnd() override;
+	virtual void OnBindInput(APlayerController& Controller) override;
+	virtual void OnUnbindInput(APlayerController& Controller) override;
+
+	UFUNCTION(BlueprintCallable)
+	void Interact();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> InteractAction;
+	int32 InteractActionBindingHandle;
 };

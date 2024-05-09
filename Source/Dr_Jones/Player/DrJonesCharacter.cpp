@@ -58,7 +58,7 @@ void ADrJonesCharacter::StartInspect(AArtifact* ArtifactToInspect)
 	ArtifactOverviewer->InitializeOverviewer(*this,*FindComponentByClass<UCameraComponent>(), *ArtifactToInspect);
 	ArtifactOverviewer->StartOverview();
 
-	ChangeArtifactInteractionMode<UArtifactCleaningMode>();
+	ChangeArtifactInteractionMode<UArtifactIdentificationMode>();
 }
 
 void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
