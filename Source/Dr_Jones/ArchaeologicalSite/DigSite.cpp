@@ -85,7 +85,7 @@ void ADigSite::UpdateMesh(bool bAsync)
 	};
 	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
 #if WITH_EDITORONLY_DATA
-		, VoxelGrid->GridVisualizer->SurfaceNetsDebugContext
+		, VoxelGrid->GridVisualizer ? VoxelGrid->GridVisualizer->SurfaceNetsDebugContext : nullptr
 #endif
 	);
 }

@@ -442,11 +442,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			AsyncTask(ENamedThreads::GameThread, [EditDynamicMeshFn,
 				CombinedVerticesAsync = MoveTemp(CombinedVerticesAsync),
 				CombinedTrianglesAsync = MoveTemp(CombinedTrianglesAsync),
-				CombinedMaterialWeights = MoveTemp(CombinedMaterialWeights),
-				DebugContext]
+				CombinedMaterialWeights = MoveTemp(CombinedMaterialWeights)]
 			{
 				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync, CombinedMaterialWeights);
-				// NS::SurfaceNets::Debug::DrawSurfaceNetsDebug(*DebugContext);
 			});
 		});
 	}
@@ -471,7 +469,6 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 		if (DynamicMesh)
 		{
 			EditDynamicMeshFn(CombinedVertices, CombinedTriangles, CombinedMaterialWeights);
-			// NS::SurfaceNets::Debug::DrawSurfaceNetsDebug(*DebugContext);
 		}
 		else
 		{

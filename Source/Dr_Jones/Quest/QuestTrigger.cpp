@@ -14,9 +14,12 @@ AQuestTrigger::AQuestTrigger()
 
 #if WITH_EDITORONLY_DATA
 	LabelComponent = CreateEditorOnlyDefaultSubobject<UTextRenderComponent>(TEXT("LabelComponent"));
-	LabelComponent->SetHorizontalAlignment(EHTA_Center);
-	LabelComponent->SetWorldSize(32.0f);
-	LabelComponent->SetupAttachment(GetCollisionComponent());
+	if (LabelComponent)
+	{
+		LabelComponent->SetHorizontalAlignment(EHTA_Center);
+		LabelComponent->SetWorldSize(32.0f);
+		LabelComponent->SetupAttachment(GetCollisionComponent());
+	}
 #endif
 }
 
@@ -57,10 +60,12 @@ void AQuestTrigger::OnConstruction(const FTransform& Transform)
 
 	const FVector Extent = Box->GetScaledBoxExtent();
 
-	check(LabelComponent);
-	LabelComponent->SetRelativeLocation(FVector(0.0f, 0.0f, Extent.Z * 1.0f / 3.0f));
+	if (LabelComponent)
+	{
+		LabelComponent->SetRelativeLocation(FVector(0.0f, 0.0f, Extent.Z * 1.0f / 3.0f));
 
-	LabelComponent->SetText(FText::FromName(TriggerIdentifier));
-	LabelComponent->SetTextRenderColor(Box->ShapeColor);
+		LabelComponent->SetText(FText::FromName(TriggerIdentifier));
+		LabelComponent->SetTextRenderColor(Box->ShapeColor);
+	}
 }
 #endif
