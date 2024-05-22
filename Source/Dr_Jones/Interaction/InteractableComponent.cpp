@@ -32,12 +32,18 @@ bool UInteractableComponent::AltInteract(ADrJonesCharacter* Player)
 
 UMeshComponent* UInteractableComponent::GetOwnerMesh() const
 {
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return nullptr;
+	}
 	USceneComponent* ParentSceneComponent = GetAttachParent();
-	if (ParentSceneComponent && ParentSceneComponent->GetOwner() != GetOwner())
+	if (ParentSceneComponent && ParentSceneComponent->GetOwner() != Owner)
 	{
 		ParentSceneComponent = nullptr;
 	}
-	return ParentSceneComponent ? Cast<UMeshComponent>(ParentSceneComponent) : GetOwner()->FindComponentByClass<UMeshComponent>();
+	// TODO: Interactable component shouldn't know anything about artifacts, it creates unneeded dependency - it is a hotfix for double mesh in artifacts.
+	return ParentSceneComponent ? Cast<UMeshComponent>(ParentSceneComponent) : Owner->IsA<AArtifact>() ? Cast<AArtifact>(Owner)->GetMeshComponent() : Owner->FindComponentByClass<UMeshComponent>();
 }
 
 void UInteractableComponent::SetRenderPostProcessInteractionOutline(bool bRender) const
