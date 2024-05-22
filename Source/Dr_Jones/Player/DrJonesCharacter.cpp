@@ -67,6 +67,9 @@ void ADrJonesCharacter::StopInspect(AArtifact* ArtifactToInspect)
 	{
 		return;
 	}
+
+	ChangeArtifactInteractionMode(nullptr);
+
 	ArtifactOverviewer->EndOverview();
 }
 
@@ -83,7 +86,10 @@ void ADrJonesCharacter::ChangeArtifactInteractionMode(UArtifactInteractionMode* 
 	}
 
 	CurrentArtifactInteractionMode = Mode;
-	CurrentArtifactInteractionMode->Begin(*this, *ArtifactOverviewer->ArtifactToOverview);
+	if (CurrentArtifactInteractionMode)
+	{
+		CurrentArtifactInteractionMode->Begin(*this, *ArtifactOverviewer->ArtifactToOverview);
+	}
 }
 
 UArtifactInteractionMode* ADrJonesCharacter::FindArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> ModeClass)
