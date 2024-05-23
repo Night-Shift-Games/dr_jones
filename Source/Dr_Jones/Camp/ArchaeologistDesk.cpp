@@ -9,7 +9,7 @@
 #include "Utilities/Utilities.h"
 #include "World/Illuminati.h"
 
-AArchaeologistDesk::AArchaeologistDesk() : Super()
+AArchaeologistDesk::AArchaeologistDesk()
 {
 	DeskMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Artifact Crate Static Mesh"));
 	RootComponent = DeskMesh;
@@ -19,7 +19,8 @@ AArchaeologistDesk::AArchaeologistDesk() : Super()
 void AArchaeologistDesk::BeginPlay()
 {
 	Super::BeginPlay();
-	InteractableComponent->InteractDelegate.AddDynamic(this, &AArchaeologistDesk::OnInteract);
+
+	InteractableComponent->InteractDelegate.AddUniqueDynamic(this, &AArchaeologistDesk::OnInteract);
 }
 
 void AArchaeologistDesk::AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Player)

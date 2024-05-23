@@ -43,15 +43,28 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopInspect(AArtifact* ArtifactToInspect);
 
-	UFUNCTION(BlueprintCallable, Category = "DrJones")
-	void ChangeArtifactInteractionMode(UArtifactInteractionMode* Mode);
+	UFUNCTION(BlueprintCallable, Category = "DrJones", DisplayName = "Change Artifact Interaction Mode (Object)")
+	void ChangeArtifactInteractionMode_Object(UArtifactInteractionMode* Mode);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones", meta = (DeterminesOutputType = "Mode"))
+	UArtifactInteractionMode* ChangeArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> Mode);
+
 	template <typename T> requires TIsDerivedFrom<T, UArtifactInteractionMode>::Value
-	void ChangeArtifactInteractionMode() { ChangeArtifactInteractionMode(FindArtifactInteractionMode<T>()); }
+	T* ChangeArtifactInteractionMode()
+	{
+		ChangeArtifactInteractionMode_Object(FindArtifactInteractionMode<T>());
+		check(!CurrentArtifactInteractionMode || CurrentArtifactInteractionMode->IsA<T>());
+		return static_cast<T*>(CurrentArtifactInteractionMode.Get());
+	}
 
 	UFUNCTION(BlueprintPure, Category = "DrJones", meta = (DeterminesOutputType = "ModeClass"))
 	UArtifactInteractionMode* FindArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> ModeClass);
+
 	template <typename T> requires TIsDerivedFrom<T, UArtifactInteractionMode>::Value
-	T* FindArtifactInteractionMode() { return static_cast<T*>(FindArtifactInteractionMode(T::StaticClass())); }
+	T* FindArtifactInteractionMode()
+	{
+		return static_cast<T*>(FindArtifactInteractionMode(T::StaticClass()));
+	}
 
 private:
 	void Move(const FInputActionValue& InputActionValue);
