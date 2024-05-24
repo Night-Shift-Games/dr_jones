@@ -20,7 +20,7 @@ public:
 	URestPlaceComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "Rest", meta = (Keywords = "Time"))
-	void Rest(const FWorldClockTimeOffset& TimeOffset, ADrJonesCharacter* Player);
+	void Rest(const FTimespan TimeOffset, ADrJonesCharacter* Player);
 
 	UFUNCTION()
 	void OnInteract(ADrJonesCharacter* Player);
@@ -30,7 +30,7 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rest")
-	FWorldClockTimeOffset DefaultRestingTime;
+	FTimespan DefaultRestingTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rest")
 	float RestFadeTime = 1.0f;

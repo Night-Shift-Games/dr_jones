@@ -9,14 +9,14 @@ URestPlaceComponent::URestPlaceComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void URestPlaceComponent::Rest(const FWorldClockTimeOffset& TimeOffset, ADrJonesCharacter* Player)
+void URestPlaceComponent::Rest(const FTimespan TimeOffset, ADrJonesCharacter* Player)
 {
 	if (!Player || FullSequenceTimerHandle.IsValid())
 	{
 		return;
 	}
 
-	if (TimeOffset.Timespan <= 0)
+	if (TimeOffset.IsZero())
 	{
 		UE_LOG(LogDrJones, Error, TEXT("Cannot rest for 0 or less seconds."));
 		return;
@@ -53,15 +53,13 @@ void URestPlaceComponent::Rest(const FWorldClockTimeOffset& TimeOffset, ADrJones
 	TimerManager.SetTimer(RestTimerHandle, FTimerDelegate::CreateLambda([Illuminati, TimeOffset]
 	{
 		check(Illuminati->IsValidLowLevel());
-		Illuminati->GetClock().SkipTime(TimeOffset.Timespan);
+		Illuminati->Clock->SkipTime(TimeOffset);
 	}), RestFadeTime, false);
 
 	check(PlayerController->PlayerCameraManager);
 
 	PlayerController->PlayerCameraManager->StartCameraFade(0.0f, 1.0f, RestFadeTime, FLinearColor::Black, false, true);
-
-	// Fade back in, with a slight delay for the time skip
-	// DEPRECATED_Clock tick should always be 1 second, the same as the DEPRECATED_Clock's interval, but make it 2, because it won't necessarily happen right when we rest.
+	
 	TimerManager.SetTimer(FadeInTimerHandle, FTimerDelegate::CreateWeakLambda(this, [this, Player, PlayerController]
 	{
 		if (Player->IsValidLowLevel() && PlayerController->IsValidLowLevel())
