@@ -3,7 +3,7 @@
 #include "Clock.h"
 #include "Engine/World.h"
 
-void UClock::InitializeClock(FDateTime StartTime)
+void UClock::InitializeClock(const FDateTime StartTime)
 {
 	OnClockNativeTick.AddWeakLambda(this, [&](FDateTime Time){ OnClockTick.Broadcast(Time); });
 	CurrentTime = StartTime;
@@ -38,17 +38,17 @@ void UClock::SetClockPaused(bool bPause)
 	}
 }
 
-void UClock::SetTime(FDateTime NewTime)
+void UClock::SetTime(const FDateTime NewTime)
 {
 	CurrentTime = NewTime;
 }
 
-FDateTime UClock::SkipTime(FTimespan TimeToSkip)
+FDateTime UClock::SkipTime(const FTimespan TimeToSkip)
 {
 	return CurrentTime += TimeToSkip;
 }
 
-FTimespan UClock::SkipTime(FDateTime TargetTime)
+FTimespan UClock::SkipTime(const FDateTime TargetTime)
 {
 	const FTimespan DeltaTime = CurrentTime - TargetTime;
 	SkipTime(DeltaTime);

@@ -8,23 +8,23 @@
 
 static TAutoConsoleVariable CVarTime(TEXT("NS.Time"), 0, TEXT("Shows current date and time"));
 
-UCLASS(meta = (Instanced))
+UCLASS()
 class DR_JONES_API UClock : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void InitializeClock(FDateTime StartTime);
+	void InitializeClock(const FDateTime StartTime);
 	void TickClock();
 	
 	void SetClockPaused(bool bPause = true);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "DrJones|Clock")
 	FDateTime GetCurrentTime() const { return CurrentTime; }
 	
-	void SetTime(FDateTime NewTime);
-	FDateTime SkipTime(FTimespan TimeToSkip);
-	FTimespan SkipTime(FDateTime TargetTime);
+	void SetTime(const FDateTime NewTime);
+	FDateTime SkipTime(const FTimespan TimeToSkip);
+	FTimespan SkipTime(const FDateTime TargetTime);
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnClockNativeTick, FDateTime);
 	FOnClockNativeTick OnClockNativeTick;
@@ -37,8 +37,8 @@ public:
 	UPROPERTY(SaveGame)
 	FDateTime CurrentTime;
 
-	UPROPERTY(EditAnywhere)
-	FTimespan TimeToApplyPerSecond = FTimespan(0,0,30);
+	UPROPERTY(EditAnywhere, Category = "DrJones|Clock")
+	FTimespan TimeToApplyPerSecond = FTimespan(0,1,0);
 	
 	FTimerHandle ClockTimer;
 };
