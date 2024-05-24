@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Engine/SCS_Node.h"
+#include "Engine/SimpleConstructionScript.h"
 #include "Player/DrJonesCharacter.h"
 #include "UI/DrJonesWidgetBase.h"
 
@@ -38,6 +40,65 @@ namespace Utilities
 	uint32 WrapIndexToArray(int64 Index, TSet<T> Array)
 	{
 		return WrapIndexToSize(Index, Array.Num());
+	}
+
+	template<typename T>
+	typename std::enable_if<std::is_base_of<UActorComponent, T>::value, T*>::type
+	FindComponentFromCDO(UClass* InActorClass)
+	{
+		if (!IsValid(InActorClass))
+		{
+			return nullptr;
+		}
+
+		const AActor* ActorCDO = InActorClass->GetDefaultObject<AActor>();
+		if (const UActorComponent* FoundComponent = ActorCDO->FindComponentByClass<T>(); FoundComponent != nullptr)
+		{
+			return Cast<T>(FoundComponent);
+		}
+
+		UBlueprintGeneratedClass* RootBlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(InActorClass);
+		UClass* ActorClass = InActorClass;
+		
+		do
+		{
+			const UBlueprintGeneratedClass* ActorBlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(ActorClass);
+			if (!ActorBlueprintGeneratedClass)
+			{
+				return nullptr;
+			}
+
+			const TArray<USCS_Node*>& ActorBlueprintNodes = ActorBlueprintGeneratedClass->SimpleConstructionScript->GetAllNodes();
+			for (USCS_Node* Node : ActorBlueprintNodes)
+			{
+				if (Node->ComponentClass->IsChildOf<T>())
+				{
+					return Cast<T>(Node->GetActualComponentTemplate(RootBlueprintGeneratedClass));
+				}
+			}
+			ActorClass = Cast<UClass>(ActorClass->GetSuperStruct());
+
+		} while (ActorClass != AActor::StaticClass());
+
+		return nullptr;
+	};
+	
+	template <typename T, typename TEnableIf<TIsDerivedFrom<T, AActor>::Value>::Type* = nullptr>
+	void FindActorsOfClass(const UObject* WorldContextObject, TArray<T*>& OutActors)
+	{
+		QUICK_SCOPE_CYCLE_COUNTER(Bambaa_Utilities_FindActorsOfClass);
+		
+		OutActors.Reset();
+
+		check(GEngine);
+		if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		{
+			for (TActorIterator<T> It(World, T::StaticClass()); It; ++It)
+			{
+				T* Actor = *It;
+				OutActors.Add(Actor);
+			}
+		}
 	}
 }	
 
