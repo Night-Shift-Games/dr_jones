@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "NightShiftMacros.h"
 #include "Engine/SCS_Node.h"
 #include "Engine/SimpleConstructionScript.h"
 #include "Player/DrJonesCharacter.h"
@@ -46,10 +47,7 @@ namespace Utilities
 	typename std::enable_if<std::is_base_of<UActorComponent, T>::value, T*>::type
 	FindComponentFromCDO(UClass* InActorClass)
 	{
-		if (!IsValid(InActorClass))
-		{
-			return nullptr;
-		}
+		NS_EARLY_R(!IsValid(InActorClass), nullptr);
 
 		const AActor* ActorCDO = InActorClass->GetDefaultObject<AActor>();
 		if (const UActorComponent* FoundComponent = ActorCDO->FindComponentByClass<T>(); FoundComponent != nullptr)
@@ -63,13 +61,10 @@ namespace Utilities
 		do
 		{
 			const UBlueprintGeneratedClass* ActorBlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(ActorClass);
-			if (!ActorBlueprintGeneratedClass)
-			{
-				return nullptr;
-			}
+			NS_EARLY_R(!ActorBlueprintGeneratedClass, nullptr);
 
 			const TArray<USCS_Node*>& ActorBlueprintNodes = ActorBlueprintGeneratedClass->SimpleConstructionScript->GetAllNodes();
-			for (USCS_Node* Node : ActorBlueprintNodes)
+			for (const USCS_Node* Node : ActorBlueprintNodes)
 			{
 				if (Node->ComponentClass->IsChildOf<T>())
 				{
@@ -81,23 +76,21 @@ namespace Utilities
 		} while (ActorClass != AActor::StaticClass());
 
 		return nullptr;
-	};
+	}; 
 	
 	template <typename T, typename TEnableIf<TIsDerivedFrom<T, AActor>::Value>::Type* = nullptr>
-	void FindActorsOfClass(const UObject* WorldContextObject, TArray<T*>& OutActors)
+	void FindObjectsOfClass(const UObject* WorldContextObject, TArray<T*>& OutObjects)
 	{
-		QUICK_SCOPE_CYCLE_COUNTER(Bambaa_Utilities_FindActorsOfClass);
-		
-		OutActors.Reset();
+		OutObjects.Reset();
 
 		check(GEngine);
-		if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		NS_EARLY(!World);
+		
+		for (TObjectIterator<T> It(World, T::StaticClass()); It; ++It)
 		{
-			for (TActorIterator<T> It(World, T::StaticClass()); It; ++It)
-			{
-				T* Actor = *It;
-				OutActors.Add(Actor);
-			}
+			T* Object = *It;
+			OutObjects.Add(Object);
 		}
 	}
 }	

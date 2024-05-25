@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #ifndef NS_EARLY
-	#define B_EARLY(exp) \
+	#define NS_EARLY(exp) \
 	{\
 		if (exp)\
 		{\
@@ -11,7 +11,7 @@
 #endif
 
 #ifndef NS_EARLY_R
-	#define B_EARLY_R(exp, retval) \
+	#define NS_EARLY_R(exp, retval) \
 	{\
 		if (exp)\
 		{\
