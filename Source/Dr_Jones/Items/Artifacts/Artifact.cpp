@@ -12,6 +12,7 @@
 #include "Equipment/EquipmentComponent.h"
 #include "GeometryScript/MeshAssetFunctions.h"
 #include "Interaction/InteractableComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestMessages.h"
 #include "Utilities/LocalMeshOctree.h"
@@ -154,7 +155,7 @@ void AArtifact::SetupDynamicArtifact()
 		return;
 	}
 
-	WhispersOfThePastData.Interactables.Reset();
+	WhispersOfThePastData.Reset();
 
 	FString SocketName;
 	for (UStaticMeshSocket* Socket : ArtifactStaticMesh->Sockets)
@@ -165,7 +166,8 @@ void AArtifact::SetupDynamicArtifact()
 		Socket->SocketName.ToString(SocketName);
 		if (SocketName.StartsWith(SocketPrefix))
 		{
-			WhispersOfThePastData.Interactables.Add(FTransform(Socket->RelativeRotation, Socket->RelativeLocation, Socket->RelativeScale));
+			FArtifactWhisperOfThePastData& Data = WhispersOfThePastData.Emplace_GetRef();
+			Data.InteractableTransform = FTransform(Socket->RelativeRotation, Socket->RelativeLocation, Socket->RelativeScale);
 		}
 	}
 
@@ -556,37 +558,95 @@ void UArtifactCleaningMode::TickBrushStroke()
 	}
 }
 
+void UArtifactIdentificationMode::Tick(float DeltaSeconds)
+{
+	AArtifact* Artifact = GetCurrentArtifact();
+	if (!Artifact || !Artifact->IsDynamic())
+	{
+		TryChangePointedSphere(nullptr);
+		return;
+	}
+
+	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this, ECC_Visibility, true);
+	if (!HitResult.IsValidBlockingHit() || HitResult.GetActor() != Artifact)
+	{
+		TryChangePointedSphere(nullptr);
+		return;
+	}
+
+	UArtifactIdentificationSphereComponent* Sphere = Cast<UArtifactIdentificationSphereComponent>(HitResult.GetComponent());
+	if (Sphere && Sphere->bVisibleOnlyInFront)
+	{
+		ADrJonesCharacter* Owner = GetTypedOuter<ADrJonesCharacter>();
+		if (!Owner)
+		{
+			TryChangePointedSphere(nullptr);
+			return;
+		}
+
+		APlayerController* Controller = Owner->GetController<APlayerController>();
+		if (!Controller)
+		{
+			TryChangePointedSphere(nullptr);
+			return;
+		}
+
+		int32 ViewportX, ViewportY;
+		Controller->GetViewportSize(ViewportX, ViewportY);
+		FVector2D ScreenCenter = FVector2D(ViewportX / 2.0, ViewportY / 2.0);
+
+		FVector WorldLocation, WorldDirection;
+		if (!Controller->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
+		{
+			TryChangePointedSphere(nullptr);
+			return;
+		}
+
+		// right vector because blender's front is -Y and we're setting up the sockets using snap's system
+		const double Dot = FVector::DotProduct(-Sphere->GetRightVector(), -WorldDirection);
+		if (Dot <= 0)
+		{
+			TryChangePointedSphere(nullptr);
+			return;
+		}
+	}
+
+	TryChangePointedSphere(Sphere);
+}
+
 void UArtifactIdentificationMode::OnBegin()
 {
 	check(GetCurrentArtifact());
-	for (const FTransform& Transform : GetCurrentArtifact()->WhispersOfThePastData.Interactables)
+	for (auto It = GetCurrentArtifact()->WhispersOfThePastData.CreateConstIterator(); It; ++It)
 	{
-		USphereComponent* Sphere = ExactCast<USphereComponent>(GetCurrentArtifact()->AddComponentByClass(USphereComponent::StaticClass(), true, Transform, true));
+		const FArtifactWhisperOfThePastData& Data = *It;
+		const FTransform& Transform = Data.InteractableTransform;
+		UArtifactIdentificationSphereComponent* Sphere = ExactCast<UArtifactIdentificationSphereComponent>(GetCurrentArtifact()->AddComponentByClass(UArtifactIdentificationSphereComponent::StaticClass(), true, Transform, true));
 		check(Sphere);
 
 		Sphere->SetupAttachment(GetCurrentArtifact()->GetMeshComponent());
 		// TODO: Unhardcode sphere radius
 		Sphere->InitSphereRadius(3.0f);
+		Sphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
 		GetCurrentArtifact()->FinishAddComponent(Sphere, true, Transform);
 		GetCurrentArtifact()->AddInstanceComponent(Sphere);
 
-		Sphere->ComponentTags.Add(SphereComponentTag);
+		Sphere->Type = EArtifactIdentificationSphereType::WhispersOfThePast;
+		Sphere->IndexInWOTPArray = It.GetIndex();
 	}
 }
 
 void UArtifactIdentificationMode::OnEnd()
 {
-	check(GetCurrentArtifact());
-	TArray<USphereComponent*, TInlineAllocator<8>> Spheres;
-	GetCurrentArtifact()->GetComponents(Spheres);
-	for (USphereComponent* Sphere : Spheres)
-	{
-		if (!Sphere->ComponentHasTag(SphereComponentTag))
-		{
-			continue;
-		}
+	AArtifact* Artifact = GetCurrentArtifact();
+	check(Artifact);
 
-		GetCurrentArtifact()->RemoveInstanceComponent(Sphere);
+	TArray<UArtifactIdentificationSphereComponent*, TInlineAllocator<8>> Spheres;
+	Artifact->GetComponents(Spheres);
+	for (UArtifactIdentificationSphereComponent* Sphere : Spheres)
+	{
+		Artifact->RemoveInstanceComponent(Sphere);
 		Sphere->DestroyComponent();
 	}
 }
@@ -614,7 +674,42 @@ void UArtifactIdentificationMode::OnUnbindInput(APlayerController& Controller)
 	}
 }
 
+void UArtifactIdentificationMode::TryChangePointedSphere(UArtifactIdentificationSphereComponent* NewSphere)
+{
+	UArtifactIdentificationSphereComponent* OldSphere = PointedIdentificationSphere;
+	PointedIdentificationSphere = NewSphere;
+	if (PointedIdentificationSphere != OldSphere)
+	{
+		OnPointedSphereChanged(OldSphere, PointedIdentificationSphere);
+	}
+}
+
+void UArtifactIdentificationMode::OnPointedSphereChanged(UArtifactIdentificationSphereComponent* OldSphere, UArtifactIdentificationSphereComponent* NewSphere)
+{
+	// TODO: Podswietlanie symboli callback itp tutaj
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, FString::Printf(TEXT("Sphere changed")));
+}
+
 void UArtifactIdentificationMode::Interact()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, TEXT("Interacted with artifact during identification!"));
+	AArtifact* Artifact = GetCurrentArtifact();
+	if (!PointedIdentificationSphere) return;
+
+	switch (PointedIdentificationSphere->Type)
+	{
+		case EArtifactIdentificationSphereType::WhispersOfThePast:
+		{
+			if (!Artifact->WhispersOfThePastData.IsValidIndex(PointedIdentificationSphere->IndexInWOTPArray))
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("Cos sie zrypalo."));
+				return;
+			}
+
+			const FArtifactWhisperOfThePastData& Data = Artifact->WhispersOfThePastData[PointedIdentificationSphere->IndexInWOTPArray];
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("Interacted with WOTP symbol [%i]"), PointedIdentificationSphere->IndexInWOTPArray));
+			// TODO: podswietlenie pokazanie dodanie do jurnala itp
+
+			break;
+		}
+	}
 }

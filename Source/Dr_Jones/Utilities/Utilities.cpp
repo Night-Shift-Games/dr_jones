@@ -89,7 +89,7 @@ namespace Utilities
 		return GetWidgetManager(WorldContextObject).GetWidget(WidgetClass);
 	}
 
-	FHitResult GetPlayerSightTarget(const float Reach, const UObject& WorldContextObject, ECollisionChannel CollisionChannel)
+	FHitResult GetPlayerSightTarget(const float Reach, const UObject& WorldContextObject, ECollisionChannel CollisionChannel, bool bTraceComplex)
 	{
 		UWorld* World = WorldContextObject.GetWorld();
 		if (!World)
@@ -110,8 +110,10 @@ namespace Utilities
 
 		FVector LineEnd = WorldLocation + WorldDirection * Reach;
 		FHitResult Hit;
-	
-		World->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, CollisionChannel);
+
+		FCollisionQueryParams Params;
+		Params.bTraceComplex = bTraceComplex;
+		World->LineTraceSingleByChannel(Hit, WorldLocation, LineEnd, CollisionChannel, Params);
 
 		if (!Hit.bBlockingHit)
 		{

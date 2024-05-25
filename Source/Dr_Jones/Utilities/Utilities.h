@@ -21,7 +21,7 @@ namespace Utilities
 	double GetMeshZOffset(const AActor& Actor);
 	UDrJonesWidgetBase* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass);
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
-	FHitResult GetPlayerSightTarget(const float Reach,  const UObject& WorldContextObject, ECollisionChannel CollisionChannel = ECC_Visibility);
+	FHitResult GetPlayerSightTarget(const float Reach,  const UObject& WorldContextObject, ECollisionChannel CollisionChannel = ECC_Visibility, bool bTraceComplex = false);
 	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
 	
 	template <class TWidgetClass>

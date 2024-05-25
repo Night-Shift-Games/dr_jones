@@ -5,6 +5,7 @@
 #include "ArtifactDatabase.h"
 #include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
+#include "Components/SphereComponent.h"
 #include "Items/Item.h"
 
 #include "Artifact.generated.h"
@@ -63,12 +64,12 @@ struct FProceduralArtifactData
 };
 
 USTRUCT(BlueprintType)
-struct FArtifactWhispersOfThePastData
+struct FArtifactWhisperOfThePastData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FTransform> Interactables;
+	FTransform InteractableTransform;
 };
 
 UCLASS(Blueprintable)
@@ -141,7 +142,7 @@ public:
 	FArtifactDirtData DirtData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Artifact")
-	FArtifactWhispersOfThePastData WhispersOfThePastData;
+	TArray<FArtifactWhisperOfThePastData> WhispersOfThePastData;
 
 	UPROPERTY(EditAnywhere, Category = "DrJones|Artifact")
 	TObjectPtr<UStaticMesh> ArtifactStaticMesh;
@@ -178,6 +179,7 @@ public:
 	void End(ADrJonesCharacter& Character);
 	bool IsActive() const { return CurrentArtifact != nullptr; }
 
+	virtual void Tick(float DeltaSeconds) {}
 	virtual void OnBegin() {}
 	virtual void OnEnd() {}
 
@@ -220,7 +222,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> BrushStrokeAction;
-	int32 BrushStrokeActionBindingHandle;
+	int32 BrushStrokeActionBindingHandle = INDEX_NONE;
 
 	UPROPERTY(BlueprintReadOnly)
 	float CleaningProgress = 0.0f;
@@ -228,7 +230,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1), Category = "Config")
 	float CleaningCompletedThreshold = 0.8f;
 
-	FVector4f CurrentPaintChannelMask;
+	FVector4f CurrentPaintChannelMask = FVector4f::Zero();
+};
+
+enum class EArtifactIdentificationSphereType : int32
+{
+	WhispersOfThePast,
+};
+
+UCLASS(Blueprintable)
+class UArtifactIdentificationSphereComponent : public USphereComponent
+{
+	GENERATED_BODY()
+
+public:
+	EArtifactIdentificationSphereType Type = EArtifactIdentificationSphereType::WhispersOfThePast;
+	int32 IndexInWOTPArray = INDEX_NONE;
+	bool bVisibleOnlyInFront = true;
 };
 
 UCLASS(Blueprintable)
@@ -237,17 +255,24 @@ class DR_JONES_API UArtifactIdentificationMode : public UArtifactInteractionMode
 	GENERATED_BODY()
 
 public:
-	static constexpr TCHAR SphereComponentTag[] = TEXT("_ArtifactIdentificationMode");
-
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnBegin() override;
 	virtual void OnEnd() override;
 	virtual void OnBindInput(APlayerController& Controller) override;
 	virtual void OnUnbindInput(APlayerController& Controller) override;
+
+	void TryChangePointedSphere(UArtifactIdentificationSphereComponent* NewSphere);
+
+	void OnPointedSphereChanged(UArtifactIdentificationSphereComponent* OldSphere, UArtifactIdentificationSphereComponent* NewSphere);
 
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> InteractAction;
-	int32 InteractActionBindingHandle;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UArtifactIdentificationSphereComponent> PointedIdentificationSphere;
+
+	int32 InteractActionBindingHandle = INDEX_NONE;
 };

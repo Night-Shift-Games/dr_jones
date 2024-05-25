@@ -26,6 +26,15 @@ ADrJonesCharacter::ADrJonesCharacter()
 	BlendCameraComponent = CreateDefaultSubobject<UBlendCameraComponent>(TEXT("BlendCameraComponent"));
 }
 
+void ADrJonesCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (CurrentArtifactInteractionMode)
+	{
+		CurrentArtifactInteractionMode->Tick(DeltaSeconds);
+	}
+}
+
 void ADrJonesCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);

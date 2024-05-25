@@ -30,6 +30,7 @@ class DR_JONES_API ADrJonesCharacter : public ACharacter
 	
 public:
 	ADrJonesCharacter();
+	virtual void Tick(float DeltaSeconds) override;
 	
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
