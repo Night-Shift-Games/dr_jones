@@ -602,8 +602,8 @@ void UArtifactIdentificationMode::Tick(float DeltaSeconds)
 			return;
 		}
 
-		// right vector because blender's front is -Y and we're setting up the sockets using snap's system
-		const double Dot = FVector::DotProduct(-Sphere->GetRightVector(), -WorldDirection);
+		// right vector because blender snaps things   is Y and we're setting up the sockets using snap's system
+		const double Dot = FVector::DotProduct(-Sphere->GetRightVector(), WorldDirection);
 		if (Dot <= 0)
 		{
 			TryChangePointedSphere(nullptr);
