@@ -120,6 +120,7 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	ArtifactName = ArtifactData.Name;
 	ArtifactDescription = ArtifactData.Description;
 	ArtifactAge = FMath::RandRange(ArtifactData.AgeMin, ArtifactData.AgeMax);
+	ItemIcon = ArtifactData.ArtifactIcon.LoadSynchronous();
 	ArtifactUsage = ArtifactData.Usage;
 	ArtifactCulture = ArtifactData.Culture;
 	ArtifactSize = ArtifactData.Size;

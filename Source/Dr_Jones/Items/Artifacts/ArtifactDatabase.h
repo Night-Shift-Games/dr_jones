@@ -53,6 +53,9 @@ struct FArtifactData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data", meta = (MultiLine = true))
 	FText Description = FText::AsCultureInvariant(TEXT("None"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	TSoftObjectPtr<UTexture2D> ArtifactIcon;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	TArray<TSoftObjectPtr<UStaticMesh>> ArtifactMesh;
@@ -115,16 +118,24 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 
 	// Find Icon
 	const FName ArtifactIconPrefix = TEXT("I_A_");
+	const FName ArtifactIconAssetName = FName(ArtifactIconPrefix.ToString() + Data->ArtifactID.ToString());
 	
 	Data->ArtifactMesh.Empty();
-
+	Data->ArtifactIcon.Reset();
+	
 	for (auto& Object : AssetData)
 	{
-		FString AssetNameWithoutSuffix = Object.AssetName.ToString().LeftChop(2);
-		if (AssetNameWithoutSuffix.Equals(ArtifactStaticMeshAssetName.ToString()))
+		FString AssetName = Object.AssetName.ToString();
+		FString AssetNameWithoutVariantSuffix = AssetName.LeftChop(2);
+		if (AssetNameWithoutVariantSuffix.Equals(ArtifactStaticMeshAssetName.ToString()))
 		{
 			TSoftObjectPtr<UStaticMesh> StaticMesh = TSoftObjectPtr<UStaticMesh>(Object.GetSoftObjectPath());
 			Data->ArtifactMesh.AddUnique(StaticMesh);
+		}
+		if (AssetName.Equals(ArtifactIconAssetName.ToString()))
+		{
+			const TSoftObjectPtr<UTexture2D> Icon = TSoftObjectPtr<UTexture2D>(Object.GetSoftObjectPath());
+			Data->ArtifactIcon = Icon;
 		}
 	}
 
@@ -136,6 +147,10 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 	if (Data->AgeMax < Data->AgeMin)
 	{
 		OutCollectedImportProblems.Add(Data->ArtifactID.ToString() + TEXT(" have invalid years data."));
+	}
+	if (!Data->ArtifactIcon)
+	{
+		OutCollectedImportProblems.Add(Data->ArtifactID.ToString() + TEXT(" do not have any properly named icon!"));
 	}
 }
 #endif
