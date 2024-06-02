@@ -16,4 +16,10 @@ class DR_JONES_API UNightShiftSettings : public UDeveloperSettings
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Data Driven Development")
 	TSoftObjectPtr<UDataTable> ArtifactDataTable;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Clock")
+	FDateTime InitialTime = FDateTime(1922, 11, 4, 15, 30);
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Clock")
+	FTimespan TimeToApplyPerSecond = FTimespan(0,1,0);
 };

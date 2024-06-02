@@ -69,7 +69,6 @@ public:
 	AIlluminati();
 	
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "World Event", meta = (AutoCreateRefTerm = "GlobalEvent"))
 	void PostGlobalEvent(const FIlluminatiGlobalEvent& GlobalEvent) const;
@@ -95,9 +94,6 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame, Category = "DrJones|Clock")
 	TObjectPtr<UClock> Clock; 
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Clock")
-	FDateTime InitialTime;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Locations")
 	TArray<FArchaeologicalSiteFactoryData> DefaultSites;

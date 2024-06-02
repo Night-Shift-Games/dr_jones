@@ -4,32 +4,29 @@
 
 #include "Managment/Dr_JonesGameModeBase.h"
 #include "Quest/QuestSystem.h"
+#include "Utilities/NightShiftMacros.h"
 
 AIlluminati::AIlluminati()
 {
 	QuestSystemComponent = CreateDefaultSubobject<UQuestSystemComponent>(TEXT("QuestSystem"));
-	Clock = CreateDefaultSubobject<UClock>(TEXT("WorldClock"));
 }
 
 void AIlluminati::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Clock->InitializeClock(InitialTime);
-}
-
-void AIlluminati::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
+	Clock = GetGameInstance()->GetSubsystem<UClock>();
+	Clock->StartClock();
 }
 
 void AIlluminati::PostGlobalEvent(const FIlluminatiGlobalEvent& GlobalEvent) const
 {
+#if ENABLE_DRAW_DEBUG
 	if (CVarIlluminatiDebug.GetValueOnGameThread())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Orange, FString::Printf(TEXT("Illuminati Global Event has been posted.")));
 	}
-
+#endif
 	FIlluminatiDelegates::OnGlobalEventReceived.Broadcast(GlobalEvent);
 	OnGlobalEventReceived.Broadcast(GlobalEvent);
 }
@@ -37,16 +34,10 @@ void AIlluminati::PostGlobalEvent(const FIlluminatiGlobalEvent& GlobalEvent) con
 AIlluminati* AIlluminati::GetIlluminatiInstance(const UObject* WorldContextObject)
 {
 	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
-	if (!World)
-	{
-		return nullptr;
-	}
+	NS_EARLY_R(!World, nullptr);
 
 	const ADr_JonesGameModeBase* GameMode = World->GetAuthGameMode<ADr_JonesGameModeBase>();
-	if (!ensureAlwaysMsgf(GameMode, TEXT("Tried to get Illuminati instance, but an incorrect game mode is active.")))
-	{
-		return nullptr;
-	}
+	NS_EARLY_R(!GameMode, nullptr);
 
 	return GameMode->GetIlluminati();
 }
@@ -54,10 +45,7 @@ AIlluminati* AIlluminati::GetIlluminatiInstance(const UObject* WorldContextObjec
 UQuestSystemComponent* AIlluminati::GetQuestSystemInstance(const UObject* WorldContextObject)
 {
 	const AIlluminati* Illuminati = GetIlluminatiInstance(WorldContextObject);
-	if (!Illuminati)
-	{
-		return nullptr;
-	}
+	NS_EARLY_R(!Illuminati, nullptr);
 
 	return Illuminati->QuestSystemComponent;
 }

@@ -6,17 +6,19 @@
 
 #include "Clock.generated.h"
 
-static TAutoConsoleVariable CVarTime(TEXT("NS.Time"), 0, TEXT("Shows current date and time"));
+inline TAutoConsoleVariable CVarTime(TEXT("NS.Time"), 0, TEXT("Shows current date and time"));
 
 UCLASS()
-class DR_JONES_API UClock : public UObject
+class DR_JONES_API UClock : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	void InitializeClock(const FDateTime StartTime);
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	void InitializeDataFromSettings();
+
+	void StartClock();
 	void TickClock();
-	
 	void SetClockPaused(bool bPause = true);
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Clock")
@@ -26,18 +28,18 @@ public:
 	FDateTime SkipTime(const FTimespan TimeToSkip);
 	FTimespan SkipTime(const FDateTime TargetTime);
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnClockNativeTick, FDateTime);
-	FOnClockNativeTick OnClockNativeTick;
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClockTick, FDateTime, CurrentDate);
 	UPROPERTY(BlueprintAssignable, Category = "DrJones|Clock")
 	FOnClockTick OnClockTick;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnClockNativeTick, FDateTime);
+	FOnClockNativeTick OnClockNativeTick;
 	
 public:
 	UPROPERTY(SaveGame)
 	FDateTime CurrentTime;
 
-	UPROPERTY(EditAnywhere, Category = "DrJones|Clock")
+	UPROPERTY(SaveGame)
 	FTimespan TimeToApplyPerSecond = FTimespan(0,1,0);
 	
 	FTimerHandle ClockTimer;

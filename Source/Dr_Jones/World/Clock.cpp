@@ -2,11 +2,23 @@
 
 #include "Clock.h"
 #include "Engine/World.h"
+#include "Utilities/NightShiftSettings.h"
 
-void UClock::InitializeClock(const FDateTime StartTime)
+void UClock::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	InitializeDataFromSettings();
+}
+
+void UClock::InitializeDataFromSettings()
+{
+	TimeToApplyPerSecond = GetDefault<UNightShiftSettings>()->TimeToApplyPerSecond;
+	CurrentTime = GetDefault<UNightShiftSettings>()->InitialTime;
+}
+
+void UClock::StartClock()
 {
 	OnClockNativeTick.AddWeakLambda(this, [&](FDateTime Time){ OnClockTick.Broadcast(Time); });
-	CurrentTime = StartTime;
 	GetWorld()->GetTimerManager().SetTimer(ClockTimer, FTimerDelegate::CreateWeakLambda(this, [&]
 	{
 		TickClock();
