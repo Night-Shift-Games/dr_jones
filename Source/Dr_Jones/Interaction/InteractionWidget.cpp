@@ -2,6 +2,8 @@
 
 #include "InteractionWidget.h"
 
+#include "Utilities/NightShiftMacros.h"
+
 bool UInteractionWidget::Initialize()
 {
 	if (!UpdaterClass)
@@ -13,7 +15,10 @@ bool UInteractionWidget::Initialize()
 
 void UInteractionWidget::UpdateData()
 {
-	HasAltInteraction = Cast<UInteractionWidgetDataObject>(Updater)->HasAltInteraction;
+	NS_EARLY(!Cast<UInteractionWidgetDataObject>(Updater)->bShouldBeUpdated);
+	
+	bHasAltInteraction = Cast<UInteractionWidgetDataObject>(Updater)->bHasAltInteraction;
+	bShouldBeVisible = Cast<UInteractionWidgetDataObject>(Updater)->bShouldBeVisible;
 	
 	Super::UpdateData();
 

@@ -3,6 +3,7 @@
 #include "Interaction/InteractionComponent.h"
 
 #include "EnhancedInputComponent.h"
+#include "InteractionHintWidget.h"
 #include "InteractionWidget.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Interaction/InteractableComponent.h"
@@ -82,43 +83,43 @@ UInteractableComponent* UInteractionComponent::FetchInteractiveComponent() const
 
 void UInteractionComponent::UpdateInteractionUI()
 {
-	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InteractionUI, SelectedInteractiveComponent ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	
 	if (PreviousSelectedInteractiveActor && SelectedInteractiveComponent != PreviousSelectedInteractiveActor)
 	{
 		PreviousSelectedInteractiveActor->SetRenderPostProcessInteractionOutline(false);
 	}
 
-	if (!SelectedInteractiveComponent)
+	if (SelectedInteractiveComponent)
 	{
-		return;
+		SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
 	}
 	
-	SelectedInteractiveComponent->SetRenderPostProcessInteractionOutline(true);
-	const bool bHaveAltInteraction = SelectedInteractiveComponent->AltInteractDelegate.IsBound();
-
+	const bool bHaveAltInteraction = SelectedInteractiveComponent ? SelectedInteractiveComponent->AltInteractDelegate.IsBound() : false;
+	const bool bDataDirty = IsValid(SelectedInteractiveComponent) != IsValid(PreviousSelectedInteractiveActor);
+	
 	UWidgetManager::RequestUpdateWidget<UInteractionWidgetDataObject>(*this, InteractionUI, [&](UInteractionWidgetDataObject& Data)
 	{
-		Data.HasAltInteraction = bHaveAltInteraction;
+		Data.bShouldBeVisible = IsValid(SelectedInteractiveComponent);
+		Data.bShouldBeUpdated = bDataDirty;
+	});
+
+	UWidgetManager::RequestUpdateWidget<UInteractionHintWidgetDataObject>(*this, InteractionHintUI, [&](UInteractionHintWidgetDataObject& Data)
+	{
+		Data.bShouldBeVisible = IsValid(SelectedInteractiveComponent);
+		Data.bHasAltInteraction = bHaveAltInteraction;
+		Data.bShouldUpdateVisuals = bDataDirty;
 	});
 }
 
 void UInteractionComponent::Interact()
 {
-	if (!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled())
-	{
-		return;
-	}
+	NS_EARLY(!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled());
 	
 	SelectedInteractiveComponent->Interact(Owner.Get());
 }
 
 void UInteractionComponent::AltInteract()
 {
-	if (!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled())
-	{
-		return;
-	}
+	NS_EARLY (!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled());
 	
 	if (!SelectedInteractiveComponent->AltInteract(Owner.Get()))
 	{

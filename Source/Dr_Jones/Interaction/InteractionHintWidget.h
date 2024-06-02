@@ -1,14 +1,14 @@
-// Property of Night Shift Games, all rights reserved.
+﻿// Property of Night Shift Games, all rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UI/DrJonesWidgetBase.h"
 
-#include "InteractionWidget.generated.h"
+#include "InteractionHintWidget.generated.h"
 
 UCLASS()
-class DR_JONES_API UInteractionWidget : public UDrJonesWidgetBase
+class DR_JONES_API UInteractionHintWidget : public UDrJonesWidgetBase
 {
 	GENERATED_BODY()
 
@@ -17,27 +17,27 @@ class DR_JONES_API UInteractionWidget : public UDrJonesWidgetBase
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bHasAltInteraction = false;
+	bool bShouldUpdateVisuals = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bShouldBeVisible = false;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bShouldBeUpdated = false;
+	bool bHasAltInteraction = false;
 };
 
 UCLASS()
-class UInteractionWidgetDataObject : public UWidgetDataObject
+class UInteractionHintWidgetDataObject : public UWidgetDataObject
 {
 	GENERATED_BODY()
 	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bHasAltInteraction = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bShouldBeVisible = false;
+	bool bShouldUpdateVisuals = false;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bShouldBeUpdated = false;
+	bool bShouldBeVisible = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bHasAltInteraction = false;
 };

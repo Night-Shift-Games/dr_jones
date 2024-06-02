@@ -59,6 +59,9 @@ protected:
 	TSubclassOf<UDrJonesWidgetBase> InteractionUI;
 
 	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
+	TSubclassOf<UDrJonesWidgetBase> InteractionHintUI;
+
+	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
 	TObjectPtr<UInputAction> InteractionAction;
 
 	UPROPERTY(EditAnywhere, Category = "DrJones|Interaction|UI")
