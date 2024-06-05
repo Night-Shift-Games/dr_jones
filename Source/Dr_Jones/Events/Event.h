@@ -23,6 +23,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Event", DisplayName = "Get Game Instance")
 	UGameInstance* GetGameInstance() const;
 
+	virtual UWorld* GetWorld() const override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "DrJones|Event", DisplayName = "OnTrigger")
+	void TriggerDynamic();
+
 	virtual void Trigger();
 
 public:

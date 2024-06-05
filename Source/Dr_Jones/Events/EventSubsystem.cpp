@@ -37,6 +37,8 @@ void UEventSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UEventSubsystem::Deinitialize()
 {
 	Events.Empty();
+
+	GetGameInstance()->GetSubsystem<UClock>()->OnClockNativeTick.RemoveAll(this);
 	
 	Super::Deinitialize();
 }

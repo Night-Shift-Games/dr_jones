@@ -23,10 +23,20 @@ UGameInstance* UEvent::GetGameInstance() const
 	return GetTypedOuter<UEventSubsystem>()->GetGameInstance();
 }
 
+UWorld* UEvent::GetWorld() const
+{
+	if (!HasAnyFlags(RF_ClassDefaultObject) && ensureMsgf(GetOuter(), TEXT("Event: %s has a null OuterPrivate in UEvent::GetWorld()"), *GetFullName())
+		&& !GetOuter()->HasAnyFlags(RF_BeginDestroyed) && !GetOuter()->IsUnreachable())
+	{
+		return GetOuter()->GetWorld();
+	}
+	return nullptr;
+}
+
 void UEvent::Trigger()
 {
 	LastTimeFired = GetGameInstance()->GetSubsystem<UClock>()->GetCurrentTime();
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, EventName.ToString());
+	TriggerDynamic();
 }
 
 bool UEvent::CanBeTriggeredDynamic_Implementation()
