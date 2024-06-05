@@ -13,7 +13,7 @@ bool UEvent::CanBeTriggered()
 float UEvent::GetTriggerProbability() const
 {
 	const float DaysSinceEventHasBeenTriggered = (GetGameInstance()->GetSubsystem<UClock>()->GetCurrentTime() - LastTimeFired).GetDays();
-	constexpr float ProbabilityFactor = 1.f / 10.f;
+	const float ProbabilityFactor = 1.f / EventRegenerationFactor;
 	const float Modifier = FMath::Pow(2.f, DaysSinceEventHasBeenTriggered * ProbabilityFactor) - 1.f;
 	return DefaultProbabilityOfTrigger * Modifier;
 }

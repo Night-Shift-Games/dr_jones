@@ -36,6 +36,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DefaultProbabilityOfTrigger = 0.01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float EventRegenerationFactor = 10.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsOneShot = false;
