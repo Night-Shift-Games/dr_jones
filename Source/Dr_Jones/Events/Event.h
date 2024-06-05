@@ -14,10 +14,12 @@ class DR_JONES_API UEvent : public UObject
 	
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "DrJones|Event", DisplayName = "Can Be Triggered")
-	bool CanBeTriggeredDynamic() const;
+	bool CanBeTriggeredDynamic();
 	
-	virtual bool CanBeTriggered() const;
+	virtual bool CanBeTriggered();
 
+	float GetTriggerProbability() const;
+	
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Event", DisplayName = "Get Game Instance")
 	UGameInstance* GetGameInstance() const;
 
@@ -28,9 +30,12 @@ public:
 	FText EventName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ProbabilityOfEvent = 0.01;
+	float DefaultProbabilityOfTrigger = 0.01;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsOneShot = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FDateTime LastTimeFired = FDateTime(1922, 11, 1, 12);
 
 };

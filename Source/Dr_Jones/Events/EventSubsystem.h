@@ -20,15 +20,28 @@ class DR_JONES_API UEventSubsystem : public UGameInstanceSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
+	UEvent* SampleRandomEvents(float TriggerChanceModifier);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Events")
+	void AddForcedEvent(TSubclassOf<UEvent> Event);
 	
 	void HandleEvents(const FDateTime CurrentTime);
 	void TriggerEvent(UEvent& EventToTrigger);
 
+	UEvent* PickEventToTrigger(const float TriggerChanceModifier);
+	
 	UPROPERTY(BlueprintAssignable, Category = "DrJones|Events")
 	FOnEventTriggered OnEventTriggered;
 	
 protected:
-	TMap<TSubclassOf<UEvent>, TStrongObjectPtr<UEvent>> Events;
+	UPROPERTY()
+	TArray<TSubclassOf<UEvent>> ForcedEvents;
 	
-	FDateTime LastEventFiredDate = FDateTime(1922, 11, 4);
+	UPROPERTY()
+	TMap<TSubclassOf<UEvent>, TObjectPtr<UEvent>> StaticEvents;
+	
+	UPROPERTY()
+	TMap<TSubclassOf<UEvent>, TObjectPtr<UEvent>> Events;
+	
+	FDateTime LastAnyEventFiredDate = FDateTime(1922, 11, 4);
 };

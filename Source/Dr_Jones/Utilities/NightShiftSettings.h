@@ -26,4 +26,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
 	TArray<TSubclassOf<UEvent>> Events;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
+	TArray<TSubclassOf<UEvent>> StaticEvents;
 };
