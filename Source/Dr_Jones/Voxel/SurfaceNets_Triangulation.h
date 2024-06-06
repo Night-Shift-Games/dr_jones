@@ -678,7 +678,14 @@ namespace NS::SurfaceNets
 			check(ChunkFields.SurfaceNetsField.IsValid());
 			DebugContext->SurfaceNetsFields.SetNum(FMath::Max(DebugContext->SurfaceNetsFields.Num(), ChunkIndex + 1));
 			DebugContext->SurfaceNetsFields[ChunkIndex] = MakeShared<FSurfaceNetsChunkField>();
-			*DebugContext->SurfaceNetsFields[ChunkIndex].Get() = *ChunkFields.SurfaceNetsField.Get();
+			if (!DebugContext->SurfaceNetsFields.IsValidIndex(ChunkIndex))
+			{
+				ensureMsgf(true, TEXT("Jacek napraw to pls"));
+			}
+			else
+			{
+				*DebugContext->SurfaceNetsFields[ChunkIndex].Get() = *ChunkFields.SurfaceNetsField.Get();
+			}
 		}
 
 		{
