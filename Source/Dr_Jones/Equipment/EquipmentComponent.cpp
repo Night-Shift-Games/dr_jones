@@ -291,8 +291,6 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 	{
 		return;
 	}
-	
-	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 
 	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
 	{
@@ -301,4 +299,6 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 		DataObject.QuickSlotsItems = &QuickSlotItems;
 		DataObject.UpdatingEquipment = this;
 	});
+	
+	Utilities::GetWidgetManager(*this).SetWidgetVisibility(InventoryMenu, bOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }
