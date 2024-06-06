@@ -23,6 +23,7 @@ namespace Utilities
 	UWidgetManager& GetWidgetManager(const UObject& WorldContextObject);
 	FHitResult GetPlayerSightTarget(const float Reach,  const UObject& WorldContextObject, ECollisionChannel CollisionChannel = ECC_Visibility, bool bTraceComplex = false);
 	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit);
+	bool IsValueBetween(double Value, float A, float B);
 	
 	template <class TWidgetClass>
 	TWidgetClass* GetWidget(const UObject& WorldContextObject, const TSubclassOf<UDrJonesWidgetBase> WidgetClass)
@@ -120,4 +121,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities", meta = (WorldContext = "WorldContextObject"))
 	static UWidgetManager* GetWidgetManager(const UObject* WorldContextObject)
 	{ return WorldContextObject ? &Utilities::GetWidgetManager(*WorldContextObject) : nullptr; }
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities")
+	static bool IsValueBetween(double Value, float Less, float More)
+	{ return Utilities::IsValueBetween(Value, Less, More);}
 };

@@ -126,6 +126,11 @@ namespace Utilities
 		return Hit;
 	}
 
+	bool IsValueBetween(double Value, float Less, float More)
+	{
+		return Value > Less && Value < More;
+	}
+	
 #if ENABLE_DRAW_DEBUG
 	void DrawInteractionDebugInfo(const FVector& WorldLocation, const FVector& LineEnd, const FHitResult& Hit)
 	{
