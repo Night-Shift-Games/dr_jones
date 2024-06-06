@@ -16,8 +16,16 @@ class UDrJonesWidgetBase : public UUserWidget
 public:
 	virtual bool Initialize() override;
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category = "DrJones")
 	void OnDataUpdated();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "DrJones")
+	void RequestVisibilityChange(ESlateVisibility NewVisibility);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	void RequestParentVisibilitySet(ESlateVisibility NewVisibility);
+	
+	virtual void SetVisibility(ESlateVisibility InVisibility) override;
 
 	virtual void UpdateData() { OnDataUpdated(); }
 	UDrJonesWidgetBase* GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass);
@@ -25,7 +33,7 @@ public:
 
 	template<typename WidgetClass>
 	WidgetClass* GetUpdater() const { return Cast<WidgetClass>(Updater); }
-
+	
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<ADrJonesCharacter> Player;

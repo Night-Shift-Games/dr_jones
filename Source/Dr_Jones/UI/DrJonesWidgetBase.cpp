@@ -10,6 +10,21 @@ bool UDrJonesWidgetBase::Initialize()
 	return Super::Initialize();
 }
 
+void UDrJonesWidgetBase::SetVisibility(ESlateVisibility InVisibility)
+{
+	RequestVisibilityChange(InVisibility);
+}
+
+void UDrJonesWidgetBase::RequestVisibilityChange_Implementation(ESlateVisibility NewVisibility)
+{
+	RequestParentVisibilitySet(NewVisibility);
+}
+
+void UDrJonesWidgetBase::RequestParentVisibilitySet(ESlateVisibility NewVisibility)
+{
+	UUserWidget::SetVisibility(NewVisibility);
+}
+
 UDrJonesWidgetBase* UDrJonesWidgetBase::GetChildWidget(TSubclassOf<UDrJonesWidgetBase> WidgetClass)
 {
 	if (!WidgetClass)
