@@ -346,6 +346,7 @@ namespace NSVE
 		float FillSurfaceZ_WS;
 		TArray<FVoxelLayer> Layers;
 		TArray<FVector> ArtifactLocations;
+		TArray<double> ArtifactRadii;
 	};
 
 	// Persistent global address of a specific voxel in the *whole* voxel grid

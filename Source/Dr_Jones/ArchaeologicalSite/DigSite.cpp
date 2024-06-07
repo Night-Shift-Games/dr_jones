@@ -269,6 +269,10 @@ void ADigSite::InitializeVoxelGrid()
 		if (const AArtifact* Artifact = Cast<AArtifact>(Overlap.GetActor()))
 		{
 			Initializer.ArtifactLocations.Add(Artifact->GetActorLocation());
+			FVector Origin;
+			FVector Extent;
+			Artifact->GetActorBounds(false, Origin, Extent);
+			Initializer.ArtifactRadii.Add(Extent.Length());
 		}
 	}
 
