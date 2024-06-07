@@ -198,10 +198,12 @@ namespace NSVE
 				Chunks[Index].Voxels.Iterate([&](FVoxel& Voxel, int32 Index, const FIntVector& Coords)
 				{
 					const FVector WorldPosition = FVoxelChunk::CoordsToWorld_Static(Coords, TransformData);
-					for (const FVector& ArtifactLocation : Initializer.ArtifactLocations)
+					for (auto It = Initializer.ArtifactLocations.CreateConstIterator(); It; ++It)
 					{
-						static constexpr double MaxDistanceToArtifact = 100.0;
-						if ((ArtifactLocation - WorldPosition).SizeSquared() < (MaxDistanceToArtifact * MaxDistanceToArtifact))
+						const FVector& ArtifactLocation = *It;
+						static constexpr double DefaultMaxDistanceToArtifact = 100.0;
+						const double Radius = Initializer.ArtifactRadii.IsValidIndex(It.GetIndex()) ? Initializer.ArtifactRadii[It.GetIndex()] : DefaultMaxDistanceToArtifact;
+						if ((ArtifactLocation - WorldPosition).SizeSquared() < (Radius * Radius))
 						{
 							Voxel.LocalMaterial = 0b111;
 						}
