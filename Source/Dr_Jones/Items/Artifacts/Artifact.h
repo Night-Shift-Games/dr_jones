@@ -104,7 +104,7 @@ public:
 
 	bool IsDynamic() const;
 
-	UFUNCTION(CallInEditor)
+	UFUNCTION(BlueprintCallable, CallInEditor)
 	static TArray<FName> GetArtifactIDs();
 	
 public:

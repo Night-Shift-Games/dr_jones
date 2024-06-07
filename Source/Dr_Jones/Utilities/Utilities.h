@@ -3,6 +3,7 @@
 #include "NightShiftMacros.h"
 #include "Engine/SCS_Node.h"
 #include "Engine/SimpleConstructionScript.h"
+#include "Items/Artifacts/ArtifactFactory.h"
 #include "Player/DrJonesCharacter.h"
 #include "UI/DrJonesWidgetBase.h"
 
@@ -125,4 +126,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "DrJones|Utilities")
 	static bool IsValueBetween(double Value, float Less, float More)
 	{ return Utilities::IsValueBetween(Value, Less, More);}
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Utilities")
+	static FArtifactData PullArtifactDataFromDatabase(FName ArtifactID)
+	{ return *UArtifactFactory::PullArtifactDataFromDatabase(ArtifactID); }
 };
