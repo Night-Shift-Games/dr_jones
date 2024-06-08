@@ -24,11 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones", meta = (MultiLine))
 	FText LetterContent = FText::AsCultureInvariant(TEXT("None"));
 
-	// Widget component that is responsible for displaying UI.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones")
-	TObjectPtr<UWidgetComponent> LetterUI;
-
 	// Display mesh of an letter.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones")
 	TObjectPtr<UStaticMeshComponent> LetterMeshComponent;
 };

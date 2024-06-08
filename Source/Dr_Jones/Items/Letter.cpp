@@ -8,8 +8,6 @@ ALetter::ALetter()
 {
 	LetterMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = LetterMeshComponent;
-	LetterUI = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetUI"));
-	LetterUI->SetupAttachment(RootComponent);
 }
 
 void ALetter::OnEquip()
