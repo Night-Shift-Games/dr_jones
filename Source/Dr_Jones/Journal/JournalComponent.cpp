@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "UI/WidgetManager.h"
 #include "InputAction.h"
+#include "Equipment/EquipmentComponent.h"
 #include "UI/DrJonesWidgetBase.h"
 #include "Utilities/Utilities.h"
 
@@ -20,7 +21,16 @@ void UJournalComponent::SetupPlayerInputComponent(UEnhancedInputComponent& Enhan
 
 void UJournalComponent::OpenJournal()
 {
-	const UWidgetManager& Manager = Utilities::GetWidgetManager(*this);
-	Manager.SetWidgetVisibility(JournalUIClass, Manager.GetWidget(JournalUIClass)->IsVisible() ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
-}
+	UEquipmentComponent* EquipmentComponent = GetOwner<ADrJonesCharacter>()->GetEquipment();
+	NS_EARLY(!EquipmentComponent);
+	const AItem* ItemInHand = EquipmentComponent->GetItemInHand();
+	if (ItemInHand && ItemInHand->IsA(JournalItem))
+	{
+		EquipmentComponent->UnequipItem();
+	}
+	else
+	{
+		EquipmentComponent->EquipItemByClass(JournalItem);
+	}
 
+}

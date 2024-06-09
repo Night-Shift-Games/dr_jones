@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Items/Item.h"
 
 #include "JournalComponent.generated.h"
 
@@ -27,5 +28,5 @@ public:
 	TObjectPtr<UInputAction> OpenJournalAction;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UDrJonesWidgetBase> JournalUIClass;
+	TSubclassOf<AItem> JournalItem;
 };
