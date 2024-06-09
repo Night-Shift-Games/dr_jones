@@ -274,5 +274,11 @@ public:
 	UPROPERTY(Transient)
 	TObjectPtr<UArtifactIdentificationSphereComponent> PointedIdentificationSphere;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FMaterialParameterInfo SphereMaskPositionMPI;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	FMaterialParameterInfo SphereMaskRadiusMPI;
+
 	int32 InteractActionBindingHandle = INDEX_NONE;
 };

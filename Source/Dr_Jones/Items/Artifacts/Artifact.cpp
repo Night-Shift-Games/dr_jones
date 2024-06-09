@@ -699,8 +699,12 @@ void UArtifactIdentificationMode::TryChangePointedSphere(UArtifactIdentification
 
 void UArtifactIdentificationMode::OnPointedSphereChanged(UArtifactIdentificationSphereComponent* OldSphere, UArtifactIdentificationSphereComponent* NewSphere)
 {
-	// TODO: Podswietlanie symboli callback itp tutaj
-	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, FString::Printf(TEXT("Sphere changed")));
+	AArtifact* Artifact = GetCurrentArtifact();
+	if (!Artifact) return;
+	if (!Artifact->ArtifactDynamicMaterial) return;
+
+	Artifact->ArtifactDynamicMaterial->SetVectorParameterValueByInfo(SphereMaskPositionMPI, NewSphere ? NewSphere->GetRelativeLocation() : FVector::ZeroVector);
+	Artifact->ArtifactDynamicMaterial->SetScalarParameterValueByInfo(SphereMaskRadiusMPI, NewSphere ? NewSphere->GetScaledSphereRadius() : 0.0f);
 }
 
 void UArtifactIdentificationMode::Interact()
