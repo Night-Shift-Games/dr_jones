@@ -213,6 +213,7 @@ void AArtifact::SetupDynamicArtifact()
 		TArray<int32> VertexElements;
 		for (int32 VtxID : Mesh.VertexIndicesItr())
 		{
+			// Vtx color based on multiple face vertices
 			FVector4f AvgColor = FVector4f::Zero();
 			ColorOverlay->GetVertexElements(VtxID, VertexElements);
 			for (int32 Elem : VertexElements)
@@ -225,19 +226,30 @@ void AArtifact::SetupDynamicArtifact()
 
 			FVector4f FinalColor;
 
-			// For now treat Red as probability
-			const float RandVal = FMath::FRand();
-			if (RandVal <= AvgColor.X)
+			auto SetupColor = [&](float& OutColor, float Amount)
 			{
-				FinalColor.X = RandVal <= DirtData.DustAmount ? 1.0f : 0.0f;
-				FinalColor.Y = RandVal <= DirtData.MudAmount ? 1.0f : 0.0f;
-				FinalColor.Z = RandVal <= DirtData.RustAmount ? 1.0f : 0.0f;
-				FinalColor.W = RandVal <= DirtData.MoldAmount ? 1.0f : 0.0f;
-			}
-			else
-			{
-				FinalColor = FVector4f::Zero();
-			}
+				// TODO: Hardcoded thresholds!
+				if (Amount < 0.15f)
+				{
+					OutColor = 0.0f;
+					return;
+				}
+
+				const float RandVal = FMath::FRand();
+				// For now treat Red (X) as probability
+				OutColor = RandVal * FMath::Max(/*Base:*/ 0.3f, AvgColor.X) * Amount;
+				// Scale this thing up because of the amount of modulation that's just taken place
+				OutColor = FMath::Pow(OutColor, 0.3f);
+				if (OutColor < 0.2f)
+				{
+					OutColor = 0.0f;
+				}
+			};
+
+			SetupColor(FinalColor.X, DirtData.DustAmount);
+			SetupColor(FinalColor.Y, DirtData.MudAmount);
+			SetupColor(FinalColor.Z, DirtData.RustAmount);
+			SetupColor(FinalColor.W, DirtData.MoldAmount);
 
 			for (int32 Elem : VertexElements)
 			{
