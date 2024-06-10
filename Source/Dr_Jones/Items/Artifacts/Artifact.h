@@ -155,8 +155,6 @@ public:
 
 	FOnArtifactAttached OnArtifactPickup;
 	
-	bool bArtifactCleared = false;
-	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrJones|Artifact")
 	TObjectPtr<UMeshComponent> ArtifactMeshComponent;

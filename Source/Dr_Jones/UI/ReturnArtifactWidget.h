@@ -21,5 +21,4 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AArtifactCrate> OwningArtifactCrate;
 
-
 };

@@ -22,43 +22,38 @@ void AArtifactCrate::BeginPlay()
 
 void AArtifactCrate::OnInteract(ADrJonesCharacter* Player)
 {
-	const UEquipmentComponent* Equipment = Player->GetEquipment();
+	UEquipmentComponent* Equipment = Player->GetEquipment();
 	AItem* ItemInHand = Equipment->GetItemInHand();
 	if (AArtifact* Artifact = ItemInHand ? Cast<AArtifact>(ItemInHand) : nullptr)
 	{
-		AddArtifact(Artifact, Player);
+		Equipment->TakeOutItemInHand();
+		AddArtifact(Artifact);
 	}
-	
-	UWidgetManager& WidgetManager = Utilities::GetWidgetManager(*this);
-	WidgetManager.AddWidget(ReturnArtifactsWidgetClass);
-	WidgetManager.ShowWidget(ReturnArtifactsWidgetClass);
-	UReturnArtifactWidget* Widget = UWidgetManager::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass);
-	Widget->OwningArtifactCrate = this;
-	Widget->OnShow();
-	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
-void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd, ADrJonesCharacter* Player)
+void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd)
 {
-	Player->GetEquipment()->TakeOutItemInHand();
-	if (Artifacts.Contains(ArtifactToAdd))
-	{
-		return; 
-	}
+	NS_EARLY(Artifacts.Contains(ArtifactToAdd));
+	
 	Artifacts.Add(ArtifactToAdd);
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	ArtifactToAdd->GetMeshComponent()->SetVisibility(true);
+	ArtifactToAdd->GetMeshComponent()->SetVisibility(false);
+	ArtifactToAdd->SetActorEnableCollision(false);
 	
+	UWidgetManager::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass)->OwningArtifactCrate = this;
 	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
 AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 {
-	if (!Artifacts.Contains(ArtifactToPullOut))
-	{
-		return nullptr; 
-	}
+	NS_EARLY_R (!Artifacts.Contains(ArtifactToPullOut), nullptr);
+	
 	Artifacts.Remove(ArtifactToPullOut);
+	ArtifactToPullOut->SetActorEnableCollision(false);
+	ArtifactToPullOut->GetMeshComponent()->SetVisibility(true);
+
+	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
+	
 	return ArtifactToPullOut;
 }
 
@@ -68,11 +63,12 @@ void AArtifactCrate::SendArtifacts()
 	{
 		AArtifact* ArtifactToSend = Artifacts.Last();
 		PullOutArtifact(ArtifactToSend);
-		ArtifactToSend->Destroy();
 		// TODO: Calculate renown based on artifact parameters.
-		const float RenownToAdd = ArtifactToSend->bArtifactCleared ? 20.f : 10.f;
+		const float RenownToAdd = 10.f;
 		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, RenownToAdd);
+		ArtifactToSend->Destroy();
 	}
+	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
 void AArtifactCrate::CloseWidget()
