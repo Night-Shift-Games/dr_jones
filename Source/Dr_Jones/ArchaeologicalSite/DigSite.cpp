@@ -272,7 +272,7 @@ void ADigSite::InitializeVoxelGrid()
 			FVector Origin;
 			FVector Extent;
 			Artifact->GetActorBounds(false, Origin, Extent);
-			Initializer.ArtifactRadii.Add(Extent.Length());
+			Initializer.ArtifactRadii.Add(FMath::Max(Extent.Length(), 30.0f));
 		}
 	}
 
