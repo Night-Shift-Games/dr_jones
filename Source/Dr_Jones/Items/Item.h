@@ -7,6 +7,12 @@
 
 #include "Item.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnItemEquippedDynamic);
+DECLARE_MULTICAST_DELEGATE(FOnItemEquipped);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnItemUnequippedDynamic);
+DECLARE_MULTICAST_DELEGATE(FOnItemUnequipped);
+
 class UActionComponent;
 class UInteractableComponent;
 
@@ -27,11 +33,22 @@ public:
 	virtual void SetWorldPhysics();
 	FVector GetLocationOfItemAfterDropdown() const;
 	
-	virtual void OnEquip() {}
-	virtual void OnUnequip() {}
+	virtual void OnEquip() { OnItemEquippedDynamic.Broadcast(); }
+	virtual void OnUnequip() { OnItemUnequippedDynamic.Broadcast(); }
 
 	virtual void OnAddedToEquipment();
 	virtual void OnRemovedFromEquipment();
+	
+public:
+	FOnItemEquipped OnItemEquipped;
+	
+	UPROPERTY(BlueprintAssignable, Category = "DrJones")
+	FOnItemEquippedDynamic OnItemEquippedDynamic;
+	
+	FOnItemUnequipped OnItemUnequipped;
+	
+	UPROPERTY(BlueprintAssignable, Category = "DrJones")
+	FOnItemUnequippedDynamic OnItemUnequippedDynamic;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "DrJones|WorldComponents")
