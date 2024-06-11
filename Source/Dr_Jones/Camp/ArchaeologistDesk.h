@@ -17,8 +17,10 @@ class DR_JONES_API AArchaeologistDesk : public ACampEntity
 public:
 	AArchaeologistDesk();
 	virtual void BeginPlay() override;
-	
+
+	UFUNCTION(BlueprintCallable)
 	void AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Player);
+	
 	void RemoveArtifact(AArtifact* Artifact);
 	
 	UFUNCTION()
