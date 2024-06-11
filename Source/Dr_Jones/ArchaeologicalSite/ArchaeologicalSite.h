@@ -44,7 +44,7 @@ struct FArchaeologicalSiteFactoryData
 	FVector2D GeoData = FVector2D::ZeroVector;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName LevelName = TEXT("L_ValleyOfKings");
+	TSoftObjectPtr<UWorld> Level;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SiteName = TEXT("Default Name");
@@ -57,9 +57,8 @@ class DR_JONES_API UArchaeologicalSite : public UObject
 	
 public:
 	UArchaeologicalSite() = default;
-	UArchaeologicalSite(AIlluminati& Owner, const FName InSiteName, const FGeoData InGeoData, const FName InLevelName = TEXT("DefaultName"))
+	UArchaeologicalSite(AIlluminati& Owner, const FName InSiteName, const FGeoData InGeoData)
 		: GeoData(InGeoData),
-		  LevelName(InLevelName),
 		  SiteName(InSiteName),
 		  OwningIlluminati(&Owner)
 	{
@@ -69,7 +68,7 @@ public:
 	FGeoData GeoData;
 	
 	UPROPERTY(BlueprintReadWrite)
-	FName LevelName = TEXT("L_ValleyOfKings");
+	TSoftObjectPtr<UWorld> Level;
 
 	UPROPERTY(BlueprintReadWrite)
 	FName SiteName = TEXT("Default Name");

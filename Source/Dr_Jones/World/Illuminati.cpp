@@ -56,7 +56,7 @@ void AIlluminati::FillArchaeologicalSites()
 	{
 		UArchaeologicalSite* NewSite = NewObject<UArchaeologicalSite>(this);
 		NewSite->GeoData = SiteData.GeoData;
-		NewSite->LevelName = SiteData.LevelName;
+		NewSite->Level = SiteData.Level;
 		NewSite->SiteName = SiteData.SiteName;
 		ArchaeologicalSites.Emplace(SiteData.SiteName, NewSite);
 	}
