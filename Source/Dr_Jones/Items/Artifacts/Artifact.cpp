@@ -563,6 +563,8 @@ void UArtifactCleaningMode::TickBrushStroke()
 		CleaningProgress = 1.0f;
 	}
 
+	Artifact->CleaningProgress = CleaningProgress;
+
 	if (CleaningProgress >= CleaningCompletedThreshold)
 	{
 		CleaningProgress = 1.0f;

@@ -141,6 +141,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Artifact")
 	FArtifactDirtData DirtData;
 
+	UPROPERTY(BlueprintReadOnly)
+	float CleaningProgress = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|Artifact")
 	TArray<FArtifactWhisperOfThePastData> WhispersOfThePastData;
 
