@@ -6,6 +6,7 @@
 #include "Reputation/ReputationComponent.h"
 #include "UI/ReturnArtifactWidget.h"
 #include "UI/WidgetManager.h"
+#include "UI/WidgetRendererComponent.h"
 #include "Utilities/Utilities.h"
 
 AArtifactCrate::AArtifactCrate() : Super()
@@ -39,9 +40,12 @@ void AArtifactCrate::AddArtifact(AArtifact* ArtifactToAdd)
 	ArtifactToAdd->AttachToComponent(CrateStaticMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	ArtifactToAdd->GetMeshComponent()->SetVisibility(false);
 	ArtifactToAdd->SetActorEnableCollision(false);
-	
-	UWidgetManager::GetWidget<UReturnArtifactWidget>(*this, ReturnArtifactsWidgetClass)->OwningArtifactCrate = this;
-	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
+
+	UWidgetRendererComponent* WidgetRenderer = FindComponentByClass<UWidgetRendererComponent>();
+	NS_EARLY(!WidgetRenderer || !WidgetRenderer->GetInternalWidget());
+	UReturnArtifactWidget* ReturnArtifactWidget = Cast<UReturnArtifactWidget>(WidgetRenderer->GetInternalWidget());
+	ReturnArtifactWidget->OwningArtifactCrate = this;
+	ReturnArtifactWidget->UpdateData();
 }
 
 AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
