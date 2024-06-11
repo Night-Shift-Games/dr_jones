@@ -97,7 +97,7 @@ public:
 	void SetupArtifact(const FArtifactData& ArtifactData);
 	void SetupDynamicArtifact();
 
-	void VertexPaint(const FVector& LocalPosition, const FColor& Color, const FVector4f& ChannelMask, float BrushRadiusWS = 10.0f, float BrushFalloffPow = 1.0f) const;
+	void VertexPaint(const FVector& LocalPosition, const FVector& LocalNormal, const FColor& Color, const FVector4f& ChannelMask, float BrushRadiusWS = 10.0f, float BrushFalloffPow = 1.0f) const;
 	void CleanCompletely() const;
 
 	virtual void OnRemovedFromEquipment() override;
@@ -229,7 +229,7 @@ public:
 	float CleaningProgress = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1), Category = "Config")
-	float CleaningCompletedThreshold = 0.8f;
+	float CleaningCompletedThreshold = 0.92f;
 
 	FVector4f CurrentPaintChannelMask = FVector4f::Zero();
 };

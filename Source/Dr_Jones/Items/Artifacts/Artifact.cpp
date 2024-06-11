@@ -271,7 +271,7 @@ void AArtifact::SetupDynamicArtifact()
 	LocalMeshOctree->BuildFromMesh(ArtifactStaticMesh);
 }
 
-void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, const FVector4f& ChannelMask, float BrushRadiusWS, float BrushFalloffPow) const
+void AArtifact::VertexPaint(const FVector& LocalPosition, const FVector& LocalNormal, const FColor& Color, const FVector4f& ChannelMask, float BrushRadiusWS, float BrushFalloffPow) const
 {
 	check(IsInGameThread());
 
@@ -311,6 +311,11 @@ void AArtifact::VertexPaint(const FVector& LocalPosition, const FColor& Color, c
 			const double DistanceSquaredToVertex = FVector::DistSquared(Vertex.Position, LocalPosition);
 			const double BrushRadiusSquared = FMath::Square(BrushRadiusWS);
 			if (DistanceSquaredToVertex > BrushRadiusSquared)
+			{
+				continue;
+			}
+
+			if (Vertex.Normal.Dot(LocalNormal) <= 0)
 			{
 				continue;
 			}
@@ -513,11 +518,13 @@ void UArtifactCleaningMode::TickBrushStroke()
 		return;
 	}
 
-	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this);
+	const FHitResult HitResult = Utilities::GetPlayerSightTarget(300.0f, *this, ECC_Visibility, true);
 	if (HitResult.IsValidBlockingHit())
 	{
-		const FVector LocalPosition = Artifact->GetActorTransform().InverseTransformPosition(HitResult.Location);
-		Artifact->VertexPaint(LocalPosition, FColor(0), CurrentPaintChannelMask);
+		const FTransform& Transform = Artifact->GetActorTransform();
+		const FVector LocalPosition = Transform.InverseTransformPosition(HitResult.Location);
+		const FVector LocalNormal = Transform.InverseTransformVector(HitResult.Normal);
+		Artifact->VertexPaint(LocalPosition, LocalNormal, FColor(0), CurrentPaintChannelMask, 5);
 	}
 
 	float TotalDirtValue = 0.0f;
