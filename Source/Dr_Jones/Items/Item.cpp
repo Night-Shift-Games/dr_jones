@@ -12,6 +12,12 @@ AItem::AItem()
 	ActionComponent = CreateDefaultSubobject<UActionComponent>(TEXT("ActionComponent"));
 }
 
+void AItem::BeginPlay()
+{
+	Super::BeginPlay();
+	InteractableComponent->InteractionText = FText::FromString("Pickup");
+}
+
 void AItem::SetInteractionEnabled(bool bEnabled) const
 {
 	check(InteractableComponent);

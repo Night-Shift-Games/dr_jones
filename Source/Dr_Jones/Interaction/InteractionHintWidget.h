@@ -24,6 +24,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bHasAltInteraction = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FText InteractionText;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FText AltInteractionText;
 };
 
 UCLASS()
@@ -40,4 +46,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bHasAltInteraction = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FText InteractionText;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FText AltInteractionText;
 };

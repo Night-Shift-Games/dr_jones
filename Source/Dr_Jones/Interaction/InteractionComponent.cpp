@@ -107,6 +107,12 @@ void UInteractionComponent::UpdateInteractionUI()
 		Data.bShouldBeVisible = IsValid(SelectedInteractiveComponent);
 		Data.bHasAltInteraction = bHaveAltInteraction;
 		Data.bShouldUpdateVisuals = bDataDirty;
+		if (IsValid(SelectedInteractiveComponent))
+		{
+			Data.InteractionText = SelectedInteractiveComponent->InteractionText;
+			Data.AltInteractionText = SelectedInteractiveComponent->AltInteractionText;
+		}
+
 	});
 }
 
@@ -114,6 +120,7 @@ void UInteractionComponent::Interact()
 {
 	NS_EARLY(!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled());
 	
+	SelectedInteractiveComponent->Interact(Owner.Get());
 	SelectedInteractiveComponent->Interact(Owner.Get());
 }
 

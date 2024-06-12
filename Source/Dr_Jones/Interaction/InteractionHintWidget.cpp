@@ -19,6 +19,9 @@ void UInteractionHintWidget::UpdateData()
 	bShouldUpdateVisuals = Cast<UInteractionHintWidgetDataObject>(Updater)->bShouldUpdateVisuals;
 	bShouldBeVisible = Cast<UInteractionHintWidgetDataObject>(Updater)->bShouldBeVisible;
 	bHasAltInteraction = Cast<UInteractionHintWidgetDataObject>(Updater)->bHasAltInteraction;
+
+	InteractionText = Cast<UInteractionHintWidgetDataObject>(Updater)->InteractionText;
+	AltInteractionText = Cast<UInteractionHintWidgetDataObject>(Updater)->AltInteractionText;
 	
 	Super::UpdateData();
 

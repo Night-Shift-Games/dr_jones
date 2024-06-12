@@ -23,6 +23,7 @@ class DR_JONES_API AItem : public AActor
 	
 public:
 	AItem();
+	virtual void BeginPlay() override;
 	
 	virtual UMeshComponent* GetMeshComponent() const { return FindComponentByClass<UMeshComponent>(); }
 	TSubclassOf<UAnimInstance> GetItemAnimation() const { return ItemAnimation; }

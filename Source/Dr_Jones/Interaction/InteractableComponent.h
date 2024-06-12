@@ -38,6 +38,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "DrJones|Interaction")
 	FOnInteract AltInteractDelegate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText InteractionText = FText::FromString("Interact");
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText AltInteractionText = FText::FromString("Alt Interact");
+	
 	bool bInteractionInProgress = false;
 	
 private:
