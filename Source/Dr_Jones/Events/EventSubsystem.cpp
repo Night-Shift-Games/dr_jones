@@ -68,7 +68,7 @@ UEvent* UEventSubsystem::SampleRandomEvents(const float TriggerChanceModifier)
 UEvent* UEventSubsystem::AddForcedEvent(TSubclassOf<UEvent> Event)
 {
 	ForcedEvents.Add(Event);
-	return StaticEvents[Event];
+	return StaticEvents.Contains(Event) ? StaticEvents[Event] : nullptr;
 }
 
 UEvent* UEventSubsystem::GetEvent(const TSubclassOf<UEvent> EventClass) const
