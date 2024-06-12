@@ -22,10 +22,10 @@ public:
 	virtual void Deinitialize() override;
 	UEvent* SampleRandomEvents(float TriggerChanceModifier);
 
-	UFUNCTION(BlueprintCallable, Category = "DrJones|Events")
-	void AddForcedEvent(TSubclassOf<UEvent> Event);
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Events", meta = (DeterminesOutputType = Event))
+	UEvent* AddForcedEvent(TSubclassOf<UEvent> Event);
 
-	UFUNCTION(BlueprintPure,  Category = "DrJones|Events")
+	UFUNCTION(BlueprintPure,  Category = "DrJones|Events", meta = (DeterminesOutputType = Event))
 	UEvent* GetEvent(const TSubclassOf<UEvent> EventClass) const;
 	
 	void HandleEvents(const FDateTime CurrentTime);

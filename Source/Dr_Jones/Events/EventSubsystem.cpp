@@ -65,9 +65,10 @@ UEvent* UEventSubsystem::SampleRandomEvents(const float TriggerChanceModifier)
 	return EventToFire;
 }
 
-void UEventSubsystem::AddForcedEvent(TSubclassOf<UEvent> Event)
+UEvent* UEventSubsystem::AddForcedEvent(TSubclassOf<UEvent> Event)
 {
 	ForcedEvents.Add(Event);
+	return StaticEvents[Event];
 }
 
 UEvent* UEventSubsystem::GetEvent(const TSubclassOf<UEvent> EventClass) const
