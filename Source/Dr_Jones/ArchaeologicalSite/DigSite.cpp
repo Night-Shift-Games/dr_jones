@@ -290,12 +290,34 @@ void ADigSite::SpawnArtifacts()
 	const auto ArtifactMap = ArtifactDatabase->GetRowMap();
 	TArray<FName> ArtifactNameArray;
 	ArtifactMap.GenerateKeyArray(ArtifactNameArray);
-	
+
 	for (int i = 0; i <= ArtifactSpawnRate; i++)
 	{
 		FName ArtifactID = ArtifactNameArray[FMath::RandRange(0, ArtifactNameArray.Num() - 1)];
+
 		AArtifact* SpawnedArtifact = UArtifactFactory::ConstructArtifactFromDatabase(*this, ArtifactID);
-		const FVector ArtifactSpawner = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation() + FVector(0.0,0.0,-140.0), FVector(500.0, 500.0, 100.0));
-		SpawnedArtifact->SetActorLocationAndRotation(ArtifactSpawner, FRotator(FMath::RandRange(0.0, 360.0)));
+		SpawnedArtifact->SetActorRotation(FRotator(FMath::RandRange(0.0, 360.0)));
+
+		FVector SpawnExtent = Extents - FVector(100, 100, 0);
+		SpawnExtent.X = FMath::Max(SpawnExtent.X, 100);
+		SpawnExtent.Y = FMath::Max(SpawnExtent.Y, 100);
+		SpawnExtent.Z /= 2.0;
+
+		const FVector DigSiteLocation = GetActorLocation();
+		FVector BBoxLocation = DigSiteLocation;
+		BBoxLocation.Z -= SpawnExtent.Z;
+		FVector SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(BBoxLocation, SpawnExtent);
+
+		FVector ArtifactOrigin;
+		FVector ArtifactExtent;
+		SpawnedArtifact->GetActorBounds(false, ArtifactOrigin, ArtifactExtent);
+
+		// Bias the Z location towards the surface
+		SpawnLocation.Z = DigSiteLocation.Z - (Extents.Z * FMath::Pow(-(SpawnLocation.Z - DigSiteLocation.Z) / Extents.Z, 4.0));
+		// 10 cm margin to make sure it definitely doesn't stick out
+		SpawnLocation.Z -= ArtifactExtent.Z + 10;
+		SpawnLocation.Z = FMath::Max(SpawnLocation.Z, BBoxLocation.Z - (SpawnExtent.Z - 10));
+
+		SpawnedArtifact->SetActorLocation(SpawnLocation);
 	}
 }
