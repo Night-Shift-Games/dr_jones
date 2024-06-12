@@ -225,9 +225,6 @@ public:
 	TObjectPtr<UInputAction> BrushStrokeAction;
 	int32 BrushStrokeActionBindingHandle = INDEX_NONE;
 
-	UPROPERTY(BlueprintReadOnly)
-	float CleaningProgress = 0.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = 0, UIMin = 0, ClampMax = 1, UIMax = 1), Category = "Config")
 	float CleaningCompletedThreshold = 0.92f;
 

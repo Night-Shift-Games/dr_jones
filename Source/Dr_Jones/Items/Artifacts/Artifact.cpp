@@ -513,7 +513,7 @@ void UArtifactCleaningMode::TickBrushStroke()
 		return;
 	}
 
-	if (CleaningProgress >= 1.0f)
+	if (Artifact->CleaningProgress >= 1.0f)
 	{
 		return;
 	}
@@ -563,18 +563,16 @@ void UArtifactCleaningMode::TickBrushStroke()
 
 	if (TotalDirtValue > 0)
 	{
-		CleaningProgress = FMath::Clamp(1.0f - CurrentDirtValue / TotalDirtValue, 0.0f, 1.0f);
+		Artifact->CleaningProgress = FMath::Clamp(1.0f - CurrentDirtValue / TotalDirtValue, 0.0f, 1.0f);
 	}
 	else
 	{
-		CleaningProgress = 1.0f;
+		Artifact->CleaningProgress = 1.0f;
 	}
 
-	Artifact->CleaningProgress = CleaningProgress;
-
-	if (CleaningProgress >= CleaningCompletedThreshold)
+	if (Artifact->CleaningProgress >= CleaningCompletedThreshold)
 	{
-		CleaningProgress = 1.0f;
+		Artifact->CleaningProgress = 1.0f;
 		Artifact->CleanCompletely();
 		OnArtifactCleaned.Broadcast(Artifact);
 	}
