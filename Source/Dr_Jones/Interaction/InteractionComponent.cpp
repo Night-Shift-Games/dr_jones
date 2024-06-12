@@ -121,7 +121,6 @@ void UInteractionComponent::Interact()
 	NS_EARLY(!SelectedInteractiveComponent || !SelectedInteractiveComponent->IsInteractionEnabled());
 	
 	SelectedInteractiveComponent->Interact(Owner.Get());
-	SelectedInteractiveComponent->Interact(Owner.Get());
 }
 
 void UInteractionComponent::AltInteract()
