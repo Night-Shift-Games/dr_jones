@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "UI/WidgetManager.h"
 #include "InputAction.h"
+#include "Components/WidgetComponent.h"
 #include "Equipment/EquipmentComponent.h"
 #include "UI/DrJonesWidgetBase.h"
 #include "Utilities/Utilities.h"
@@ -17,6 +18,15 @@ UJournalComponent::UJournalComponent()
 void UJournalComponent::SetupPlayerInputComponent(UEnhancedInputComponent& EnhancedInputComponent)
 {
 	EnhancedInputComponent.BindAction(OpenJournalAction, ETriggerEvent::Triggered, this, &UJournalComponent::OpenJournal);
+}
+
+void UJournalComponent::ConstructJournal()
+{
+	for (auto& KV : Chapters)
+	{
+		FJournalChapter Chapter = KV.Value;
+		Chapter.NumberOfPages = Chapter.Pages.Num();
+	}
 }
 
 void UJournalComponent::OpenJournal()
@@ -32,5 +42,8 @@ void UJournalComponent::OpenJournal()
 	{
 		EquipmentComponent->EquipItemByClass(JournalItem);
 	}
+}
 
+void UJournalComponent::SetActivePage(int NewPage)
+{
 }

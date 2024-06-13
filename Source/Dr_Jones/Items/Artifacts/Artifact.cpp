@@ -730,9 +730,11 @@ void UArtifactIdentificationMode::Interact()
 			}
 
 			const FArtifactWhisperOfThePastData& Data = Artifact->WhispersOfThePastData[PointedIdentificationSphere->IndexInWOTPArray];
-			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("Interacted with WOTP symbol [%i]"), PointedIdentificationSphere->IndexInWOTPArray));
+#if UE_ENABLE_DEBUG_DRAWING
+				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("Interacted with WOTP symbol [%i]"), PointedIdentificationSphere->IndexInWOTPArray));
+#endif
 			// TODO: podswietlenie pokazanie dodanie do jurnala itp
-
+			OnArtifactIdentified.Broadcast(Artifact);
 			break;
 		}
 	}

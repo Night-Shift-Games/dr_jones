@@ -18,6 +18,8 @@ class ULocalMeshOctree;
 
 DECLARE_DELEGATE_OneParam(FOnArtifactAttached, AArtifact*)
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArtifactIdentified, AArtifact*, IdentifiedArtifact);
+
 USTRUCT(BlueprintType)
 struct FArtifactDirtData
 {
@@ -262,7 +264,7 @@ public:
 	void TryChangePointedSphere(UArtifactIdentificationSphereComponent* NewSphere);
 
 	void OnPointedSphereChanged(UArtifactIdentificationSphereComponent* OldSphere, UArtifactIdentificationSphereComponent* NewSphere);
-
+	
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
@@ -278,5 +280,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
 	FMaterialParameterInfo SphereMaskRadiusMPI;
 
+	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, Category = "DrJones|Identification")
+	FOnArtifactIdentified OnArtifactIdentified;
+	
 	int32 InteractActionBindingHandle = INDEX_NONE;
 };
