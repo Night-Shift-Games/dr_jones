@@ -256,7 +256,8 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 	}
 	
 	ItemToAttach.AttachToComponent(Owner->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, ItemToAttach.GetItemAttachmentSocket());
-
+	ItemToAttach.SetActorRelativeTransform(ItemToAttach.GetItemAttachmentTransformOffset());
+	
 	ItemToAttach.OnAddedToEquipment();
 }
 

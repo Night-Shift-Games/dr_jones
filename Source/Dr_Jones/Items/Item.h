@@ -29,7 +29,8 @@ public:
 	TSubclassOf<UAnimInstance> GetItemAnimation() const { return ItemAnimation; }
 	UTexture2D* GetItemIcon() const { return ItemIcon; }
 	FName GetItemAttachmentSocket() const { return AttachmentSocket; }
-
+	FTransform GetItemAttachmentTransformOffset() const { return AttachmentOffset; }
+	
 	void SetInteractionEnabled(bool bEnabled) const;
 	virtual void SetWorldPhysics();
 	FVector GetLocationOfItemAfterDropdown() const;
@@ -66,4 +67,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|UI")
 	TObjectPtr<UTexture2D> ItemIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones")
+	FTransform AttachmentOffset = FTransform::Identity;
 };

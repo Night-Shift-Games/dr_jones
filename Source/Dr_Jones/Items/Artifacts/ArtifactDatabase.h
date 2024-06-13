@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Animation/ArtifactAnimationDataAsset.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
@@ -84,6 +85,9 @@ struct FArtifactData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	EArtifactSize Size = EArtifactSize::Normal;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	TSoftObjectPtr<UArtifactAnimationDataAsset> ArtifactAnimationDataAsset;
+
 #if WITH_EDITORONLY_DATA
 	virtual void OnPostDataImport(const UDataTable* InDataTable, const FName InRowName, TArray<FString>& OutCollectedImportProblems) override;
 #endif
@@ -107,7 +111,8 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 	Filter.bRecursivePaths = true;
 	Filter.ClassPaths = {
 		UStaticMesh::StaticClass()->GetClassPathName(),
-		UTexture2D::StaticClass()->GetClassPathName()
+		UTexture2D::StaticClass()->GetClassPathName(),
+		UArtifactAnimationDataAsset::StaticClass()->GetClassPathName()
 	};
 	Filter.PackagePaths.Add(TEXT("/Game/DrJones/Regions"));
 	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
@@ -120,8 +125,12 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 	const FName ArtifactIconPrefix = TEXT("I_A_");
 	const FName ArtifactIconAssetName = FName(ArtifactIconPrefix.ToString() + Data->ArtifactID.ToString());
 	
+	const FName ArtifactAnimationDataAssetPrefix = TEXT("DA_A_");
+	const FName ArtifactAnimationAssetName = FName(ArtifactAnimationDataAssetPrefix.ToString() + Data->ArtifactID.ToString());
+
 	Data->ArtifactMesh.Empty();
 	Data->ArtifactIcon.Reset();
+	Data->ArtifactAnimationDataAsset = nullptr;
 	
 	for (auto& Object : AssetData)
 	{
@@ -136,6 +145,11 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 		{
 			const TSoftObjectPtr<UTexture2D> Icon = TSoftObjectPtr<UTexture2D>(Object.GetSoftObjectPath());
 			Data->ArtifactIcon = Icon;
+		}
+		if (AssetName.Equals(ArtifactAnimationAssetName.ToString()))
+		{
+			const TSoftObjectPtr<UArtifactAnimationDataAsset> ArtifactAnimationDataAsset = TSoftObjectPtr<UArtifactAnimationDataAsset>(Object.GetSoftObjectPath());
+			Data->ArtifactAnimationDataAsset = ArtifactAnimationDataAsset;
 		}
 	}
 

@@ -135,6 +135,13 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
 	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
 
+	if (const UArtifactAnimationDataAsset* ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset ? ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous() : nullptr)
+	{
+		ItemAnimation = ArtifactAnimDataAsset->HoldLayer;
+		AttachmentSocket = ArtifactAnimDataAsset->AttachBone;
+		AttachmentOffset = ArtifactAnimDataAsset->AttachOffset;
+	}
+	
 	SetupDynamicArtifact();
 }
 
