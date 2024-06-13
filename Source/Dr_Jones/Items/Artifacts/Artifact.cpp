@@ -130,10 +130,10 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	ArtifactWear = ArtifactData.Wear;
 
 	// TODO: Generate these from the above values?
-	DirtData.DustAmount = FMath::FRand();
-	DirtData.MudAmount = FMath::FRand();
-	DirtData.RustAmount = FMath::FRand();
-	DirtData.MoldAmount = FMath::FRand();
+	DirtData.DustAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.MudAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
 
 	SetupDynamicArtifact();
 }
@@ -146,10 +146,10 @@ void AArtifact::SetupDynamicArtifact()
 	DirtData.MudMPI = FMaterialParameterInfo(TEXT("DirtIntensity"), BlendParameter, 0);
 
 	// TODO: Generate these from the above values?
-	DirtData.DustAmount = FMath::FRand();
-	DirtData.MudAmount = FMath::FRand();
-	DirtData.RustAmount = FMath::FRand();
-	DirtData.MoldAmount = FMath::FRand();
+	DirtData.DustAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.MudAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
+	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
 
 	if (!ArtifactStaticMesh)
 	{
