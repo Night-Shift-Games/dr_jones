@@ -27,7 +27,7 @@ void UEquipmentComponent::BeginPlay()
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
-		if (Tools.Num() < 3)
+		if (ToolClass->GetDefaultObject<ATool>()->bCanBeVisibleInEquipment)
 		{
 			AddToQuickSlot(NewTool->GetClass(), Tools.Num() - 1);
 		}
@@ -66,7 +66,6 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	}
 	
 	AttachItemToHand(*ItemToAdd);
-	EquipItem(ItemToAdd);
 }
 
 void UEquipmentComponent::EquipItemByClass(const TSubclassOf<AItem> ItemClass)
@@ -112,13 +111,14 @@ void UEquipmentComponent::UnequipItem()
 	AItem* ItemToUnequip = ItemInHand;
 	ItemInHand = nullptr;
 	
-	ItemToUnequip->OnUnequip();
-	
 	if (ItemToUnequip->IsA<AArtifact>() || ItemToUnequip->IsA<ABucket>())
 	{
 		DetachItemFromHand(*ItemToUnequip);
 	}
 
+	ItemToUnequip->OnUnequip();
+	
+	
 	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }
 

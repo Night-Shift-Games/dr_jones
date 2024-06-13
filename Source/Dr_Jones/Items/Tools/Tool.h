@@ -35,6 +35,10 @@ public:
 	virtual void OnEquip() override;
 	virtual void OnUnequip() override;
 	
+	// TODO: Journal workaround
+	UPROPERTY(EditAnywhere)
+	bool bCanBeVisibleInEquipment = true;
+	
 protected:
 	UPROPERTY(Transient)
 	TObjectPtr<ADrJonesCharacter> OwningPlayer;

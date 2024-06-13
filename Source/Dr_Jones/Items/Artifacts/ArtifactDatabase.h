@@ -115,6 +115,7 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 		UArtifactAnimationDataAsset::StaticClass()->GetClassPathName()
 	};
 	Filter.PackagePaths.Add(TEXT("/Game/DrJones/Regions"));
+	Filter.PackagePaths.Add(TEXT("/Game/Dev"));
 	AssetRegistryModule.Get().GetAssets(Filter, AssetData);
 
 	// Find and set Static Mesh

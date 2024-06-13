@@ -88,6 +88,7 @@ void AArtifact::PickUp(ADrJonesCharacter* Taker)
 		return;
 	}
 	EquipmentComponent->AddItem(this);
+	EquipmentComponent->EquipItem(this);
 	OnArtifactPickup.ExecuteIfBound(this);
 	OnArtifactPickedUp(Taker);
 
@@ -135,7 +136,8 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
 	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
 
-	if (const UArtifactAnimationDataAsset* ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset ? ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous() : nullptr)
+	const UArtifactAnimationDataAsset* ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous();
+	if (ArtifactAnimDataAsset)
 	{
 		ItemAnimation = ArtifactAnimDataAsset->HoldLayer;
 		AttachmentSocket = ArtifactAnimDataAsset->AttachBone;

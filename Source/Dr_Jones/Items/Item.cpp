@@ -2,6 +2,7 @@
 
 #include "Item.h"
 
+#include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
 #include "Utilities/Utilities.h"
