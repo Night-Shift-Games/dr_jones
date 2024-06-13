@@ -148,8 +148,8 @@ inline void FArtifactData::OnPostDataImport(const UDataTable* InDataTable, const
 		}
 		if (AssetName.Equals(ArtifactAnimationAssetName.ToString()))
 		{
-			const TSoftObjectPtr<UArtifactAnimationDataAsset> ArtifactAnimationDataAsset = TSoftObjectPtr<UArtifactAnimationDataAsset>(Object.GetSoftObjectPath());
-			Data->ArtifactAnimationDataAsset = ArtifactAnimationDataAsset;
+			const TSoftObjectPtr<UArtifactAnimationDataAsset> SoftArtifactAnimationDataAsset = TSoftObjectPtr<UArtifactAnimationDataAsset>(Object.GetSoftObjectPath());
+			Data->ArtifactAnimationDataAsset = SoftArtifactAnimationDataAsset;
 		}
 	}
 
