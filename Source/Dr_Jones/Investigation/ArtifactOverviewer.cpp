@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Items/Artifacts/Artifact.h"
+#include "Slate/SceneViewport.h"
 #include "Utilities/Utilities.h"
 
 void UArtifactOverviewer::InitializeOverviewer(ADrJonesCharacter& PlayerPawn, UCameraComponent& Camera, AArtifact& Artifact, TFunctionRef<void(AArtifact&)> CallbackFunc)
@@ -25,6 +26,8 @@ void UArtifactOverviewer::StartOverview()
 	SetOverviewFixedAxis();
 	AddOverviewMappingContext();
 	bIsOverviewing = true;
+
+	FixCameraPenetration();
 }
 
 void UArtifactOverviewer::EndOverview()
@@ -34,8 +37,37 @@ void UArtifactOverviewer::EndOverview()
 	bIsOverviewing = false;
 }
 
+void UArtifactOverviewer::FixCameraPenetration() const
+{
+	// Reset the artifact position for the bounds check to yield the correct results
+	ArtifactToOverview->SetActorLocation(ArtifactTransformAtOverviewBeginning.GetLocation());
+
+	FBox Box(ForceInit);
+	const FTransform WorldToCamera = CameraTransformAtOverviewBeginning.Inverse();
+
+	ArtifactToOverview->ForEachComponent<UPrimitiveComponent>(false, [&](const UPrimitiveComponent* InPrimComp)
+	{
+		if (InPrimComp->IsRegistered())
+		{
+			const FTransform ComponentToCameraSpace = InPrimComp->GetComponentTransform() * WorldToCamera;
+			Box += InPrimComp->CalcBounds(ComponentToCameraSpace).GetBox();
+		}
+	});
+
+	// A so-called camera "safe zone"
+	FVector CameraBoxExtent = FVector(50, 100, 100);
+	FBox CameraBox(-CameraBoxExtent, CameraBoxExtent);
+	FBox OverlapBox = CameraBox.Overlap(Box);
+	const double Penetration = OverlapBox.GetSize().X;
+
+	FVector OffsetVector = CameraTransformAtOverviewBeginning.TransformVector(FVector(Penetration, 0, 0));
+	ArtifactToOverview->SetActorLocation(ArtifactTransformAtOverviewBeginning.GetLocation() + OffsetVector);
+}
+
 void UArtifactOverviewer::ApplyControl(const FInputActionValue& InputActionValue)
 {
+	check(ArtifactToOverview);
+
 	const FVector2D InputVector = InputActionValue.Get<FVector2D>();
 	FVector2D OutDirection;
 	float OutLength;
@@ -44,6 +76,7 @@ void UArtifactOverviewer::ApplyControl(const FInputActionValue& InputActionValue
 	FVector Direction = FVector(OutDirection.X, -OutDirection.Y, 0.0);
 
 	RequestRotate(Direction);
+	FixCameraPenetration();
 }
 
 void UArtifactOverviewer::FetchPreOverviewActorProperties()
@@ -57,9 +90,24 @@ void UArtifactOverviewer::SetActorOverviewProperties()
 {
 	const FVector CameraLocation = CameraComponent->GetComponentLocation();
 	const FVector CameraForwardVector = CameraComponent->GetForwardVector();
-	ArtifactToOverview->SetActorLocation(CameraLocation + CameraForwardVector * 50.0);
+	static constexpr float DistanceToArtifact = 50.0f;
+	ArtifactToOverview->SetActorLocation(CameraLocation + CameraForwardVector * DistanceToArtifact);
 	ArtifactToOverview->SetActorRotation(CameraForwardVector.ToOrientationRotator());
 	ArtifactToOverview->SetInteractionEnabled(false);
+
+	// TODO: Check that pls
+	const float AspectRatio = Viewer->GetController<APlayerController>()->GetLocalPlayer()->ViewportClient->GetGameViewport()->GetDesiredAspectRatio();
+	const float VerticalFov = CameraComponent->FieldOfView / AspectRatio;
+	const double DesiredVerticalSize = FMath::Tan(FMath::DegreesToRadians(VerticalFov / 2.0f)) * DistanceToArtifact;
+	FVector Origin;
+	FVector Extent;
+	ArtifactToOverview->GetActorBounds(false, Origin, Extent);
+	const double AvgAxisSize = (Extent.X + Extent.Y + Extent.Z) * 2.0 / 3.0;
+	const double DesiredScale = DesiredVerticalSize / AvgAxisSize;
+	ArtifactToOverview->SetActorRelativeScale3D(FVector(DesiredScale));
+
+	CameraTransformAtOverviewBeginning = CameraComponent->GetComponentTransform();
+	ArtifactTransformAtOverviewBeginning = ArtifactToOverview->GetActorTransform();
 }
 
 void UArtifactOverviewer::AddOverviewMappingContext()

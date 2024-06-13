@@ -38,11 +38,14 @@ protected:
 	void RemoveOverviewMappingContext();
 	void SetOverviewFixedAxis();
 	void RestoreActorToPreOverviewState();
+	void FixCameraPenetration() const;
 	
 public:
 	FTransform OverviewFixedTransform = FTransform::Identity;
 	FName PreviousAttachmentSocket;
 	FTransform ActorTransformBeforeOverview;
+	FTransform CameraTransformAtOverviewBeginning;
+	FTransform ArtifactTransformAtOverviewBeginning;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<AActor> PreviousActorOwner;
