@@ -231,6 +231,9 @@ public:
 	float CleaningCompletedThreshold = 0.92f;
 
 	FVector4f CurrentPaintChannelMask = FVector4f::Zero();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
+	TObjectPtr<USoundBase> CleanedArtifactSound;
 };
 
 enum class EArtifactIdentificationSphereType : int32

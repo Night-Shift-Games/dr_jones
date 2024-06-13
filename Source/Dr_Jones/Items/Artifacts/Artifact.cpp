@@ -582,6 +582,12 @@ void UArtifactCleaningMode::TickBrushStroke()
 		Artifact->CleaningProgress = 1.0f;
 		Artifact->CleanCompletely();
 		OnArtifactCleaned.Broadcast(Artifact);
+
+		// TODO: Move this to the journal - it should not be triggered by cleaning mode at all
+		if (CleanedArtifactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, CleanedArtifactSound, Artifact->GetActorLocation());
+		}
 	}
 }
 
