@@ -3,8 +3,10 @@
 #include "Items/Tools/Tool.h"
 
 #include "Animation/CharacterAnimationComponent.h"
+#include "Audio/DefaultSoundBank.h"
 #include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/DrJonesCharacter.h"
 
 void ATool::BeginPlay()
@@ -54,6 +56,19 @@ void ATool::OnEquip()
 {
 	Super::OnEquip();
 	GetMeshComponent()->SetVisibility(true, true);
+
+	USoundBase* Sound = EquipSound;
+	if (!EquipSound)
+	{
+		if (const UDefaultSoundBank* SoundBank = UNightShiftSettings::LoadDefaultSoundBank())
+		{
+			Sound = SoundBank->EquipSound;
+		}
+	}
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation());
+	}
 }
 
 void ATool::OnUnequip()

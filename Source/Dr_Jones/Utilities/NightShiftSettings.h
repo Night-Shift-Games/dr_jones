@@ -9,6 +9,8 @@
 
 #include "NightShiftSettings.generated.h"
 
+class UDefaultSoundBank;
+
 UCLASS(Config = Game, defaultconfig, meta = (DisplayName = "Night Shift Settings"))
 class DR_JONES_API UNightShiftSettings : public UDeveloperSettings
 {
@@ -17,7 +19,10 @@ class DR_JONES_API UNightShiftSettings : public UDeveloperSettings
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Data Driven Development")
 	TSoftObjectPtr<UDataTable> ArtifactDataTable;
-	
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	TSoftObjectPtr<UDefaultSoundBank> DefaultSoundBank;
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Clock")
 	FDateTime InitialTime = FDateTime(1922, 11, 4, 15, 30);
 
@@ -29,4 +34,6 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
 	TArray<TSubclassOf<UEvent>> StaticEvents;
+
+	static UDefaultSoundBank* LoadDefaultSoundBank();
 };

@@ -38,4 +38,7 @@ public:
 protected:
 	UPROPERTY(Transient)
 	TObjectPtr<ADrJonesCharacter> OwningPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USoundBase> EquipSound;
 };
