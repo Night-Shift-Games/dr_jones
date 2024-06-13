@@ -148,3 +148,14 @@ namespace Utilities
 	}
 #endif
 }
+
+FArtifactData UDrJonesUtilitiesFunctionLibrary::PullArtifactDataFromDatabase(FName ArtifactID, bool& OutValid)
+{
+	if (FArtifactData* Data = UArtifactFactory::PullArtifactDataFromDatabase(ArtifactID))
+	{
+		OutValid = true;
+		return *Data;
+	}
+	OutValid = false;
+	return {};
+}

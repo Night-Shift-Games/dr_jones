@@ -128,6 +128,5 @@ public:
 	{ return Utilities::IsValueBetween(Value, Less, More);}
 
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Utilities")
-	static FArtifactData PullArtifactDataFromDatabase(FName ArtifactID)
-	{ return *UArtifactFactory::PullArtifactDataFromDatabase(ArtifactID); }
+	static FArtifactData PullArtifactDataFromDatabase(FName ArtifactID, bool& OutValid);
 };
