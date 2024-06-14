@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Animation/ArtifactAnimationDataAsset.h"
 #include "Engine/DataTable.h"
 #include "Engine/DeveloperSettings.h"
 #include "Events/Event.h"
@@ -34,6 +35,9 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
 	TArray<TSoftClassPtr<UEvent>> StaticEvents;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	TSoftObjectPtr<UArtifactAnimationDataAsset> FallbackArtifactAnimDataAsset;
 
 	static UDefaultSoundBank* LoadDefaultSoundBank();
 };

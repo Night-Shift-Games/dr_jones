@@ -136,7 +136,12 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
 	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
 
-	const UArtifactAnimationDataAsset* ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous();
+	UArtifactAnimationDataAsset* ArtifactAnimDataAsset = nullptr;
+	ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous();
+	if (!ArtifactAnimDataAsset)
+	{
+		ArtifactAnimDataAsset = GetDefault<UNightShiftSettings>()->FallbackArtifactAnimDataAsset.LoadSynchronous();
+	}
 	if (ArtifactAnimDataAsset)
 	{
 		ItemAnimation = ArtifactAnimDataAsset->HoldLayer;
