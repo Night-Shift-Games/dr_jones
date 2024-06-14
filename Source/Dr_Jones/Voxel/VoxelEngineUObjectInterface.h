@@ -122,7 +122,6 @@ struct FVoxelEngineMeshOptimizationData
 {
 	struct FChunkData
 	{
-		TArray<int32> Vertices;
 		TArray<int32> Triangles;
 	};
 	TMap<int32, FChunkData> PerChunkData;

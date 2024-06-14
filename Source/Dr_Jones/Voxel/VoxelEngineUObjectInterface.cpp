@@ -372,10 +372,7 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 							{
 								EditMesh.RemoveTriangle(Triangle);
 							}
-							for (int32 Vertex : ChunkData->Vertices)
-							{
-								EditMesh.RemoveVertex(Vertex);
-							}
+							OptimizationData->PerChunkData.Remove(Index);
 						}
 					}
 				}
@@ -388,7 +385,6 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 					for (auto It = ChunkSlices.VertexSlices.CreateConstIterator(); It; ++It)
 					{
 						check(ChunkSlices.ChunkIndices.IsValidIndex(It.GetIndex()));
-						int32 ChunkIndex = ChunkSlices.ChunkIndices[It.GetIndex()];
 
 						const NS::SurfaceNets::FTriangulationChunkSlice& Slice = *It;
 						if (Slice.Length == 0)
@@ -396,14 +392,12 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 							continue;
 						}
 
-						FVoxelEngineMeshOptimizationData::FChunkData& ChunkData = OptimizationData->PerChunkData.Add(ChunkIndex);
 						for (int32 I = Slice.Start; I < Slice.Start + Slice.Length; ++I)
 						{
 							if (ensure(CombinedVertices.IsValidIndex(I)))
 							{
 								const FVector& Vertex = CombinedVertices[I];
 								int32 Vtx = EditMesh.AppendVertex(Vertex);
-								ChunkData.Vertices.Add(Vtx);
 								if (bPartial)
 								{
 									IndexRemap.Add(Vtx);
@@ -424,7 +418,7 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 							continue;
 						}
 
-						FVoxelEngineMeshOptimizationData::FChunkData& ChunkData = OptimizationData->PerChunkData.FindChecked(ChunkIndex);
+						FVoxelEngineMeshOptimizationData::FChunkData& ChunkData = OptimizationData->PerChunkData.Add(ChunkIndex);
 						for (int32 I = Slice.Start; I < Slice.Start + Slice.Length; ++I)
 						{
 							if (ensure(CombinedTriangles.IsValidIndex(I)))
@@ -434,7 +428,6 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 								if (bPartial)
 								{
 									TriangleID = EditMesh.AppendTriangle(IndexRemap[Triangle.A], IndexRemap[Triangle.B], IndexRemap[Triangle.C]);
-									TrianglesAdded.Add(TriangleID);
 								}
 								else
 								{
@@ -446,8 +439,10 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 								{
 									continue;
 								}
+								ensureAlways(TriangleID != FDynamicMesh3::DuplicateTriangleID);
 								MaterialIDs->SetValue(TriangleID, 0);
 								ChunkData.Triangles.Add(TriangleID);
+								TrianglesAdded.Add(TriangleID);
 							}
 						}
 					}

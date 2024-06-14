@@ -880,7 +880,7 @@ namespace NS::SurfaceNets
 			TArray<FMaterialWeights> MaterialWeights;
 			TriangulateVoxelChunk(VoxelGrid, Chunk, ChunkIndex, Vertices, Triangles, MaterialWeights, DebugContext);
 
-			if (!Vertices.IsEmpty())
+			if (!Triangles.IsEmpty())
 			{
 				FScopeLock Lock(&TransactionGuard);
 

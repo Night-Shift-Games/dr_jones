@@ -43,7 +43,10 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 		TStaticArray<int32, 26> Neighbors = VoxelGrid->GetInternal().GetChunkNeighborIndices(Chunk);
 		for (int32 N : Neighbors)
 		{
-			ChunksToUpdate.Add(N);
+			if (N != INDEX_NONE)
+			{
+				ChunksToUpdate.Add(N);
+			}
 		}
 	}
 
@@ -88,7 +91,10 @@ void ADigSite::UnDig(const FVector& Location, float DigRadius)
 		TStaticArray<int32, 26> Neighbors = VoxelGrid->GetInternal().GetChunkNeighborIndices(Chunk);
 		for (int32 N : Neighbors)
 		{
-			ChunksToUpdate.Add(N);
+			if (N != INDEX_NONE)
+			{
+				ChunksToUpdate.Add(N);
+			}
 		}
 	}
 
