@@ -3,6 +3,33 @@
 #include "DigSiteBorder.h"
 
 #include "DigSite.h"
+#include "Components/SphereComponent.h"
+
+ADigSiteBorderBreakMarker::ADigSiteBorderBreakMarker()
+{
+	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SceneComponent->bVisualizeComponent = true;
+	RootComponent = SceneComponent;
+
+	VisSphere = CreateDefaultSubobject<USphereComponent>(TEXT("VisSphere"));
+	VisSphere->SetupAttachment(RootComponent);
+	VisSphere->ShapeColor = FColorList::GreenYellow;
+}
+
+void ADigSiteBorderBreakMarker::PostLoad()
+{
+	Super::PostLoad();
+	VisSphere->SetSphereRadius(Radius);
+}
+
+void ADigSiteBorderBreakMarker::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ADigSiteBorderBreakMarker, Radius))
+	{
+		VisSphere->SetSphereRadius(Radius);
+	}
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
 
 UDigSiteBorder::UDigSiteBorder()
 {

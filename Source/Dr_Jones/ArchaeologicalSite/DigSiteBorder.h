@@ -7,6 +7,8 @@
 
 #include "DigSiteBorder.generated.h"
 
+class USphereComponent;
+
 USTRUCT(BlueprintType)
 struct FDigSiteRectangularBorderDesc
 {
@@ -20,6 +22,26 @@ struct FDigSiteRectangularBorderDesc
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Height = 0.0f;
+};
+
+UCLASS(Blueprintable)
+class ADigSiteBorderBreakMarker : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	ADigSiteBorderBreakMarker();
+
+	virtual void PostLoad() override;
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
+	UPROPERTY()
+	TObjectPtr<USphereComponent> VisSphere;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Radius = 10.0f;
 };
 
 UCLASS(Blueprintable, Abstract, ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent))
