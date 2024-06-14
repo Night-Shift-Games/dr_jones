@@ -6,6 +6,7 @@
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
 #include "Utilities/Utilities.h"
+#include "Tools/Tool.h"
 
 AItem::AItem()
 {
@@ -40,7 +41,15 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), { this, GetInstigator() });
+	TArray<ATool*> Tools = Utilities::GetPlayerCharacter(*this).EquipmentComponent->GetTools();
+	TArray<const AActor*> ActorArray;
+	for (ATool* Tool : Tools)
+	{
+		ActorArray.Add(Tool);
+	}
+	ActorArray.Add(GetInstigator());
+	ActorArray.Add(this);
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ActorArray);
 	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
 	return GroundLocation;
 }
