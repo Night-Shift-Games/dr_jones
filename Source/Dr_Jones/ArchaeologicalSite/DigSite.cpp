@@ -36,7 +36,18 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 		DigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
 
-	UpdateMeshPartial(ChunkIndicesInRadius, true);
+	TSet<int32> ChunksToUpdate;
+	for (int32 Chunk : ChunkIndicesInRadius)
+	{
+		ChunksToUpdate.Add(Chunk);
+		TStaticArray<int32, 26> Neighbors = VoxelGrid->GetInternal().GetChunkNeighborIndices(Chunk);
+		for (int32 N : Neighbors)
+		{
+			ChunksToUpdate.Add(N);
+		}
+	}
+
+	UpdateMeshPartial(ChunksToUpdate.Array(), true);
 }
 
 FDigSiteSample ADigSite::SampleDig(const FVector& Location, float DigRadius)
@@ -70,7 +81,18 @@ void ADigSite::UnDig(const FVector& Location, float DigRadius)
 		UnDigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
 
-	UpdateMeshPartial(ChunkIndicesInRadius, true);
+	TSet<int32> ChunksToUpdate;
+	for (int32 Chunk : ChunkIndicesInRadius)
+	{
+		ChunksToUpdate.Add(Chunk);
+		TStaticArray<int32, 26> Neighbors = VoxelGrid->GetInternal().GetChunkNeighborIndices(Chunk);
+		for (int32 N : Neighbors)
+		{
+			ChunksToUpdate.Add(N);
+		}
+	}
+
+	UpdateMeshPartial(ChunksToUpdate.Array(), true);
 }
 
 void ADigSite::UpdateMesh(bool bAsync)

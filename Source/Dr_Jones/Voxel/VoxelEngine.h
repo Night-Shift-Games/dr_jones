@@ -428,6 +428,8 @@ namespace NSVE
 
 		bool AreCoordsValid(const FIntVector& Coords) const;
 
+		TStaticArray<int32, 26> GetChunkNeighborIndices(int32 Index) const;
+
 		FVoxelChunk* GetChunkByIndex(int32 Index);
 		const FVoxelChunk* GetChunkByIndex(int32 Index) const;
 		FVoxelChunk& GetChunkRefByIndex(int32 Index);

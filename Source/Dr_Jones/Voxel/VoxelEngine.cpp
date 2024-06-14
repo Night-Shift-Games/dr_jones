@@ -221,6 +221,31 @@ namespace NSVE
 		}
 	}
 
+	TStaticArray<int32, 26> FVoxelGrid::GetChunkNeighborIndices(int32 Index) const
+	{
+		TStaticArray<int32, 26> Neighbors;
+		FIntVector Coords = IndexToCoords(Index);
+		int32 I = 0;
+		for (int32 Z = -1; Z <= 1; ++Z)
+		{
+			for (int32 Y = -1; Y <= 1; ++Y)
+			{
+				for (int32 X = -1; X <= 1; ++X)
+				{
+					if (X == 0 && Y == 0 && Z == 0)
+					{
+						continue;
+					}
+					FIntVector NeighborCoords = Coords + FIntVector(X, Y, Z);
+					int32 NeighborChunkIndex = AreCoordsValid(NeighborCoords) ? CoordsToIndex(NeighborCoords) : INDEX_NONE;
+					Neighbors[I] = NeighborChunkIndex;
+					++I;
+				}
+			}
+		}
+		return Neighbors;
+	}
+
 	FVoxel* FVoxelGrid::ResolveAddress(const FVoxelAddress& VoxelAddress)
 	{
 		if (!AreCoordsValid(VoxelAddress.ChunkCoords))
