@@ -32,6 +32,7 @@ void ATool::PickUp(ADrJonesCharacter* Player)
 	checkf(EquipmentComponent, TEXT("Inventory is missing!"));
 
 	EquipmentComponent->AddItem(this);
+	EquipmentComponent->EquipItem(this);
 }
 
 UAnimMontage* ATool::FindActionMontage(const FName& MontageName) const
