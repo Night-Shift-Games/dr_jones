@@ -832,11 +832,27 @@ namespace NS::SurfaceNets
 		}
 	}
 
+	struct FTriangulationChunkSlice
+	{
+		int32 Start = 0;
+		int32 Length = 0;
+	};
+
+	struct FTriangulationChunkSlices
+	{
+		TArray<int32> ChunkIndices;
+		TArray<FTriangulationChunkSlice> VertexSlices;
+		TArray<FTriangulationChunkSlice> TriangleSlices;
+		TArray<FTriangulationChunkSlice> MaterialWeightsSlices;
+	};
+
 	inline void TriangulateVoxelGrid(
 		const FVoxelGrid& VoxelGrid,
+		const TArray<int32>& OnlyChunks,
 		TArray<FVector>& OutVertices,
 		TArray<FIndex3i>& OutTriangles,
 		TArray<FMaterialWeights>& OutMaterialWeights,
+		FTriangulationChunkSlices& OutChunkSlices,
 		Debug::FDebugContext* DebugContext = nullptr)
 	{
 		SCOPED_NAMED_EVENT(NSVE_SurfaceNets_TriangulateVoxelGrid, FColorList::Wheat)
@@ -854,13 +870,25 @@ namespace NS::SurfaceNets
 
 		VoxelGrid.IterateChunks_Parallel([&](const FVoxelChunk& Chunk, int32 ChunkIndex)
 		{
+			if (!OnlyChunks.IsEmpty() && !OnlyChunks.Contains(ChunkIndex))
+			{
+				return;
+			}
+
 			TArray<FVector> Vertices;
 			TArray<FIndex3i> Triangles;
 			TArray<FMaterialWeights> MaterialWeights;
 			TriangulateVoxelChunk(VoxelGrid, Chunk, ChunkIndex, Vertices, Triangles, MaterialWeights, DebugContext);
 
+			if (!Vertices.IsEmpty())
 			{
 				FScopeLock Lock(&TransactionGuard);
+
+				OutChunkSlices.ChunkIndices.Add(ChunkIndex);
+
+				OutChunkSlices.VertexSlices.Add(FTriangulationChunkSlice{ .Start = OutVertices.Num(), .Length = Vertices.Num() });
+				OutChunkSlices.TriangleSlices.Add(FTriangulationChunkSlice{ .Start = OutTriangles.Num(), .Length = Triangles.Num() });
+				OutChunkSlices.MaterialWeightsSlices.Add(FTriangulationChunkSlice{ .Start = OutMaterialWeights.Num(), .Length = MaterialWeights.Num() });
 
 				Algo::Copy(Vertices, OutVertices);
 				Algo::Copy(MaterialWeights, OutMaterialWeights);

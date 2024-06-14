@@ -118,13 +118,31 @@ private:
 	TUniquePtr<NSVE::FVoxelGrid> InternalVoxelGrid;
 };
 
+struct FVoxelEngineMeshOptimizationData
+{
+	struct FChunkData
+	{
+		TArray<int32> Vertices;
+		TArray<int32> Triangles;
+	};
+	TMap<int32, FChunkData> PerChunkData;
+};
+
 UCLASS()
 class DR_JONES_API UVoxelEngineUtilities : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	static void TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount, TFunction<void()> OnCompleted, bool bAsync = true, const TSharedPtr<NS::SurfaceNets::Debug::FDebugContext>& DebugContext = nullptr);
+	static void TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid,
+		const TArray<int32>& OnlyChunks,
+		TSharedPtr<FVoxelEngineMeshOptimizationData> OptimizationData,
+		UDynamicMesh* DynamicMesh,
+		int32& OutVertexCount,
+		int32& OutTriangleCount,
+		TFunction<void()> OnCompleted,
+		bool bAsync = true,
+		const TSharedPtr<NS::SurfaceNets::Debug::FDebugContext>& DebugContext = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "NightShift|VoxelEngine")
 	static void TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamicMesh* DynamicMesh, int32& OutVertexCount, int32& OutTriangleCount);

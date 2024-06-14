@@ -310,6 +310,8 @@ void UVoxelGrid::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 }
 
 void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid& VoxelGrid,
+	const TArray<int32>& OnlyChunks,
+	TSharedPtr<FVoxelEngineMeshOptimizationData> OptimizationData,
 	UDynamicMesh* DynamicMesh,
 	int32& OutVertexCount,
 	int32& OutTriangleCount,
@@ -327,14 +329,21 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 	auto EditDynamicMeshFn = [DynamicMesh, OnCompleted](
 		const TArray<FVector>& CombinedVertices,
 		const TArray<FTriangle>& CombinedTriangles,
-		const TArray<NS::SurfaceNets::FMaterialWeights>& CombinedMaterialWeights)
+		const TArray<NS::SurfaceNets::FMaterialWeights>& CombinedMaterialWeights,
+		const TArray<int32>& OnlyChunks,
+		const NS::SurfaceNets::FTriangulationChunkSlices& ChunkSlices,
+		TSharedPtr<FVoxelEngineMeshOptimizationData> OptimizationData)
 	{
 		{
 			SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh, FColorList::NavyBlue)
 
 			DynamicMesh->EditMesh([&](FDynamicMesh3& EditMesh)
 			{
-				EditMesh.Clear();
+				const bool bPartial = !OnlyChunks.IsEmpty();
+				if (!bPartial)
+				{
+					EditMesh.Clear();
+				}
 
 				if (!EditMesh.HasAttributes())
 				{
@@ -352,36 +361,147 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 				FDynamicMeshColorOverlay* ColorOverlay = EditMesh.Attributes()->PrimaryColors();
 				FDynamicMeshMaterialAttribute* MaterialIDs = EditMesh.Attributes()->GetMaterialID();
 
+				if (bPartial)
+				{
+					checkf(OptimizationData, TEXT("Optimization data is required for partial edits"));
+					for (int32 Index : OnlyChunks)
+					{
+						if (FVoxelEngineMeshOptimizationData::FChunkData* ChunkData = OptimizationData->PerChunkData.Find(Index))
+						{
+							for (int32 Triangle : ChunkData->Triangles)
+							{
+								EditMesh.RemoveTriangle(Triangle);
+							}
+							for (int32 Vertex : ChunkData->Vertices)
+							{
+								EditMesh.RemoveVertex(Vertex);
+							}
+						}
+					}
+				}
+
 				{
 					SCOPED_NAMED_EVENT(VoxelEngineUtilities_TriangulateVoxelGrid_Internal_EditMesh_Append, FColorList::DustyRose)
-					for (auto It = CombinedVertices.CreateConstIterator(); It; ++It)
-					{
-						const FVector& Vertex = *It;
-						EditMesh.AppendVertex(Vertex);
-					}
+					TArray<int32> IndexRemap;
+					TArray<int32> TrianglesAdded;
 
-					for (const FTriangle& Triangle : CombinedTriangles)
+					for (auto It = ChunkSlices.VertexSlices.CreateConstIterator(); It; ++It)
 					{
-						const int32 TriangleID = EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
-						// NOTE: With surface nets, non-manifold triangles are to be expected,
-						// but of course, Unreal's dynamic mesh shows them a middle finger and doesn't add them at all.
-						if (!ensureMsgf(TriangleID >= 0, TEXT("Non-manifold or invalid triangle detected during EditMesh.")))
+						check(ChunkSlices.ChunkIndices.IsValidIndex(It.GetIndex()));
+						int32 ChunkIndex = ChunkSlices.ChunkIndices[It.GetIndex()];
+
+						const NS::SurfaceNets::FTriangulationChunkSlice& Slice = *It;
+						if (Slice.Length == 0)
 						{
 							continue;
 						}
-						MaterialIDs->SetValue(TriangleID, 0);
+
+						FVoxelEngineMeshOptimizationData::FChunkData& ChunkData = OptimizationData->PerChunkData.Add(ChunkIndex);
+						for (int32 I = Slice.Start; I < Slice.Start + Slice.Length; ++I)
+						{
+							if (ensure(CombinedVertices.IsValidIndex(I)))
+							{
+								const FVector& Vertex = CombinedVertices[I];
+								int32 Vtx = EditMesh.AppendVertex(Vertex);
+								ChunkData.Vertices.Add(Vtx);
+								if (bPartial)
+								{
+									IndexRemap.Add(Vtx);
+								}
+							}
+						}
 					}
 
-					ColorOverlay->CreateFromPredicate([](int, int, int) { return true; }, 0.0f);
-					for (const int32 ElementID : ColorOverlay->ElementIndicesItr())
+					// TODO: Remap indices if partial
+					for (auto It = ChunkSlices.TriangleSlices.CreateConstIterator(); It; ++It)
 					{
-						const int32 VertexID = ColorOverlay->GetParentVertex(ElementID);
-						FVector4f Color;
-						Color.X = CombinedMaterialWeights[VertexID].Weights[0];
-						Color.Y = CombinedMaterialWeights[VertexID].Weights[1];
-						Color.Z = CombinedMaterialWeights[VertexID].Weights[2];
-						Color.W = CombinedMaterialWeights[VertexID].Weights[7];
-						ColorOverlay->SetElement(ElementID, Color);
+						check(ChunkSlices.ChunkIndices.IsValidIndex(It.GetIndex()));
+						int32 ChunkIndex = ChunkSlices.ChunkIndices[It.GetIndex()];
+
+						const NS::SurfaceNets::FTriangulationChunkSlice& Slice = *It;
+						if (Slice.Length == 0)
+						{
+							continue;
+						}
+
+						FVoxelEngineMeshOptimizationData::FChunkData& ChunkData = OptimizationData->PerChunkData.FindChecked(ChunkIndex);
+						for (int32 I = Slice.Start; I < Slice.Start + Slice.Length; ++I)
+						{
+							if (ensure(CombinedTriangles.IsValidIndex(I)))
+							{
+								const FTriangle& Triangle = CombinedTriangles[I];
+								int32 TriangleID;
+								if (bPartial)
+								{
+									TriangleID = EditMesh.AppendTriangle(IndexRemap[Triangle.A], IndexRemap[Triangle.B], IndexRemap[Triangle.C]);
+									TrianglesAdded.Add(TriangleID);
+								}
+								else
+								{
+									TriangleID = EditMesh.AppendTriangle(Triangle.A, Triangle.B, Triangle.C);
+								}
+								// NOTE: With surface nets, non-manifold triangles are to be expected,
+								// but of course, Unreal's dynamic mesh shows them a middle finger and doesn't add them at all.
+								if (!ensureMsgf(TriangleID >= 0, TEXT("Non-manifold or invalid triangle detected during EditMesh.")))
+								{
+									continue;
+								}
+								MaterialIDs->SetValue(TriangleID, 0);
+								ChunkData.Triangles.Add(TriangleID);
+							}
+						}
+					}
+
+					if (!bPartial)
+					{
+						ColorOverlay->CreateFromPredicate([](int, int, int) { return false; }, 0.0f);
+						for (const int32 ElementID : ColorOverlay->ElementIndicesItr())
+						{
+							const int32 VertexID = ColorOverlay->GetParentVertex(ElementID);
+							FVector4f Color;
+							Color.X = CombinedMaterialWeights[VertexID].Weights[0];
+							Color.Y = CombinedMaterialWeights[VertexID].Weights[1];
+							Color.Z = CombinedMaterialWeights[VertexID].Weights[2];
+							Color.W = CombinedMaterialWeights[VertexID].Weights[7];
+							ColorOverlay->SetElement(ElementID, Color);
+						}
+					}
+					else
+					{
+						TMap<int32, int32> IndexReverseRemap;
+						for (auto It = IndexRemap.CreateConstIterator(); It; ++It)
+						{
+							IndexReverseRemap.Add(*It, It.GetIndex());
+						}
+						for (int32 Triangle : TrianglesAdded)
+						{
+							if (Triangle == FDynamicMesh3::NonManifoldID)
+							{
+								continue;
+							}
+
+							ensure(!ColorOverlay->IsSetTriangle(Triangle));
+							ColorOverlay->InitializeNewTriangle(Triangle);
+							FIndex3i Tri = EditMesh.GetTriangle(Triangle);
+							FIndex3i NewTri = FIndex3i{
+								IndexReverseRemap.FindChecked(Tri.A),
+								IndexReverseRemap.FindChecked(Tri.B),
+								IndexReverseRemap.FindChecked(Tri.C),
+							};
+
+							// xd
+							FIndex3i NewestTri;
+							for (int32 I = 0; I < 3; ++I)
+							{
+								FVector4f Color;
+								Color.X = CombinedMaterialWeights[NewTri[I]].Weights[0];
+								Color.Y = CombinedMaterialWeights[NewTri[I]].Weights[1];
+								Color.Z = CombinedMaterialWeights[NewTri[I]].Weights[2];
+								Color.W = CombinedMaterialWeights[NewTri[I]].Weights[7];
+								NewestTri[I] = ColorOverlay->AppendElement(Color);
+							}
+							ColorOverlay->SetTriangle(Triangle, NewestTri);
+						}
 					}
 				}
 
@@ -409,6 +529,8 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 		AsyncTask(ENamedThreads::AnyHiPriThreadHiPriTask, [EditDynamicMeshFn,
 			// TODO: Kamilu to jebnie
 			&VoxelGrid,
+			OnlyChunks,
+			OptimizationData,
 			DynamicMesh,
 			OnCompleted,
 			DebugContext]
@@ -420,8 +542,9 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			// TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVerticesAsync, CombinedTrianglesAsync, VertexCount, TriangleCount);
 			TArray<FIndex3i> Indices;
 			TArray<NS::SurfaceNets::FMaterialWeights> CombinedMaterialWeights;
+			NS::SurfaceNets::FTriangulationChunkSlices ChunkSlices;
 
-			NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVerticesAsync, Indices, CombinedMaterialWeights, DebugContext.Get());
+			NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, OnlyChunks, CombinedVerticesAsync, Indices, CombinedMaterialWeights, ChunkSlices, DebugContext.Get());
 
 			Algo::Transform(Indices, CombinedTrianglesAsync, [](const FIndex3i& Triangle)
 			{
@@ -442,9 +565,12 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 			AsyncTask(ENamedThreads::GameThread, [EditDynamicMeshFn,
 				CombinedVerticesAsync = MoveTemp(CombinedVerticesAsync),
 				CombinedTrianglesAsync = MoveTemp(CombinedTrianglesAsync),
-				CombinedMaterialWeights = MoveTemp(CombinedMaterialWeights)]
+				CombinedMaterialWeights = MoveTemp(CombinedMaterialWeights),
+				ChunkSlices = MoveTemp(ChunkSlices),
+				OnlyChunks,
+				OptimizationData]
 			{
-				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync, CombinedMaterialWeights);
+				EditDynamicMeshFn(CombinedVerticesAsync, CombinedTrianglesAsync, CombinedMaterialWeights, OnlyChunks, ChunkSlices, OptimizationData);
 			});
 		});
 	}
@@ -455,7 +581,8 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 		// TriangulateVoxelGrid_MarchingCubes(VoxelGrid, CombinedVertices, CombinedTriangles, OutVertexCount, OutTriangleCount);
 		TArray<FIndex3i> Indices;
 		TArray<NS::SurfaceNets::FMaterialWeights> CombinedMaterialWeights;
-		NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, CombinedVertices, Indices, CombinedMaterialWeights, DebugContext.Get());
+		NS::SurfaceNets::FTriangulationChunkSlices ChunkSlices;
+		NS::SurfaceNets::TriangulateVoxelGrid(VoxelGrid, OnlyChunks, CombinedVertices, Indices, CombinedMaterialWeights, ChunkSlices, DebugContext.Get());
 		Algo::Transform(Indices, CombinedTriangles, [](const FIndex3i& Triangle)
 		{
 			FTriangle Triangle2;
@@ -468,7 +595,7 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(const NSVE::FVoxelGrid
 
 		if (DynamicMesh)
 		{
-			EditDynamicMeshFn(CombinedVertices, CombinedTriangles, CombinedMaterialWeights);
+			EditDynamicMeshFn(CombinedVertices, CombinedTriangles, CombinedMaterialWeights, OnlyChunks, ChunkSlices, OptimizationData);
 		}
 		else
 		{
@@ -491,5 +618,5 @@ void UVoxelEngineUtilities::TriangulateVoxelGrid(UVoxelGrid* VoxelGrid, UDynamic
 	OutTriangleCount = 0;
 	int32 VertexCount;
 	int32 TriangleCount;
-	TriangulateVoxelGrid_Internal(VoxelGrid->GetInternal(), DynamicMesh, VertexCount, TriangleCount, []{}, true);
+	TriangulateVoxelGrid_Internal(VoxelGrid->GetInternal(), {}, {}, DynamicMesh, VertexCount, TriangleCount, []{}, true);
 }

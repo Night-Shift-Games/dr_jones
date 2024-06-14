@@ -61,7 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dig Site")
 	void UpdateMesh(bool bAsync = true);
 
-	void GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks) const;
+	UFUNCTION(BlueprintCallable, Category = "Dig Site")
+	void UpdateMeshPartial(const TArray<int32>& OnlyChunks, bool bAsync = true);
+
+	void GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks, TArray<int32>* OutIndices = nullptr) const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -99,6 +102,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dig Site")
 	TObjectPtr<UVoxelGrid> VoxelGrid;
+
+	TSharedPtr<FVoxelEngineMeshOptimizationData> VoxelEngineMeshOptimizationData;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Dig Site")
 	TObjectPtr<UDigSiteBorder> BorderGenerator;

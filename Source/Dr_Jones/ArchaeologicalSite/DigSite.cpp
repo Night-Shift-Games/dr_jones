@@ -27,7 +27,8 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 	SCOPED_NAMED_EVENT(DigSite_Dig, FColorList::PaleGreen)
 
 	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
-	GetChunksInRadius(Location, DigRadius, ChunksInRadius);
+	TArray<int32> ChunkIndicesInRadius;
+	GetChunksInRadius(Location, DigRadius, ChunksInRadius, &ChunkIndicesInRadius);
 
 	const int32 ChunkCount = ChunksInRadius.Num();
 	ParallelForTemplate(ChunkCount, [this, ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
@@ -35,7 +36,7 @@ void ADigSite::Dig(const FVector& Location, float DigRadius)
 		DigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
 
-	UpdateMesh(true);
+	UpdateMeshPartial(ChunkIndicesInRadius, true);
 }
 
 FDigSiteSample ADigSite::SampleDig(const FVector& Location, float DigRadius)
@@ -60,7 +61,8 @@ void ADigSite::UnDig(const FVector& Location, float DigRadius)
 	SCOPED_NAMED_EVENT(DigSite_UnDig, FColorList::VioletRed)
 
 	TArray<NSVE::FVoxelChunk*> ChunksInRadius;
-	GetChunksInRadius(Location, DigRadius, ChunksInRadius);
+	TArray<int32> ChunkIndicesInRadius;
+	GetChunksInRadius(Location, DigRadius, ChunksInRadius, &ChunkIndicesInRadius);
 
 	const int32 ChunkCount = ChunksInRadius.Num();
 	ParallelForTemplate(ChunkCount, [ChunksInRadius = MoveTemp(ChunksInRadius), Location, DigRadius](int32 Index)
@@ -68,11 +70,16 @@ void ADigSite::UnDig(const FVector& Location, float DigRadius)
 		UnDigVoxelsInRadius(*ChunksInRadius[Index], Location, DigRadius);
 	});
 
-	UpdateMesh(true);
+	UpdateMeshPartial(ChunkIndicesInRadius, true);
 }
 
 void ADigSite::UpdateMesh(bool bAsync)
 {
+	if (!VoxelEngineMeshOptimizationData)
+	{
+		VoxelEngineMeshOptimizationData = MakeShared<FVoxelEngineMeshOptimizationData>();
+	}
+
 	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
 	const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
 	int32 VerticesCount;
@@ -83,14 +90,38 @@ void ADigSite::UpdateMesh(bool bAsync)
 		DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
 		DynamicMeshComponent->UpdateCollision(true);
 	};
-	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
+	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, {}, VoxelEngineMeshOptimizationData, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), false
 #if WITH_EDITORONLY_DATA
 		, VoxelGrid->GridVisualizer ? VoxelGrid->GridVisualizer->SurfaceNetsDebugContext : nullptr
 #endif
 	);
 }
 
-void ADigSite::GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks) const
+void ADigSite::UpdateMeshPartial(const TArray<int32>& OnlyChunks, bool bAsync)
+{
+	if (!VoxelEngineMeshOptimizationData)
+	{
+		VoxelEngineMeshOptimizationData = MakeShared<FVoxelEngineMeshOptimizationData>();
+	}
+
+	UDynamicMesh* DynamicMesh = DynamicMeshComponent->GetDynamicMesh();
+	const NSVE::FVoxelGrid& Grid = VoxelGrid->GetInternal();
+	int32 VerticesCount;
+	int32 TriangleCount;
+	auto UpdateMeshComponentFn = [this, bAsync]
+	{
+		DynamicMeshComponent->bUseAsyncCooking = bAsync;
+		DynamicMeshComponent->SetComplexAsSimpleCollisionEnabled(true, false);
+		DynamicMeshComponent->UpdateCollision(true);
+	};
+	UVoxelEngineUtilities::TriangulateVoxelGrid_Internal(Grid, OnlyChunks, VoxelEngineMeshOptimizationData, DynamicMesh, VerticesCount, TriangleCount, MoveTemp(UpdateMeshComponentFn), true
+#if WITH_EDITORONLY_DATA
+		, VoxelGrid->GridVisualizer ? VoxelGrid->GridVisualizer->SurfaceNetsDebugContext : nullptr
+#endif
+	);
+}
+
+void ADigSite::GetChunksInRadius(const FVector& Location, float Radius, TArray<NSVE::FVoxelChunk*>& OutChunks, TArray<int32>* OutIndices) const
 {
 	NSVE::FVoxelGrid& InternalGrid = VoxelGrid->GetInternal();
 
@@ -101,6 +132,10 @@ void ADigSite::GetChunksInRadius(const FVector& Location, float Radius, TArray<N
 		if (FMath::SphereAABBIntersection(Location, DigRadiusSquared, Chunk.Bounds.GetBox()))
 		{
 			OutChunks.Add(&Chunk);
+			if (OutIndices)
+			{
+				OutIndices->Add(Index);
+			}
 		}
 	});
 }
