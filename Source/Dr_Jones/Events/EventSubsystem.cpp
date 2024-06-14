@@ -9,21 +9,22 @@ void UEventSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	TArray<TSubclassOf<UEvent>> EventsToCreate = GetDefault<UNightShiftSettings>()->Events;
-	TArray<TSubclassOf<UEvent>> StaticEventsToCreate = GetDefault<UNightShiftSettings>()->StaticEvents;
+	TArray<TSoftClassPtr<UEvent>> EventsToCreate = GetDefault<UNightShiftSettings>()->Events;
+	TArray<TSoftClassPtr<UEvent>> StaticEventsToCreate = GetDefault<UNightShiftSettings>()->StaticEvents;
 
-	for (TSubclassOf<UEvent> EventClass : EventsToCreate)
+	for (TSoftClassPtr<UEvent> EventSoftClass : EventsToCreate)
 	{
+		TSubclassOf<UEvent> EventClass = EventSoftClass.LoadSynchronous();
 		UEvent* NewEvent = NewObject<UEvent>(this, EventClass);
-		Events.Add(EventClass, NewEvent);
+		Events.Emplace(EventClass, NewEvent);
 	}
 
-	for (TSubclassOf<UEvent> EventClass : StaticEventsToCreate)
+	for (TSoftClassPtr<UEvent> EventSoftClass : StaticEventsToCreate)
 	{
+		TSubclassOf<UEvent> EventClass = EventSoftClass.LoadSynchronous();
 		UEvent* NewEvent = NewObject<UEvent>(this, EventClass);
-		StaticEvents.Add(EventClass, NewEvent);
+		StaticEvents.Emplace(EventClass, NewEvent);
 	}
-
 
 	GetGameInstance()->GetSubsystem<UClock>()->OnClockNativeTick.AddWeakLambda(this, [&](const FDateTime CurrentTime)
 	{

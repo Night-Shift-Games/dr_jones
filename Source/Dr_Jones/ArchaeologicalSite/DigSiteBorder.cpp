@@ -8,7 +8,9 @@
 ADigSiteBorderBreakMarker::ADigSiteBorderBreakMarker()
 {
 	USceneComponent* SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+#if WITH_EDITORONLY_DATA
 	SceneComponent->bVisualizeComponent = true;
+#endif
 	RootComponent = SceneComponent;
 
 	VisSphere = CreateDefaultSubobject<USphereComponent>(TEXT("VisSphere"));
@@ -21,7 +23,7 @@ void ADigSiteBorderBreakMarker::PostLoad()
 	Super::PostLoad();
 	VisSphere->SetSphereRadius(Radius);
 }
-
+#if WITH_EDITOR
 void ADigSiteBorderBreakMarker::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ADigSiteBorderBreakMarker, Radius))
@@ -30,7 +32,7 @@ void ADigSiteBorderBreakMarker::PostEditChangeProperty(FPropertyChangedEvent& Pr
 	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
-
+#endif
 UDigSiteBorder::UDigSiteBorder()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject))

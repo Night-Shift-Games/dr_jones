@@ -204,7 +204,7 @@ void AArtifact::SetupDynamicArtifact()
 		FDynamicMeshAttributeSet* Attributes = Mesh.Attributes();
 
 		// Don't worry if this triggers - it's just a remainder to opierdolic patryk G.
-		if (!ensure(Attributes->HasPrimaryColors()))
+		if (!Attributes->HasPrimaryColors())
 		{
 			Attributes->EnablePrimaryColors();
 			FDynamicMeshColorOverlay* ColorOverlay = Attributes->PrimaryColors();

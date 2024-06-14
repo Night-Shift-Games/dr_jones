@@ -103,6 +103,11 @@ void ADrJonesCharacter::ChangeArtifactInteractionMode_Object(UArtifactInteractio
 
 UArtifactInteractionMode* ADrJonesCharacter::ChangeArtifactInteractionMode(TSubclassOf<UArtifactInteractionMode> Mode)
 {
+	if (!Mode)
+	{
+		ChangeArtifactInteractionMode_Object(nullptr);
+		return CurrentArtifactInteractionMode;
+	}
 	ChangeArtifactInteractionMode_Object(FindArtifactInteractionMode(Mode));
 	check(!CurrentArtifactInteractionMode || CurrentArtifactInteractionMode->IsA(Mode));
 	return CurrentArtifactInteractionMode;

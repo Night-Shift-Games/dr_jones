@@ -30,10 +30,10 @@ public:
 	FTimespan TimeToApplyPerSecond = FTimespan(0,1,0);
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
-	TArray<TSubclassOf<UEvent>> Events;
+	TArray<TSoftClassPtr<UEvent>> Events;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Events")
-	TArray<TSubclassOf<UEvent>> StaticEvents;
+	TArray<TSoftClassPtr<UEvent>> StaticEvents;
 
 	static UDefaultSoundBank* LoadDefaultSoundBank();
 };
