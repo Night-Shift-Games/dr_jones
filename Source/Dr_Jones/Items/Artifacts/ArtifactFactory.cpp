@@ -8,7 +8,7 @@
 AArtifact* UArtifactFactory::ConstructArtifactFromDatabase(const UObject& WorldContextObject, const FName& ArtifactID)
 {
 	const FArtifactData* ArtifactData = PullArtifactDataFromDatabase(ArtifactID);
-	return ConstructArtifact(WorldContextObject, *ArtifactData);
+	return ArtifactData ? ConstructArtifact(WorldContextObject, *ArtifactData) : nullptr;
 }
 
 FArtifactData* UArtifactFactory::PullArtifactDataFromDatabase(const FName& ArtifactID)

@@ -19,7 +19,10 @@ public:
 	void Shake();
 	
 	void SpawnArtifacts();
-
+	
+	virtual void OnUnequip() override;
+	virtual void OnRemovedFromEquipment() override;
+	
 	UPROPERTY(EditAnywhere, Category = "DrJones|Animation")
 	TObjectPtr<UAnimMontage> ShakeMontage;
 };

@@ -129,4 +129,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Utilities")
 	static FArtifactData PullArtifactDataFromDatabase(FName ArtifactID, bool& OutValid);
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Utilities")
+	static AArtifact* ConstructArtifactFromDatabase(const UObject* WorldContextObject, const FName ArtifactID)
+	{
+		return WorldContextObject ? UArtifactFactory::ConstructArtifactFromDatabase(*WorldContextObject, ArtifactID) : nullptr;
+	}
 };

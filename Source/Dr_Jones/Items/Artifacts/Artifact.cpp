@@ -82,6 +82,9 @@ void AArtifact::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 void AArtifact::PickUp(ADrJonesCharacter* Taker)
 {
 	checkf(Taker, TEXT("Player is missing!"));
+
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	
 	UEquipmentComponent* EquipmentComponent = Taker->GetEquipment();
 	if (!EquipmentComponent && !EquipmentComponent->CanPickUpItem())
 	{

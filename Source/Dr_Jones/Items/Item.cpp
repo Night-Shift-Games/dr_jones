@@ -41,15 +41,18 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
+	TArray<AActor*> ActorArray;
+	GetAttachedActors(ActorArray);
 	TArray<ATool*> Tools = Utilities::GetPlayerCharacter(*this).EquipmentComponent->GetTools();
-	TArray<const AActor*> ActorArray;
+	TArray<const AActor*> ConstActorArray;
 	for (ATool* Tool : Tools)
 	{
-		ActorArray.Add(Tool);
+		ConstActorArray.Add(Tool);
 	}
-	ActorArray.Add(GetInstigator());
-	ActorArray.Add(this);
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ActorArray);
+	ConstActorArray.Add(GetInstigator());
+	ConstActorArray.Add(this);
+	ConstActorArray.Append(ActorArray);
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ConstActorArray);
 	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
 	return GroundLocation;
 }

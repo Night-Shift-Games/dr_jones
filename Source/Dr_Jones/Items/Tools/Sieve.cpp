@@ -3,8 +3,11 @@
 #include "Sieve.h"
 
 #include "Animation/DrJonesAnimNotify.h"
+#include "Audio/DefaultSoundBank.h"
+#include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Utilities/Utilities.h"
 
 // Called when the game starts or when spawned
@@ -41,6 +44,23 @@ void ASieve::Shake()
 
 void ASieve::SpawnArtifacts()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, __func__);
+}
+
+void ASieve::OnUnequip()
+{
+	Super::OnUnequip();
+	UEquipmentComponent* Equipment = Utilities::GetPlayerCharacter(*this).GetEquipment();
+	Equipment->DetachItemFromHand(*this);
+}
+
+void ASieve::OnRemovedFromEquipment()
+{
+	Super::OnRemovedFromEquipment();
+	
+	const ADrJonesCharacter* Player = GetInstigator<ADrJonesCharacter>();
+	const FVector GroundLocation = GetLocationOfItemAfterDropdown();
+	const FRotator Rotation = Player ? FRotator(0.0, Player->GetActorRotation().Yaw, 0.0) : FRotator::ZeroRotator; 
+
+	SetActorLocationAndRotation(GroundLocation, Rotation);
 }
 
