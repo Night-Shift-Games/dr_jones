@@ -41,14 +41,11 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
+
 	TArray<AActor*> ActorArray;
 	GetAttachedActors(ActorArray);
-	TArray<ATool*> Tools = Utilities::GetPlayerCharacter(*this).EquipmentComponent->GetTools();
+	GetInstigator()->GetAttachedActors(ActorArray);
 	TArray<const AActor*> ConstActorArray;
-	for (ATool* Tool : Tools)
-	{
-		ConstActorArray.Add(Tool);
-	}
 	ConstActorArray.Add(GetInstigator());
 	ConstActorArray.Add(this);
 	ConstActorArray.Append(ActorArray);

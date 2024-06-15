@@ -38,7 +38,7 @@ namespace Utilities
 			return FVector::ZeroVector;
 		}
 		FHitResult Hit;
-		const FVector End = StartLocation + FVector(0.0, 0.0, -300.0);
+		const FVector End = StartLocation + FVector(0.0, 0.0, -1000.0);
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActors(ActorsToIgnore);
@@ -48,7 +48,7 @@ namespace Utilities
 		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
 
 		World->LineTraceSingleByObjectType(Hit, StartLocation, End, CollisionObjectQueryParams, QueryParams);
-
+		
 		return Hit.Location;
 	}
 
