@@ -27,10 +27,6 @@ void UEquipmentComponent::BeginPlay()
 		ATool* NewTool = World->SpawnActor<ATool>(ToolClass, SpawnParameters);
 		NewTool->GetMeshComponent()->SetVisibility(false);
 		AddItem(NewTool);
-		if (ToolClass->GetDefaultObject<ATool>()->bCanBeVisibleInEquipment)
-		{
-			AddToQuickSlot(NewTool->GetClass(), Tools.Num() - 1);
-		}
 	}
 	
 	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
@@ -60,6 +56,10 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 	if (ATool* Tool = Cast<ATool>(ItemToAdd))
 	{
 		Tools.Emplace(Tool);
+		if (Tool->bCanBeVisibleInEquipment)
+		{
+			AddToQuickSlot(ItemToAdd->GetClass(), Tools.Num() - 1);
+		}
 		OnToolAdded.Broadcast(Tool);
 	}
 	else if (ALetter* LetterToAdd = Cast<ALetter>(ItemToAdd))
@@ -252,7 +252,7 @@ void UEquipmentComponent::AttachItemToHand(AItem& ItemToAttach)
 		Mesh->SetSimulatePhysics(false);
 	}
 	
-	if (Owner->GetMovementBase() == ItemToAttach.GetMeshComponent())
+	if (Owner && Owner->GetMovementBase() == ItemToAttach.GetMeshComponent())
 	{
 		Owner->SetBase(nullptr);
 	}

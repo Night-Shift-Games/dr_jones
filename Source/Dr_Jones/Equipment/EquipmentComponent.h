@@ -70,7 +70,7 @@ public:
 	FOnToolAddedDelegate OnToolAdded;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "DrJones|Tools")
+	UPROPERTY(EditAnywhere, Category = "DrJones|Tools")
 	TArray<TSubclassOf<ATool>> DefaultTools;
 	
 	// UI
