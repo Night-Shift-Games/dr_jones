@@ -2,11 +2,9 @@
 
 #include "Item.h"
 
-#include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
 #include "Utilities/Utilities.h"
-#include "Tools/Tool.h"
 
 AItem::AItem()
 {
@@ -44,7 +42,7 @@ FVector AItem::GetLocationOfItemAfterDropdown() const
 
 	TArray<AActor*> ActorArray;
 	GetAttachedActors(ActorArray);
-	GetInstigator()->GetAttachedActors(ActorArray);
+	GetInstigator()->GetAttachedActors(ActorArray, false);
 	TArray<const AActor*> ConstActorArray;
 	ConstActorArray.Add(GetInstigator());
 	ConstActorArray.Add(this);

@@ -55,6 +55,8 @@ void UEquipmentComponent::AddItem(AItem* ItemToAdd)
 		return;
 	}
 
+	ItemToAdd->SetInstigator(GetOwner<APawn>());
+	
 	if (ATool* Tool = Cast<ATool>(ItemToAdd))
 	{
 		Tools.Emplace(Tool);
