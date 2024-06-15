@@ -164,13 +164,13 @@ void AShovel::MontageCompletedEvent(bool bInterrupted)
 bool AShovel::TraceDig(FHitResult& OutHit) const
 {
 	const UShapeComponent* DigCollision = GetDigCollision();
-#if !UE_BUILD_SHIPPING
 	if (!DigCollision)
 	{
+#if !UE_BUILD_SHIPPING
 		UE_LOG(LogTemp, Error, TEXT("Cannot find Dig Collision component in %s"), *this->GetName());
+#endif
 		return false;
 	}
-#endif
 
 	const UWorld* World = GetWorld();
 	checkf(World, TEXT("World is null"));
