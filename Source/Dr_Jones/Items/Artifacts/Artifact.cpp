@@ -591,6 +591,12 @@ void UArtifactCleaningMode::TickBrushStroke()
 	{
 		Artifact->CleaningProgress = 1.0f;
 		Artifact->CleanCompletely();
+
+		AIlluminati::SendQuestMessage<UArtifactCleanedQuestMessage>(this, [Artifact](UArtifactCleanedQuestMessage* Message)
+		{
+			Message->Artifact = Artifact;
+		});
+
 		OnArtifactCleaned.Broadcast(Artifact);
 
 		// TODO: Move this to the journal - it should not be triggered by cleaning mode at all
