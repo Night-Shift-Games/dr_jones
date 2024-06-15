@@ -214,10 +214,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quest")
 	void SendQuestMessage(const TScriptInterface<IQuestMessageInterface>& QuestMessage);
 
+	UFUNCTION(BlueprintPure, Category = "Quest")
+	UQuest* FindQuest(const FQuestHandle& Handle) const;
+
 protected:
 	FQuestHandle RegisterQuest(UQuest& Quest);
 	void InitializePendingQuest(UQuest& Quest);
-	UQuest* FindQuest(const FQuestHandle& Handle) const;
 
 public:
 	UPROPERTY(BlueprintAssignable)
