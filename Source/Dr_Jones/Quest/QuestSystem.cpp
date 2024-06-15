@@ -193,6 +193,8 @@ UQuest* UQuestSystemComponent::AddQuest(const FQuestDescription& QuestDescriptio
 	QuestSystemUtils::LogDebugIfEnabled(TEXT("Quest \"%s\" (%s) has been added to the System."),
 		*QuestDescription.DisplayName.ToString(), *QuestObject->GetName());
 
+	OnGlobalQuestAdded.Broadcast(QuestObject);
+
 	return QuestObject;
 }
 
