@@ -9,11 +9,11 @@ ETriggerState UInputTriggerPreventAction::UpdateState_Implementation(const UEnha
 {
 	const FInputActionInstance* EventData = PlayerInput->FindActionInstanceData(ActionThatPrevents);
 	const ETriggerEvent EventState = EventData ? EventData->GetTriggerEvent() : ETriggerEvent::None;
-	if (EventState == ETriggerEvent::Triggered)
+	if (EventState == ETriggerEvent::Completed || EventState == ETriggerEvent::Triggered)
 	{
 		bTriggered = true;
 	}
-	else if (EventState == ETriggerEvent::Canceled)
+	else if (EventState == ETriggerEvent::Canceled || EventState == ETriggerEvent::Started)
 	{
 		bTriggered = false;
 	}
