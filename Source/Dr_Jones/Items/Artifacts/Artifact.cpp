@@ -138,19 +138,12 @@ void AArtifact::SetupArtifact(const FArtifactData& ArtifactData)
 	DirtData.MudAmount = FMath::FRandRange(0.5f, 1.0f);
 	DirtData.RustAmount = FMath::FRandRange(0.5f, 1.0f);
 	DirtData.MoldAmount = FMath::FRandRange(0.5f, 1.0f);
-
-	UArtifactAnimationDataAsset* ArtifactAnimDataAsset = nullptr;
-	ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous();
-	if (!ArtifactAnimDataAsset)
-	{
-		ArtifactAnimDataAsset = GetDefault<UNightShiftSettings>()->FallbackArtifactAnimDataAsset.LoadSynchronous();
-	}
-	if (ArtifactAnimDataAsset)
-	{
-		ItemAnimation = ArtifactAnimDataAsset->HoldLayer;
-		AttachmentSocket = ArtifactAnimDataAsset->AttachBone;
-		AttachmentOffset = ArtifactAnimDataAsset->AttachOffset;
-	}
+	
+	const UArtifactAnimationDataAsset* ArtifactAnimDataAsset = ArtifactData.ArtifactAnimationDataAsset.LoadSynchronous();
+	UArtifactAnimationDataAsset* FallbackArtifactAnimDataAsset = GetDefault<UNightShiftSettings>()->FallbackArtifactAnimDataAsset.LoadSynchronous();
+	ItemAnimation = ArtifactAnimDataAsset && ArtifactAnimDataAsset->HoldLayer ? ArtifactAnimDataAsset->HoldLayer : FallbackArtifactAnimDataAsset->HoldLayer;
+	AttachmentSocket = ArtifactAnimDataAsset && !ArtifactAnimDataAsset->AttachBone.IsNone() ? ArtifactAnimDataAsset->AttachBone : FallbackArtifactAnimDataAsset->AttachBone;
+	AttachmentOffset = ArtifactAnimDataAsset ? ArtifactAnimDataAsset->AttachOffset : FallbackArtifactAnimDataAsset->AttachOffset;
 	
 	SetupDynamicArtifact();
 }
