@@ -37,17 +37,14 @@ namespace Utilities
 		{
 			return FVector::ZeroVector;
 		}
+		
 		FHitResult Hit;
 		const FVector End = StartLocation + FVector(0.0, 0.0, -1000.0);
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActors(ActorsToIgnore);
-
-		FCollisionObjectQueryParams CollisionObjectQueryParams;
-		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-		World->LineTraceSingleByObjectType(Hit, StartLocation, End, CollisionObjectQueryParams, QueryParams);
+		
+		World->LineTraceSingleByChannel(Hit, StartLocation, End, ECC_Visibility, QueryParams);
 		
 		return Hit.Location;
 	}
