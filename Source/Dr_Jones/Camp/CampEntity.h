@@ -20,9 +20,14 @@ public:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(Blueprintable)
-	void Grab(ADrJonesCharacter* Grabber);
+	void ToggleGrab(ADrJonesCharacter* Grabber);
+	
+	void SetGrabPostProcessEnabled(bool bEnabled);
 
-	void HoldActor();
+	void Grab();
+	void Ungrab();
+	
+	void UpdateActorPosition();
 	
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DrJones|Interaction", meta = (NoResetToDefault))
@@ -30,4 +35,10 @@ public:
 
 	FTimerHandle GrabTimer;
 	bool bGrabbed = false;
+
+	FHitResult GrabResult;
+
+	// Actors to ignore during searching for hit result.
+	UPROPERTY(Transient)
+	TArray<const AActor*> ActorsToIgnoreDuringGrab;
 };

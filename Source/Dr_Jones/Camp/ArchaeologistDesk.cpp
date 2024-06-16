@@ -34,7 +34,7 @@ void AArchaeologistDesk::AddArtifact(AArtifact* Artifact, ADrJonesCharacter* Pla
 
 	FVector SocketPlace = DeskMesh->GetSocketLocation(TEXT("ArtifactSocket"));
 	const double ZOffset = Utilities::GetMeshZOffset(*ArtifactOnDesk);
-	SocketPlace = Utilities::FindGround(*this, SocketPlace + FVector (0, 0, 20), {ArtifactOnDesk});
+	SocketPlace = Utilities::FindGround(*this, SocketPlace + FVector (0, 0, 20), {ArtifactOnDesk}).Location;
 	ArtifactOnDesk->AttachToComponent(DeskMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("ArtifactSocket"));
 	ArtifactOnDesk->SetActorLocation(SocketPlace - FVector(0,0, ZOffset));
 	ArtifactOnDesk->SetOwner(this);

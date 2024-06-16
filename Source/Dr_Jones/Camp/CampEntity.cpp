@@ -14,36 +14,84 @@ ACampEntity::ACampEntity()
 void ACampEntity::BeginPlay()
 {
 	Super::BeginPlay();
-	InteractableComponent->AltInteractDelegate.AddDynamic(this, &ACampEntity::Grab);
+	InteractableComponent->AltInteractDelegate.AddDynamic(this, &ACampEntity::ToggleGrab);
 }
 
-void ACampEntity::Grab(ADrJonesCharacter* Grabber)
+void ACampEntity::ToggleGrab(ADrJonesCharacter* Grabber)
 {
 	if (!bGrabbed)
 	{
-		GetWorld()->GetTimerManager().SetTimer(GrabTimer,this, &ACampEntity::HoldActor, GetWorld()->GetDeltaSeconds() / 2.0, true);
-		SetActorEnableCollision(false);
-		GetRootComponent()->SetMobility(EComponentMobility::Movable);
-		bGrabbed = true;
-		InteractableComponent->bInteractionInProgress = true;
+		Grab();
 	}
 	else
 	{
-		GetWorld()->GetTimerManager().ClearTimer(GrabTimer);
-		SetActorEnableCollision(true);
-		bGrabbed = false;
-		InteractableComponent->bInteractionInProgress = false;
+		Ungrab();
 	}
 }
 
-void ACampEntity::HoldActor()
+void ACampEntity::SetGrabPostProcessEnabled(bool bEnabled)
 {
-	const ADrJonesCharacter& Player = Utilities::GetPlayerCharacter(*this);
-
-	const FHitResult PlayerHitResult = Utilities::GetPlayerSightTarget(200.f, *this);
-	const FVector FoundLocation = Utilities::FindGround(*this, PlayerHitResult.Location + FVector(0.0, 0.0, 20.0), { this });
-	SetActorLocation(FoundLocation, false);
-
-	SetActorRotation((Player.GetActorForwardVector() * -1).Rotation());
+	const int32 CustomStencilID = bEnabled ? 2 : 0;
+	
+	for (const AActor* Actor : ActorsToIgnoreDuringGrab)
+	{
+		TArray<UMeshComponent*> MeshComponents;
+		Actor->GetComponents<UMeshComponent>(MeshComponents, true);
+		for (UMeshComponent* Mesh : MeshComponents)
+		{
+			Mesh->SetCustomDepthStencilValue(CustomStencilID);
+			Mesh->SetRenderCustomDepth(bEnabled);
+		}
+	}
 }
 
+void ACampEntity::Grab()
+{
+	SetActorEnableCollision(false);
+	GetRootComponent()->SetMobility(EComponentMobility::Movable);
+	bGrabbed = true;
+	InteractableComponent->bInteractionInProgress = true;
+	
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors, true);
+	AttachedActors.Add(this);
+	ActorsToIgnoreDuringGrab.Reset();
+	ActorsToIgnoreDuringGrab.Append(AttachedActors);
+
+	SetGrabPostProcessEnabled(true);
+	
+	GetWorld()->GetTimerManager().SetTimer(GrabTimer,this, &ACampEntity::UpdateActorPosition, GetWorld()->GetDeltaSeconds(), true);
+}
+
+void ACampEntity::Ungrab()
+{
+	GetWorld()->GetTimerManager().ClearTimer(GrabTimer);
+	SetActorEnableCollision(true);
+	bGrabbed = false;
+	InteractableComponent->bInteractionInProgress = false;
+
+	SetGrabPostProcessEnabled(false);
+	
+	if (AActor* ActorToAttachTo = GrabResult.GetActor())
+	{
+		AttachToActor(ActorToAttachTo, FAttachmentTransformRules::KeepWorldTransform);
+	}
+}
+
+void ACampEntity::UpdateActorPosition()
+{
+	const ADrJonesCharacter& Player = Utilities::GetPlayerCharacter(*this);
+	const FHitResult PlayerHitResult = Utilities::GetPlayerSightTarget(200.f, *this);
+	
+	GrabResult = Utilities::FindGround(*this, PlayerHitResult.Location + FVector(0.0, 0.0, 20.0), ActorsToIgnoreDuringGrab);
+
+	if (!GrabResult.bBlockingHit)
+	{
+		return;
+	}
+	
+	const FVector FoundLocation = GrabResult.Location;
+	
+	SetActorLocation(FoundLocation);
+	SetActorRotation((Player.GetActorForwardVector() * -1).Rotation());
+}

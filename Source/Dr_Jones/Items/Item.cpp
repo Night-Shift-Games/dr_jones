@@ -39,7 +39,6 @@ void AItem::SetWorldPhysics()
 
 FVector AItem::GetLocationOfItemAfterDropdown() const
 {
-
 	TArray<AActor*> ActorArray;
 	GetAttachedActors(ActorArray);
 	GetInstigator()->GetAttachedActors(ActorArray, false);
@@ -47,7 +46,7 @@ FVector AItem::GetLocationOfItemAfterDropdown() const
 	ConstActorArray.Add(GetInstigator());
 	ConstActorArray.Add(this);
 	ConstActorArray.Append(ActorArray);
-	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ConstActorArray);
+	FVector GroundLocation = Utilities::FindGround(*this, GetActorLocation(), ConstActorArray).Location;
 	GroundLocation.Z -= Utilities::GetMeshZOffset(*this);
 	return GroundLocation;
 }
