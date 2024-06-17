@@ -13,8 +13,11 @@ class DR_JONES_API UDrJonesGameUserSettings : public UGameUserSettings
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "DrJones")
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Settings")
 	static UDrJonesGameUserSettings* GetDrJonesGameUserSettings();
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Settings")
+	static TArray<FIntPoint> GetSupportedDisplayResolutions();
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "Input")
 	float LookSensitivity = 1.0f;
