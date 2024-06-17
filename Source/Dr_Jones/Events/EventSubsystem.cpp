@@ -74,12 +74,17 @@ UEvent* UEventSubsystem::AddForcedEvent(TSubclassOf<UEvent> Event)
 
 UEvent* UEventSubsystem::GetEvent(const TSubclassOf<UEvent> EventClass) const
 {
-	UEvent* FoundedEvent = Events.FindRef(EventClass);
-	if (!FoundedEvent)
+	UEvent* FoundEvent = Events.FindRef(EventClass);
+	if (!FoundEvent)
 	{
-		FoundedEvent = StaticEvents.FindRef(EventClass);
+		FoundEvent = StaticEvents.FindRef(EventClass);
 	}
-	return FoundedEvent;
+	return FoundEvent;
+}
+
+bool UEventSubsystem::IsEventForced(TSubclassOf<UEvent> EventClass) const
+{
+	return ForcedEvents.Contains(EventClass);
 }
 
 UEvent* UEventSubsystem::PickEventToTrigger(const float TriggerChanceModifier)

@@ -25,8 +25,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DrJones|Events", meta = (DeterminesOutputType = Event))
 	UEvent* AddForcedEvent(TSubclassOf<UEvent> Event);
 
-	UFUNCTION(BlueprintPure,  Category = "DrJones|Events", meta = (DeterminesOutputType = Event))
+	UFUNCTION(BlueprintPure,  Category = "DrJones|Events", meta = (DeterminesOutputType = EventClass))
 	UEvent* GetEvent(const TSubclassOf<UEvent> EventClass) const;
+
+	UFUNCTION(BlueprintPure, Category = "DrJones|Events")
+	bool IsEventForced(TSubclassOf<UEvent> EventClass) const;
 	
 	void HandleEvents(const FDateTime CurrentTime);
 	void TriggerEvent(UEvent& EventToTrigger);
