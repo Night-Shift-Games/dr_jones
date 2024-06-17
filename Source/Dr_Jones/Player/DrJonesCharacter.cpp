@@ -2,6 +2,7 @@
 
 #include "DrJonesCharacter.h"
 
+#include "DrJonesGameUserSettings.h"
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
@@ -137,11 +138,16 @@ void ADrJonesCharacter::Move(const FInputActionValue& InputActionValue)
 
 void ADrJonesCharacter::Look(const FInputActionValue& InputActionValue)
 {
-	const FVector2D Vector = InputActionValue.Get<FVector2D>();
+	FVector2D Vector = InputActionValue.Get<FVector2D>();
 	if (Vector.Length() == 0)
 	{
 		return;
 	}
+
+	UDrJonesGameUserSettings* Settings = UDrJonesGameUserSettings::GetDrJonesGameUserSettings();
+	float LookSensitivity = Settings ? Settings->LookSensitivity : 1.0f;
+	Vector *= LookSensitivity;
+
 	AddControllerYawInput(Vector.X);
 	AddControllerPitchInput(Vector.Y);
 }
