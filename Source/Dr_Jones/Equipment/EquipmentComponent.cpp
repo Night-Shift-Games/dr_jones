@@ -295,6 +295,11 @@ void UEquipmentComponent::OpenEquipmentWheel(const FInputActionValue& InputActio
 		return;
 	}
 
+	if (bOpen == Utilities::GetWidgetManager(*this).GetWidget(InventoryMenu)->IsVisible())
+	{
+		return;
+	}
+	
 	UWidgetManager::RequestUpdateWidget<UEquipmentWidgetDataObject>(*this, InventoryMenu, [&](UEquipmentWidgetDataObject& DataObject)
 	{
 		DataObject.Letters = &QuestItems;
