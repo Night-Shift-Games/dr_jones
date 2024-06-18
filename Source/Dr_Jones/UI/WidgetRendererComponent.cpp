@@ -156,7 +156,6 @@ void UWidgetRendererComponent::ReleaseResources()
 {
 	if (InternalWidget)
 	{
-		InternalWidget->RemoveFromParent();
 		InternalWidget = nullptr;
 	}
 	if (InternalSlateWidget)
