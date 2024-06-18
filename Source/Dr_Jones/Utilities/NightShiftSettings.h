@@ -12,6 +12,21 @@
 
 class UDefaultSoundBank;
 
+USTRUCT(BlueprintType)
+struct FAudioSettingsData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<USoundSubmix> MasterSubmix;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<USoundSubmix> SFXSubmix;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	TSoftObjectPtr<USoundSubmix> MusicSubmix;
+};
+
 UCLASS(Config = Game, defaultconfig, meta = (DisplayName = "Night Shift Settings"))
 class DR_JONES_API UNightShiftSettings : public UDeveloperSettings
 {
@@ -23,6 +38,9 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Audio")
 	TSoftObjectPtr<UDefaultSoundBank> DefaultSoundBank;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	FAudioSettingsData AudioSettings;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Clock")
 	FDateTime InitialTime = FDateTime(1922, 11, 4, 15, 30);
