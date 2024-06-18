@@ -1,10 +1,6 @@
 ﻿// Property of Night Shift Games, all rights reserved.
 
 #include "ReputationComponent.h"
-#include "UI/DrJonesWidgetBase.h"
-#include "UI/WidgetManager.h"
-
-#include "Utilities/Utilities.h"
 
 UReputationComponent::UReputationComponent()
 {
@@ -21,6 +17,16 @@ int32 UReputationComponent::GetReputation(EReputationType ReputationType) const
 	return ReputationType == EReputationType::Archaeologist ? ArchaeologistReputation : TreasureHunterReputation;
 }
 
+float UReputationComponent::GetTotalReputationNeededForLevel(int Level) const
+{
+	return LevelCurveFloat ? LevelCurveFloat->GetFloatValue(static_cast<float>(Level)) : static_cast<float>(Level) * 100.f;
+}
+
+void UReputationComponent::LevelUp()
+{
+	CurrentLevel += 1;
+}
+
 void UReputationComponent::SetReputation(EReputationType Faction, int32 NewReputation)
 {
 	if (Faction == EReputationType::Archaeologist)
@@ -32,5 +38,11 @@ void UReputationComponent::SetReputation(EReputationType Faction, int32 NewReput
 		TreasureHunterReputation = NewReputation;
 	}
 	Morality = static_cast<float>(ArchaeologistReputation) / static_cast<float>(GetReputationCombined());
-	UWidgetManager::UpdateWidget(*this, ReputationBarWidgetClass);
+
+	if (GetTotalReputationNeededForLevel(CurrentLevel + 1) <= GetReputationCombined())
+	{
+		LevelUp();
+	}
+	
+	OnReputationUpdated.Broadcast();
 }

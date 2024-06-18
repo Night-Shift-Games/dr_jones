@@ -23,6 +23,8 @@ enum class EReputationType : uint8
 	TreasureHunter,
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUIUpdated);
+
 UCLASS(ClassGroup = (DrJones), meta = (BlueprintSpawnableComponent),
 	HideCategories = (Variable, Tags, ComponentTick, Activation, AssetUserData, Replication, ComponentReplication, Cooking, Collision))
 class DR_JONES_API UReputationComponent : public UActorComponent
@@ -43,11 +45,25 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
 	float GetMorality() const { return Morality; }
+
+	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
+	int GetCurrentLevel() const {return CurrentLevel; }
+
+	UFUNCTION(BlueprintPure, Category = "Night Shift|Reputation")
+	float GetTotalReputationNeededForLevel(int Level) const;
 	
 private:
+	void LevelUp();
 	void SetReputation(EReputationType Faction, int32 NewReputation);
+
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Night Shift|Reputation|UI", meta = (AllowPrivateAccess = true))
+	FOnUIUpdated OnReputationUpdated;
 	
 private:
+	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
+	int CurrentLevel = 0;
+	
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
 	float Morality = 0.5f;
 	
@@ -58,7 +74,7 @@ private:
 	// "Negative" reputation
 	UPROPERTY(SaveGame, BlueprintReadOnly, Category = "Night Shift|Reputation", meta = (AllowPrivateAccess = true))
 	int32 TreasureHunterReputation = 0;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Night Shift|Reputation|UI", meta = (AllowPrivateAccess = true))
-	TSubclassOf<UDrJonesWidgetBase> ReputationBarWidgetClass;
+	TObjectPtr<UCurveFloat> LevelCurveFloat;
 };
