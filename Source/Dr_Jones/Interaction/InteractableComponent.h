@@ -47,6 +47,7 @@ public:
 	bool bInteractionInProgress = false;
 	
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	bool bEnabledInteraction = true;
 	
 };
