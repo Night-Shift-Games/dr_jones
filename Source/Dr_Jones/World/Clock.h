@@ -39,7 +39,7 @@ public:
 	UPROPERTY(SaveGame)
 	FDateTime CurrentTime;
 
-	UPROPERTY(SaveGame)
+	UPROPERTY(SaveGame, BlueprintReadOnly)
 	FTimespan TimeToApplyPerSecond = FTimespan(0,1,0);
 	
 	FTimerHandle ClockTimer;
