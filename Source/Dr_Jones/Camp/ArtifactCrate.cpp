@@ -63,16 +63,17 @@ AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 
 void AArtifactCrate::SendArtifacts()
 {
+	float RenownToAdd = 0.0f;
 	while (!Artifacts.IsEmpty())
 	{
 		AArtifact* ArtifactToSend = Artifacts.Last();
 		PullOutArtifact(ArtifactToSend);
 		// TODO: Calculate renown based on artifact parameters.
-		float RenownToAdd = 10.f;
+		RenownToAdd += 10.0f;
 		RenownToAdd += ArtifactToSend->CleaningProgress * 10.0f;
-		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, RenownToAdd);
 		ArtifactToSend->Destroy();
 	}
+	Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, RenownToAdd);
 	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
