@@ -23,8 +23,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "DrJones|Clock")
 	FDateTime GetCurrentTime() const { return CurrentTime; }
-	
+
+	UFUNCTION(BlueprintCallable, Category = "DrJones|Clock")
 	void SetTime(const FDateTime NewTime);
+	
 	FDateTime SkipTime(const FTimespan TimeToSkip);
 	FTimespan SkipTime(const FDateTime TargetTime);
 
@@ -34,7 +36,13 @@ public:
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnClockNativeTick, FDateTime);
 	FOnClockNativeTick OnClockNativeTick;
-	
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTimeSkipDynamic, FDateTime, DateBeforeTimeSkip, FTimespan, TimeSkipped);
+	UPROPERTY(BlueprintAssignable, Category = "DrJones|Clock")
+	FOnTimeSkipDynamic OnTimeSkip;
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTimeSkipNative, FDateTime, FTimespan);
+	FOnTimeSkipNative OnTimeSkipNative;
 public:
 	UPROPERTY(SaveGame)
 	FDateTime CurrentTime;

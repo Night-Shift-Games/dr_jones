@@ -23,6 +23,7 @@ void UClock::StartClock()
 	{
 		TickClock();
 	}), 1.f, true);
+	OnTimeSkipNative.AddWeakLambda(this, [&](FDateTime TimeBeforeSkip, FTimespan SkippedTime) { OnTimeSkip.Broadcast(TimeBeforeSkip, SkippedTime); });
 }
 
 void UClock::TickClock()
@@ -57,7 +58,11 @@ void UClock::SetTime(const FDateTime NewTime)
 
 FDateTime UClock::SkipTime(const FTimespan TimeToSkip)
 {
-	return CurrentTime += TimeToSkip;
+	FDateTime TimeBeforeSkip = GetCurrentTime();
+	CurrentTime += TimeToSkip;
+	OnTimeSkipNative.Broadcast(TimeBeforeSkip, TimeToSkip);
+	
+	return CurrentTime;
 }
 
 FTimespan UClock::SkipTime(const FDateTime TargetTime)
