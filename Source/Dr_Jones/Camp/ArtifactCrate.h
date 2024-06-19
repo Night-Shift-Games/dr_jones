@@ -29,7 +29,7 @@ public:
 	AArtifact* PullOutArtifact(AArtifact* ArtifactToPullOut);
 	
 	UFUNCTION(BlueprintCallable)
-	void SendArtifacts();
+	void SendArtifacts(int32& OutCalculatedReputation);
 
 	UFUNCTION(BlueprintCallable)
 	void CloseWidget();
@@ -46,4 +46,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool IsArchaeologistCrate = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bAffectReputation = true;
 };

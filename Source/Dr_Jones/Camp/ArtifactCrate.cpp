@@ -61,7 +61,7 @@ AArtifact* AArtifactCrate::PullOutArtifact(AArtifact* ArtifactToPullOut)
 	return ArtifactToPullOut;
 }
 
-void AArtifactCrate::SendArtifacts()
+void AArtifactCrate::SendArtifacts(int32& OutCalculatedReputation)
 {
 	float RenownToAdd = 0.0f;
 	while (!Artifacts.IsEmpty())
@@ -73,7 +73,11 @@ void AArtifactCrate::SendArtifacts()
 		RenownToAdd += ArtifactToSend->CleaningProgress * 10.0f;
 		ArtifactToSend->Destroy();
 	}
-	Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, RenownToAdd);
+	if (bAffectReputation)
+	{
+		Utilities::GetPlayerCharacter(*this).ReputationComponent->AddReputation(IsArchaeologistCrate ? EReputationType::Archaeologist : EReputationType::TreasureHunter, RenownToAdd);
+	}
+	OutCalculatedReputation = RenownToAdd;
 	UWidgetManager::UpdateWidget(*this, ReturnArtifactsWidgetClass);
 }
 
