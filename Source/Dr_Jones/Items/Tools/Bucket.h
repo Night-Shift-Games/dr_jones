@@ -16,4 +16,5 @@ public:
 	int BucketCapacity = 5;
 
 	virtual void OnRemovedFromEquipment() override;
+	virtual void OnUnequip() override;
 };

@@ -113,13 +113,12 @@ void UEquipmentComponent::UnequipItem()
 	AItem* ItemToUnequip = ItemInHand;
 	ItemInHand = nullptr;
 	
-	if (ItemToUnequip->IsA<AArtifact>() || ItemToUnequip->IsA<ABucket>())
+	if (ItemToUnequip->IsA<AArtifact>())
 	{
 		DetachItemFromHand(*ItemToUnequip);
 	}
 
 	ItemToUnequip->OnUnequip();
-	
 	
 	UWidgetManager::UpdateWidget(*this, ItemInfo);
 }

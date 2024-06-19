@@ -3,11 +3,9 @@
 #include "Sieve.h"
 
 #include "Animation/DrJonesAnimNotify.h"
-#include "Audio/DefaultSoundBank.h"
 #include "Equipment/EquipmentComponent.h"
 #include "Interaction/InteractableComponent.h"
 #include "Items/ActionComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Utilities/Utilities.h"
 
 // Called when the game starts or when spawned
@@ -49,6 +47,7 @@ void ASieve::SpawnArtifacts()
 void ASieve::OnUnequip()
 {
 	Super::OnUnequip();
+	
 	UEquipmentComponent* Equipment = Utilities::GetPlayerCharacter(*this).GetEquipment();
 	Equipment->DetachItemFromHand(*this);
 }
