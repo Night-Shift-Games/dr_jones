@@ -14,6 +14,7 @@
 #include "Interaction/InteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Managment/Dr_JonesGameModeBase.h"
+#include "Managment/FlagSubsystem.h"
 #include "Quest/QuestMessages.h"
 #include "Utilities/LocalMeshOctree.h"
 #include "Utilities/Utilities.h"
@@ -534,7 +535,8 @@ void UArtifactCleaningMode::TickBrushStroke()
 		const FTransform& Transform = Artifact->GetActorTransform();
 		const FVector LocalPosition = Transform.InverseTransformPosition(HitResult.Location);
 		const FVector LocalNormal = Transform.InverseTransformVector(HitResult.Normal);
-		Artifact->VertexPaint(LocalPosition, LocalNormal, FColor(0), CurrentPaintChannelMask, 5);
+		const float Radius = 5 * (UGameplayStatics::GetGameInstance(this)->GetSubsystem<UFlagSubsystem>()->IsFlagSet(TEXT("F_CleaningArea")) ? 1.2f : 1.0f);
+		Artifact->VertexPaint(LocalPosition, LocalNormal, FColor(0), CurrentPaintChannelMask, Radius);
 	}
 
 	float TotalDirtValue = 0.0f;
