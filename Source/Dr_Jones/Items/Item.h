@@ -66,6 +66,9 @@ protected:
 	TSubclassOf<UAnimInstance> ItemAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|UI")
+	FName ItemName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones|UI")
 	TObjectPtr<UTexture2D> ItemIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DrJones")
