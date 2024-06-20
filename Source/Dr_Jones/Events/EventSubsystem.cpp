@@ -28,7 +28,7 @@ void UEventSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	GetGameInstance()->GetSubsystem<UClock>()->OnClockNativeTick.AddWeakLambda(this, [&](const FDateTime CurrentTime)
 	{
-		if (CurrentTime.GetTimeOfDay().GetMinutes() % 30 == 0)
+		if (CurrentTime.GetTimeOfDay().GetMinutes() % 15 == 0)
 		{
 			HandleEvents(CurrentTime);
 		}
