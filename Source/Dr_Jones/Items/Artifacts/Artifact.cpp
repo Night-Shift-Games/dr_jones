@@ -271,9 +271,9 @@ void AArtifact::SetupDynamicArtifact()
 	});
 
 	check(ArtifactMeshComponent);
-	ArtifactMeshComponent->SetVisibility(false);
-	if (!IsDefaultSubobject() && (GetWorld() && GetWorld()->HasBegunPlay() || IsActorBeginningPlay()))
+	if (GetWorld() && GetWorld()->IsGameWorld())
 	{
+		ArtifactMeshComponent->SetVisibility(false);
 		ArtifactDynamicMaterial = UMaterialInstanceDynamic::Create(ArtifactStaticMesh->GetMaterial(0), ArtifactDynamicMesh);
 		ArtifactDynamicMesh->SetMaterial(0, ArtifactDynamicMaterial);
 
@@ -281,8 +281,7 @@ void AArtifact::SetupDynamicArtifact()
 		ArtifactDynamicMaterial->SetScalarParameterValueByInfo(DirtData.MudMPI, 1.0f);
 		ArtifactDynamicMaterial->SetScalarParameterValueByInfo(DirtData.DustMPI, 1.0f);
 	}
-
-
+	
 	LocalMeshOctree->BuildFromMesh(ArtifactStaticMesh);
 }
 
