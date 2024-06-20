@@ -359,6 +359,11 @@ void ADigSite::SpawnArtifacts()
 		FName ArtifactID = ArtifactNameArray[FMath::RandRange(0, ArtifactNameArray.Num() - 1)];
 
 		AArtifact* SpawnedArtifact = UArtifactFactory::ConstructArtifactFromDatabase(*this, ArtifactID);
+		if (SpawnedArtifact->ArtifactRarity == EArtifactRarity::Story)
+		{
+			SpawnedArtifact->Destroy();
+			continue;
+		}
 		SpawnedArtifact->SetActorRotation(FRotator(FMath::RandRange(0.0, 360.0)));
 
 		FVector SpawnExtent = Extents - FVector(100, 100, 0);

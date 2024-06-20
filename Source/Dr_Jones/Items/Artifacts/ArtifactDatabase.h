@@ -46,7 +46,7 @@ struct FArtifactData : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Arifact Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
 	FName ArtifactID = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arifact Data")
