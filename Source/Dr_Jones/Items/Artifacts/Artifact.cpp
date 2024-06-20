@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "StaticMeshLODResourcesToDynamicMesh.h"
+#include "Audio/DefaultSoundBank.h"
 #include "Components/DynamicMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/StaticMeshSocket.h"
@@ -387,6 +388,13 @@ void AArtifact::OnRemovedFromEquipment()
 	const FRotator Rotation = Player ? FRotator(0.0, Player->GetActorRotation().Yaw, 0.0) : FRotator::ZeroRotator; 
 
 	SetActorLocationAndRotation(GroundLocation, Rotation);
+
+	USoundBase* Sound = nullptr;
+	if (const UDefaultSoundBank* SoundBank = UNightShiftSettings::LoadDefaultSoundBank())
+	{
+		Sound = SoundBank->PlaceArtifactSound;
+	}
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GroundLocation);
 }
 
 bool AArtifact::IsDynamic() const

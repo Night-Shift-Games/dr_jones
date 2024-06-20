@@ -15,4 +15,7 @@ class DR_JONES_API UDefaultSoundBank : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Equipment")
 	TObjectPtr<USoundBase> EquipSound;
+
+	UPROPERTY(EditAnywhere,	BlueprintReadOnly, Category = "Equipment")
+	TObjectPtr<USoundBase> PlaceArtifactSound;
 };
